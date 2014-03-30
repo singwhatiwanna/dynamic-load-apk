@@ -1,5 +1,6 @@
 package com.ryg.dynamicloadhost;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
@@ -53,8 +54,8 @@ public class ProxyActivity extends Activity {
     @SuppressLint("NewApi")
     protected void launchTargetActivity(final String className) {
         Log.d(TAG, "start launchTargetActivity, className=" + className);
-        final String dexOutputPath = mDexPath.substring(0,
-                mDexPath.lastIndexOf('/'));
+        File dexOutputDir = this.getDir("dex", 0);
+        final String dexOutputPath = dexOutputDir.getAbsolutePath();
         ClassLoader localClassLoader = ClassLoader.getSystemClassLoader();
         DexClassLoader dexClassLoader = new DexClassLoader(mDexPath,
                 dexOutputPath, null, localClassLoader);
