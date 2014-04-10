@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">DynamicLoadClient</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">看看是否能生效</string>
+    <string name="test">这是测试页面</string>
+
+</resources>
