@@ -148,3 +148,4 @@ protected void onPause() {
 ![mahua](http://img.blog.csdn.net/20140411000445437?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2luZ3doYXRpd2FubmE=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
 
 首先宿主程序运行后，会把位于/mnt/sdcard/DynamicLoadHost目录下的所有apk都加载进来，然后点击列表就可以调起对应的apk，本文中的demo和第一篇文章中的demo看起来差不多，实际是有区别的，区别有两点：activity具有生命周期、加载资源可以用R，具体的代码实现请大家参见源码。
+###特别感谢[nealgao](http://nealgao06.lofter.com)为本项目设计的logo。
