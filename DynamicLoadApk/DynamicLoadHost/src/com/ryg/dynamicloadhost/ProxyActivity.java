@@ -35,6 +35,7 @@ public class ProxyActivity extends Activity {
     private AssetManager mAssetManager;
     private Resources mResources;
     private Theme mTheme;
+    private ClassLoader mClassLoader;
 
     private Activity mRemoteActivity;
     private HashMap<String, Method> mActivityLifecircleMethods = new HashMap<String, Method>();
@@ -89,6 +90,7 @@ public class ProxyActivity extends Activity {
         ClassLoader localClassLoader = ClassLoader.getSystemClassLoader();
         DexClassLoader dexClassLoader = new DexClassLoader(mDexPath,
                 dexOutputPath, null, localClassLoader);
+        mClassLoader = dexClassLoader;
         try {
             Class<?> localClass = dexClassLoader.loadClass(className);
             Constructor<?> localConstructor = localClass.getConstructor(new Class[] {});
@@ -171,6 +173,29 @@ public class ProxyActivity extends Activity {
     @Override
     public Theme getTheme() {
         return mTheme == null ? super.getTheme() : mTheme;
+    }
+
+    @Override
+    public ClassLoader getClassLoader() {
+        ClassLoader classLoader = new ClassLoader(super.getClassLoader()) {
+            @Override
+            public Class<?> loadClass(String className) throws ClassNotFoundException {
+                Class<?> clazz = null;
+                clazz = mClassLoader.loadClass(className);
+                Log.d(TAG, "load class:" + className);
+                if (clazz == null) {
+                    clazz = getParent().loadClass(className);
+                }
+                // still not found
+                if (clazz == null) {
+                    throw new ClassNotFoundException(className);
+                }
+
+                return clazz;
+            }
+        };
+
+        return classLoader;
     }
 
     @Override
