@@ -151,7 +151,7 @@ protected void onPause() {
 ###特别感谢[nealgao](http://nealgao06.lofter.com)为本项目设计的logo。
 ## License
 
-    Copyright 2014 singwhatiwanna
+    Copyright 2014 singwhatiwanna & tianxiao
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
