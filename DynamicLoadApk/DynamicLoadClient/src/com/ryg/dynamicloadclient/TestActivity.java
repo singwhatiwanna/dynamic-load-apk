@@ -20,7 +20,7 @@ public class TestActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.test);
-        Button button = (Button)findViewById(R.id.button1);
+        TestButton button = (TestButton)findViewById(R.id.button1);
         button.setText(that.getResources().getString(R.string.test));
         button.setOnClickListener(new OnClickListener() {
             
