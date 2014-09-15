@@ -40,6 +40,9 @@ public class ProxyActivity extends Activity {
     private Activity mRemoteActivity;
     private HashMap<String, Method> mActivityLifecircleMethods = new HashMap<String, Method>();
 
+	private DexClassLoader dexClassLoader;
+	private ClassLoader localClassLoader;
+
     protected void loadResources() {
         try {
             AssetManager assetManager = AssetManager.class.newInstance();
@@ -87,10 +90,13 @@ public class ProxyActivity extends Activity {
         Log.d(TAG, "start launchTargetActivity, className=" + className);
         File dexOutputDir = this.getDir("dex", Context.MODE_PRIVATE);
         final String dexOutputPath = dexOutputDir.getAbsolutePath();
-        ClassLoader localClassLoader = ClassLoader.getSystemClassLoader();
-        DexClassLoader dexClassLoader = new DexClassLoader(mDexPath,
-                dexOutputPath, null, localClassLoader);
-        mClassLoader = dexClassLoader;
+        localClassLoader = ClassLoader.getSystemClassLoader();
+        if(dexClassLoader == null){
+        	dexClassLoader = new DexClassLoader(mDexPath,
+                    dexOutputPath, null, localClassLoader);
+            mClassLoader = dexClassLoader;
+        }
+        
         try {
             Class<?> localClass = dexClassLoader.loadClass(className);
             Constructor<?> localConstructor = localClass.getConstructor(new Class[] {});
