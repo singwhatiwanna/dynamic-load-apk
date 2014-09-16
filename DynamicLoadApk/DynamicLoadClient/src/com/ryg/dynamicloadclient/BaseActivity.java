@@ -7,12 +7,14 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 
+import com.ryg.dynamicloadhost.IRemoteActivity;
+
 /**
  * note: can use that like this.
  * @see {@link BaseActivity.that} 
  * @author renyugang
  */
-public class BaseActivity extends Activity {
+public class BaseActivity extends Activity implements IRemoteActivity {
 
     private static final String TAG = "Client-BaseActivity";
 
@@ -45,7 +47,7 @@ public class BaseActivity extends Activity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             mFrom = savedInstanceState.getInt(FROM, FROM_INTERNAL);
         }
@@ -127,5 +129,41 @@ public class BaseActivity extends Activity {
         } else {
             return mProxyActivity.findViewById(id);
         }
+    }
+    
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        
+    }
+
+    @Override
+    public void onStart() {
+        
+    }
+
+    @Override
+    public void onRestart() {
+        
+    }
+
+    @Override
+    public void onStop() {
+        
+    }
+
+    @Override
+    public void onDestroy() {
+        
+    }
+    
+    @Override
+    public void onPause() {
+        
+    }
+    
+    @Override
+    public void onResume() {
+        
     }
 }
