@@ -40,8 +40,8 @@ public class ProxyActivity extends Activity {
     private Activity mRemoteActivity;
     private HashMap<String, Method> mActivityLifecircleMethods = new HashMap<String, Method>();
 
-	private DexClassLoader dexClassLoader;
-	private ClassLoader localClassLoader;
+    private DexClassLoader dexClassLoader;
+    private ClassLoader localClassLoader;
 
     protected void loadResources() {
         try {
@@ -94,8 +94,9 @@ public class ProxyActivity extends Activity {
         if(dexClassLoader == null){
         	dexClassLoader = new DexClassLoader(mDexPath,
                     dexOutputPath, null, localClassLoader);
-            mClassLoader = dexClassLoader;
         }
+        
+        mClassLoader = dexClassLoader;
         
         try {
             Class<?> localClass = dexClassLoader.loadClass(className);
