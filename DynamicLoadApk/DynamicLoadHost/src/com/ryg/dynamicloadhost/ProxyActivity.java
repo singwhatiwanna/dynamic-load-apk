@@ -40,7 +40,7 @@ public class ProxyActivity extends Activity {
     private Activity mRemoteActivity;
     private HashMap<String, Method> mActivityLifecircleMethods = new HashMap<String, Method>();
 
-    private DexClassLoader dexClassLoader;
+    private static DexClassLoader dexClassLoader;
     private ClassLoader localClassLoader;
 
     protected void loadResources() {
