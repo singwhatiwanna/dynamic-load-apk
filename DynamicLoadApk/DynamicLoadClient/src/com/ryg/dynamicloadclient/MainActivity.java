@@ -1,9 +1,9 @@
 package com.ryg.dynamicloadclient;
 
-import android.os.Bundle;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -18,7 +18,7 @@ public class MainActivity extends BaseActivity {
     private static final String TAG = "Client-MainActivity";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initView(savedInstanceState);
     }
@@ -48,7 +48,7 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG, "onActivityResult resultCode=" + resultCode);
         if (resultCode == RESULT_FIRST_USER) {
             that.finish();
@@ -62,5 +62,4 @@ public class MainActivity extends BaseActivity {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
-
 }

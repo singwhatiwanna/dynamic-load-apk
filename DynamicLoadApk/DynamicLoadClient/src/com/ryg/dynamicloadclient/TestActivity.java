@@ -16,7 +16,7 @@ public class TestActivity extends BaseActivity {
     private EditText mEditText;
     private ImageView mImageView;
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.test);
@@ -36,7 +36,7 @@ public class TestActivity extends BaseActivity {
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         if (mFrom == FROM_INTERNAL) { 
             super.onResume();
         }
@@ -46,7 +46,7 @@ public class TestActivity extends BaseActivity {
     }
     
     @Override
-    protected void onPause() {
+    public void onPause() {
         Log.d(TAG, "onPause");
         if (mFrom == FROM_INTERNAL) { 
             super.onPause();
