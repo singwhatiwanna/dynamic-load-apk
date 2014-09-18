@@ -33,7 +33,7 @@ public class MainActivity extends BaseActivity {
                 LayoutParams.MATCH_PARENT));
         layout.setBackgroundColor(Color.parseColor("#F79AB5"));
         Button button = new Button(context);
-        button.setText("button");
+        button.setText("Start TextActivity");
         layout.addView(button, LayoutParams.MATCH_PARENT,
                 LayoutParams.WRAP_CONTENT);
         button.setOnClickListener(new OnClickListener() {
