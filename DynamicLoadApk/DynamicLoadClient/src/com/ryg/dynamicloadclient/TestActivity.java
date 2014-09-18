@@ -1,5 +1,7 @@
 package com.ryg.dynamicloadclient;
 
+import com.ryg.utils.TestHostClass;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -33,6 +35,18 @@ public class TestActivity extends BaseActivity {
         });
         mEditText = (EditText)findViewById(R.id.editText1);
         mEditText.setText(R.string.hello_world);
+        
+        Button invokeHostButton = (Button) findViewById(R.id.invokeHost);
+        invokeHostButton.setOnClickListener(new OnClickListener() {
+            
+            @Override
+            public void onClick(View v) {
+                TestHostClass testHostClass = new TestHostClass();
+                testHostClass.testMethod(that);
+            }
+        });
+        
+        
     }
 
     @Override
