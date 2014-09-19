@@ -10,11 +10,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.res.AssetManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
+import android.view.WindowManager.LayoutParams;
 import dalvik.system.DexClassLoader;
 
 public class ProxyActivity extends Activity {
@@ -36,7 +40,7 @@ public class ProxyActivity extends Activity {
     private Theme mTheme;
     private ClassLoader mClassLoader;
 
-    private IRemoteActivity mRemoteActivity;
+    protected IRemoteActivity mRemoteActivity;
 
     private static DexClassLoader dexClassLoader;
     private ClassLoader localClassLoader;
@@ -195,5 +199,53 @@ public class ProxyActivity extends Activity {
         mRemoteActivity.onDestroy();
         super.onDestroy();
     }
+    
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        mRemoteActivity.onSaveInstanceState(outState);
+        super.onSaveInstanceState(outState);
+    }
+    
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        mRemoteActivity.onRestoreInstanceState(savedInstanceState);
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+    
+    @Override
+    protected void onNewIntent(Intent intent) {
+        mRemoteActivity.onNewIntent(intent);
+        super.onNewIntent(intent);
+    }
+    
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        super.onTouchEvent(event);
+        return mRemoteActivity.onTouchEvent(event);
+    }
+    
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        super.onKeyUp(keyCode, event);
+        return mRemoteActivity.onKeyUp(keyCode, event);
+    }
+    
+    @Override
+    public void onWindowAttributesChanged(LayoutParams params) {
+        mRemoteActivity.onWindowAttributesChanged(params);
+        super.onWindowAttributesChanged(params);
+    }
+    
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        mRemoteActivity.onWindowFocusChanged(hasFocus);
+        super.onWindowFocusChanged(hasFocus);
+    }
+    
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+    }
+    
 
 }
