@@ -1,5 +1,6 @@
 package com.ryg.dynamicloadclient;
 
+import com.ryg.dynamicloadhost.sample.IFullLieftcycleRemoteActivity;
 import com.ryg.utils.TestHostClass;
 
 import android.os.Bundle;
@@ -11,7 +12,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-public class TestActivity extends BaseActivity {
+public class TestActivity extends BaseActivity implements IFullLieftcycleRemoteActivity{
 
     private static final String TAG = "TestActivity";
 
@@ -46,7 +47,6 @@ public class TestActivity extends BaseActivity {
             }
         });
         
-        
     }
 
     @Override
@@ -65,6 +65,11 @@ public class TestActivity extends BaseActivity {
         if (mFrom == FROM_INTERNAL) { 
             super.onPause();
         }
+    }
+    
+    @Override
+    public void finish() {
+        Toast.makeText(that, "Success finish", Toast.LENGTH_SHORT).show();
     }
 
 }

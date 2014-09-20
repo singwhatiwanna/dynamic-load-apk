@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 
@@ -164,6 +166,34 @@ public class BaseActivity extends Activity implements IRemoteActivity {
     
     @Override
     public void onResume() {
+        
+    }
+    
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        
+    }
+    
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+    }
+    
+    public void onNewIntent(Intent intent) {
+        
+    }
+    
+    public boolean onTouchEvent(MotionEvent event) {
+        return false;
+    }
+    
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        return false;
+        
+    }
+    public void onWindowAttributesChanged(LayoutParams params) {
+        
+    }
+    public void onWindowFocusChanged(boolean hasFocus) {
         
     }
 }
