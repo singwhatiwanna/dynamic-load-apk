@@ -1,5 +1,7 @@
 package com.ryg.utils;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -56,4 +58,8 @@ public class DLUtils {
         return pm.getApplicationLabel(appInfo);
     }
 
+    public static void showDialog(Activity activity, String title, String message) {
+        new AlertDialog.Builder(activity).setTitle(title).setMessage(message)
+                .setPositiveButton("确定", null).show();
+    }
 }

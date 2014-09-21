@@ -41,9 +41,7 @@ public class ProxyActivity extends Activity {
     private ClassLoader mClassLoader;
 
     protected IRemoteActivity mRemoteActivity;
-
-    private static DexClassLoader dexClassLoader;
-    private ClassLoader localClassLoader;
+    protected static ClassLoader sDefaultClassLoader;
 
     protected void loadResources() {
         try {
@@ -92,15 +90,14 @@ public class ProxyActivity extends Activity {
         Log.d(TAG, "start launchTargetActivity, className=" + className);
         File dexOutputDir = this.getDir("dex", Context.MODE_PRIVATE);
         final String dexOutputPath = dexOutputDir.getAbsolutePath();
-        localClassLoader = getClassLoader();
-        if(dexClassLoader == null){
-        	dexClassLoader = new DexClassLoader(mDexPath,
-                    dexOutputPath, null, localClassLoader);
+        DexClassLoader localClassLoader = new DexClassLoader(mDexPath,
+                dexOutputPath, null, getClassLoader());
+        if (sDefaultClassLoader == null) {
+            sDefaultClassLoader = localClassLoader;
         }
-
-        mClassLoader = dexClassLoader;
+        mClassLoader = localClassLoader;
         try {
-            Class<?> localClass = dexClassLoader.loadClass(className);
+            Class<?> localClass = sDefaultClassLoader.loadClass(className);
             Constructor<?> localConstructor = localClass.getConstructor(new Class[] {});
             Object instance = localConstructor.newInstance(new Object[] {});
             setRemoteActivity(instance);
@@ -142,8 +139,11 @@ public class ProxyActivity extends Activity {
             @Override
             public Class<?> loadClass(String className) throws ClassNotFoundException {
                 Class<?> clazz = null;
-                clazz = mClassLoader.loadClass(className);
+                clazz = sDefaultClassLoader.loadClass(className);
                 Log.d(TAG, "load class:" + className);
+                if (clazz == null) {
+                    clazz = mClassLoader.loadClass(className);
+                }
                 if (clazz == null) {
                     clazz = getParent().loadClass(className);
                 }
@@ -170,18 +170,19 @@ public class ProxyActivity extends Activity {
         mRemoteActivity.onStart();
         super.onStart();
     }
-    
+
     @Override
     protected void onRestart() {
         mRemoteActivity.onRestart();
         super.onRestart();
     }
+
     @Override
     protected void onResume() {
         mRemoteActivity.onResume();
         super.onResume();
     }
-    
+
     @Override
     protected void onPause() {
         mRemoteActivity.onPause();
@@ -193,59 +194,58 @@ public class ProxyActivity extends Activity {
         mRemoteActivity.onStop();
         super.onStop();
     }
-    
+
     @Override
     protected void onDestroy() {
         mRemoteActivity.onDestroy();
         super.onDestroy();
     }
-    
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         mRemoteActivity.onSaveInstanceState(outState);
         super.onSaveInstanceState(outState);
     }
-    
+
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         mRemoteActivity.onRestoreInstanceState(savedInstanceState);
         super.onRestoreInstanceState(savedInstanceState);
     }
-    
+
     @Override
     protected void onNewIntent(Intent intent) {
         mRemoteActivity.onNewIntent(intent);
         super.onNewIntent(intent);
     }
-    
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         super.onTouchEvent(event);
         return mRemoteActivity.onTouchEvent(event);
     }
-    
+
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         super.onKeyUp(keyCode, event);
         return mRemoteActivity.onKeyUp(keyCode, event);
     }
-    
+
     @Override
     public void onWindowAttributesChanged(LayoutParams params) {
         mRemoteActivity.onWindowAttributesChanged(params);
         super.onWindowAttributesChanged(params);
     }
-    
+
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         mRemoteActivity.onWindowFocusChanged(hasFocus);
         super.onWindowFocusChanged(hasFocus);
     }
-    
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
     }
-    
 
 }

@@ -1,7 +1,3 @@
-package com.ryg.dynamicloadhost.sample;
-
-import com.ryg.dynamicloadhost.ProxyActivity;
-
 /**
  * 
  * @author Song
@@ -12,6 +8,10 @@ import com.ryg.dynamicloadhost.ProxyActivity;
  * 
  *
  */
+package com.ryg.dynamicloadhost.sample;
+
+import com.ryg.dynamicloadhost.ProxyActivity;
+
 public class CustomProxyActivity extends ProxyActivity{
     
     private IFullLieftcycleRemoteActivity mCustomRemoteActivity;

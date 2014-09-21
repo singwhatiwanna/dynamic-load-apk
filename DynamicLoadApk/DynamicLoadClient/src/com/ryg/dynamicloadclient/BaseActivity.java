@@ -1,5 +1,7 @@
 package com.ryg.dynamicloadclient;
 
+import com.ryg.dynamicloadhost.IRemoteActivity;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,8 +10,6 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-
-import com.ryg.dynamicloadhost.IRemoteActivity;
 
 /**
  * note: can use that like this.
@@ -132,68 +132,68 @@ public class BaseActivity extends Activity implements IRemoteActivity {
             return mProxyActivity.findViewById(id);
         }
     }
-    
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        
     }
 
     @Override
     public void onStart() {
-        
+
     }
 
     @Override
     public void onRestart() {
-        
+
     }
 
     @Override
     public void onStop() {
-        
+
     }
 
     @Override
     public void onDestroy() {
-        
+
     }
-    
+
     @Override
     public void onPause() {
-        
+
     }
-    
+
     @Override
     public void onResume() {
-        
+
     }
-    
+
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
-        
+
     }
-    
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
     }
-    
+
     public void onNewIntent(Intent intent) {
-        
+
     }
-    
+
     public boolean onTouchEvent(MotionEvent event) {
         return false;
     }
-    
+
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         return false;
-        
     }
+
     public void onWindowAttributesChanged(LayoutParams params) {
-        
+
     }
+
     public void onWindowFocusChanged(boolean hasFocus) {
-        
+
     }
 }

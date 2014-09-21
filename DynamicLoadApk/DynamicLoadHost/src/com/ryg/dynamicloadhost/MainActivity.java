@@ -4,17 +4,18 @@ import java.io.File;
 import java.util.ArrayList;
 
 import android.os.Bundle;
+import android.os.Environment;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -31,7 +32,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
     private PluginAdapter mPluginAdapter;
 
     private ListView mListView;
-    private Button mOpenClient;
+    private TextView mNoPluginTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,14 +45,17 @@ public class MainActivity extends Activity implements OnItemClickListener {
     private void initView() {
         mPluginAdapter = new PluginAdapter();
         mListView = (ListView) findViewById(R.id.plugin_list);
-        mListView.setAdapter(mPluginAdapter);
-        mListView.setOnItemClickListener(this);
+        mNoPluginTextView = (TextView)findViewById(R.id.no_plugin);
     }
 
     private void initData() {
-        String pluginFolder = "/mnt/sdcard/DynamicLoadHost";
+        String pluginFolder = Environment.getExternalStorageDirectory() + "/DynamicLoadHost";
         File file = new File(pluginFolder);
         File[] plugins = file.listFiles();
+        if (plugins == null || plugins.length == 0) {
+            mNoPluginTextView.setVisibility(View.VISIBLE);
+            return;
+        }
 
         for (File plugin : plugins) {
             PluginItem item = new PluginItem();
@@ -60,6 +64,8 @@ public class MainActivity extends Activity implements OnItemClickListener {
             mPluginItems.add(item);
         }
 
+        mListView.setAdapter(mPluginAdapter);
+        mListView.setOnItemClickListener(this);
         mPluginAdapter.notifyDataSetChanged();
     }
 
@@ -68,6 +74,19 @@ public class MainActivity extends Activity implements OnItemClickListener {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case R.id.action_settings:
+            DLUtils.showDialog(this, getString(R.string.action_about), getString(R.string.introducation));
+            break;
+
+        default:
+            break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private class PluginAdapter extends BaseAdapter {
