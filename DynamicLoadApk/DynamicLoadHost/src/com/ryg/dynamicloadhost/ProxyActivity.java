@@ -1,12 +1,10 @@
 package com.ryg.dynamicloadhost;
 
-import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.res.AssetManager;
@@ -40,8 +38,9 @@ public class ProxyActivity extends Activity {
     private Theme mTheme;
     private ClassLoader mClassLoader;
 
-    protected IRemoteActivity mRemoteActivity;
+    protected static IRemoteActivity mRemoteActivity;
     protected static ClassLoader sDefaultClassLoader;
+    private DexClassLoader localClassLoader;
 
     protected void loadResources() {
         try {
@@ -53,8 +52,7 @@ public class ProxyActivity extends Activity {
             e.printStackTrace();
         }
         Resources superRes = super.getResources();
-        mResources = new Resources(mAssetManager, superRes.getDisplayMetrics(),
-                superRes.getConfiguration());
+        mResources = new Resources(mAssetManager, superRes.getDisplayMetrics(), superRes.getConfiguration());
         mTheme = mResources.newTheme();
         mTheme.setTo(super.getTheme());
     }
@@ -75,10 +73,8 @@ public class ProxyActivity extends Activity {
     }
 
     protected void launchTargetActivity() {
-        PackageInfo packageInfo = getPackageManager().getPackageArchiveInfo(
-                mDexPath, 1);
-        if ((packageInfo.activities != null)
-                && (packageInfo.activities.length > 0)) {
+        PackageInfo packageInfo = getPackageManager().getPackageArchiveInfo(mDexPath, 1);
+        if ((packageInfo.activities != null) && (packageInfo.activities.length > 0)) {
             String activityName = packageInfo.activities[0].name;
             mClass = activityName;
             launchTargetActivity(mClass);
@@ -88,11 +84,8 @@ public class ProxyActivity extends Activity {
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     protected void launchTargetActivity(final String className) {
         Log.d(TAG, "start launchTargetActivity, className=" + className);
-        File dexOutputDir = this.getDir("dex", Context.MODE_PRIVATE);
-        final String dexOutputPath = dexOutputDir.getAbsolutePath();
-        DexClassLoader localClassLoader = new DexClassLoader(mDexPath,
-                dexOutputPath, null, getClassLoader());
-        if (sDefaultClassLoader == null) {
+        if (localClassLoader == null) {
+            localClassLoader = HostClassLoader.getClassLoader(mDexPath, ProxyActivity.this, getClassLoader());
             sDefaultClassLoader = localClassLoader;
         }
         mClassLoader = localClassLoader;
@@ -112,7 +105,6 @@ public class ProxyActivity extends Activity {
             e.printStackTrace();
         }
     }
-
 
     protected void setRemoteActivity(Object activity) {
         mRemoteActivity = (IRemoteActivity) activity;
