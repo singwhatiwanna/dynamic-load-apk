@@ -4,16 +4,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.ryg.dynamicload.DLBasePluginActivity;
-import com.ryg.dynamicload.sample.mainhost.IFullLieftcycleRemoteActivity;
-import com.ryg.dynamicload.sample.mainhost.TestHostClass;
 
-public class TestActivity extends DLBasePluginActivity implements IFullLieftcycleRemoteActivity{
+public class TestActivity extends DLBasePluginActivity{
 
     private static final String TAG = "TestActivity";
 
@@ -37,17 +34,6 @@ public class TestActivity extends DLBasePluginActivity implements IFullLieftcycl
         });
         mEditText = (EditText)findViewById(R.id.editText1);
         mEditText.setText(R.string.hello_world);
-        
-        Button invokeHostButton = (Button) findViewById(R.id.invokeHost);
-        invokeHostButton.setOnClickListener(new OnClickListener() {
-            
-            @Override
-            public void onClick(View v) {
-                TestHostClass testHostClass = new TestHostClass();
-                testHostClass.testMethod(that);
-            }
-        });
-        
     }
 
     @Override
@@ -68,9 +54,4 @@ public class TestActivity extends DLBasePluginActivity implements IFullLieftcycl
         }
     }
     
-    @Override
-    public void finish() {
-        Toast.makeText(that, "Success finish", Toast.LENGTH_SHORT).show();
-    }
-
 }
