@@ -17,7 +17,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.WindowManager.LayoutParams;
-import dalvik.system.DexClassLoader;
 
 public class ProxyActivity extends Activity {
 
@@ -36,11 +35,9 @@ public class ProxyActivity extends Activity {
     private AssetManager mAssetManager;
     private Resources mResources;
     private Theme mTheme;
-    private ClassLoader mClassLoader;
+    private ClassLoader mLocalClassLoader;
 
-    protected static IRemoteActivity mRemoteActivity;
-    protected static ClassLoader sDefaultClassLoader;
-    private DexClassLoader localClassLoader;
+    protected IRemoteActivity mRemoteActivity;
 
     protected void loadResources() {
         try {
@@ -84,13 +81,11 @@ public class ProxyActivity extends Activity {
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     protected void launchTargetActivity(final String className) {
         Log.d(TAG, "start launchTargetActivity, className=" + className);
-        if (localClassLoader == null) {
-            localClassLoader = HostClassLoader.getClassLoader(mDexPath, ProxyActivity.this, getClassLoader());
-            sDefaultClassLoader = localClassLoader;
+        if (mLocalClassLoader == null) {
+            mLocalClassLoader = HostClassLoader.getClassLoader(mDexPath, ProxyActivity.this, getClassLoader());
         }
-        mClassLoader = localClassLoader;
         try {
-            Class<?> localClass = sDefaultClassLoader.loadClass(className);
+            Class<?> localClass = mLocalClassLoader.loadClass(className);
             Constructor<?> localConstructor = localClass.getConstructor(new Class[] {});
             Object instance = localConstructor.newInstance(new Object[] {});
             setRemoteActivity(instance);
@@ -131,11 +126,8 @@ public class ProxyActivity extends Activity {
             @Override
             public Class<?> loadClass(String className) throws ClassNotFoundException {
                 Class<?> clazz = null;
-                clazz = sDefaultClassLoader.loadClass(className);
+                clazz = mLocalClassLoader.loadClass(className);
                 Log.d(TAG, "load class:" + className);
-                if (clazz == null) {
-                    clazz = mClassLoader.loadClass(className);
-                }
                 if (clazz == null) {
                     clazz = getParent().loadClass(className);
                 }
