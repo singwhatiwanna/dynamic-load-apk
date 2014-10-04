@@ -20,7 +20,7 @@ import android.view.WindowManager.LayoutParams;
 
 public class DLProxyActivity extends Activity {
 
-    private static final String TAG = "ProxyActivity";
+    private static final String TAG = "DLProxyActivity";
 
     public static final String FROM = "extra.from";
     public static final int FROM_INTERNAL = 0;
@@ -82,7 +82,7 @@ public class DLProxyActivity extends Activity {
     protected void launchTargetActivity(final String className) {
         Log.d(TAG, "start launchTargetActivity, className=" + className);
         if (mLocalClassLoader == null) {
-            mLocalClassLoader = HostClassLoader.getClassLoader(mDexPath, DLProxyActivity.this, getClassLoader());
+            mLocalClassLoader = DLClassLoader.getClassLoader(mDexPath, DLProxyActivity.this, getClassLoader());
         }
         try {
             Class<?> localClass = mLocalClassLoader.loadClass(className);

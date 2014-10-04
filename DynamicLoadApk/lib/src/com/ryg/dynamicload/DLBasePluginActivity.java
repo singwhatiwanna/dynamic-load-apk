@@ -1,13 +1,19 @@
 package com.ryg.dynamicload;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.ryg.dynamicload.DLPlugin;
 
@@ -18,7 +24,7 @@ import com.ryg.dynamicload.DLPlugin;
  */
 public class DLBasePluginActivity extends Activity implements DLPlugin {
 
-    private static final String TAG = "Client-BaseActivity";
+    private static final String TAG = "DLBasePluginActivity";
 
     public static final String FROM = "extra.from";
     public static final int FROM_INTERNAL = 0;
@@ -26,7 +32,7 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
     public static final String EXTRA_DEX_PATH = "extra.dex.path";
     public static final String EXTRA_CLASS = "extra.class";
 
-    public static final String PROXY_VIEW_ACTION = "com.ryg.dynamicloadhost.VIEW";
+    public static final String PROXY_VIEW_ACTION = "com.ryg.dynamicload.proxy.VIEW";
 
     /**
      * 代理activity，可以当作Context来使用，会根据需要来决定是否指向this
@@ -63,7 +69,7 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
     }
 
     protected void startActivityByProxy(String className) {
-        if (mProxyActivity == this) {
+        if (mFrom == FROM_INTERNAL) {
             Intent intent = new Intent();
             intent.setClassName(this, className);
             mProxyActivity.startActivity(intent);
@@ -76,7 +82,7 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
     }
 
     public void startActivityForResultByProxy(String className, int requestCode) {
-        if (mProxyActivity == this) {
+        if (mFrom == FROM_INTERNAL) {
             Intent intent = new Intent();
             intent.setClassName(this, className);
             mProxyActivity.startActivityForResult(intent, requestCode);
@@ -90,7 +96,7 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
 
     @Override
     public void setContentView(View view) {
-        if (mProxyActivity == this) {
+        if (mFrom == FROM_INTERNAL) {
             super.setContentView(view);
         } else {
             mProxyActivity.setContentView(view);
@@ -99,7 +105,7 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
 
     @Override
     public void setContentView(View view, LayoutParams params) {
-        if (mProxyActivity == this) {
+        if (mFrom == FROM_INTERNAL) {
             super.setContentView(view, params);
         } else {
             mProxyActivity.setContentView(view, params);
@@ -108,7 +114,7 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
 
     @Override
     public void setContentView(int layoutResID) {
-        if (mProxyActivity == this) {
+        if (mFrom == FROM_INTERNAL) {
             super.setContentView(layoutResID);
         } else {
             mProxyActivity.setContentView(layoutResID);
@@ -117,7 +123,7 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
 
     @Override
     public void addContentView(View view, LayoutParams params) {
-        if (mProxyActivity == this) {
+        if (mFrom == FROM_INTERNAL) {
             super.addContentView(view, params);
         } else {
             mProxyActivity.addContentView(view, params);
@@ -126,7 +132,7 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
 
     @Override
     public View findViewById(int id) {
-        if (mProxyActivity == this) {
+        if (mFrom == FROM_INTERNAL) {
             return super.findViewById(id);
         } else {
             return mProxyActivity.findViewById(id);
@@ -134,66 +140,178 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
     }
 
     @Override
+    public Intent getIntent() {
+        if (mFrom == FROM_INTERNAL) {
+            return super.getIntent();
+        } else {
+            return mProxyActivity.getIntent();
+        }
+    }
+
+    @Override
+    public Resources getResources() {
+        if (mFrom == FROM_INTERNAL) {
+            return super.getResources();
+        } else {
+            return mProxyActivity.getResources();
+        }
+    }
+
+    @Override
+    public LayoutInflater getLayoutInflater() {
+        if (mFrom == FROM_INTERNAL) {
+            return super.getLayoutInflater();
+        } else {
+            return mProxyActivity.getLayoutInflater();
+        }
+    }
+
+    @Override
+    public SharedPreferences getSharedPreferences(String name, int mode) {
+        if (mFrom == FROM_INTERNAL) {
+            return super.getSharedPreferences(name, mode);
+        } else {
+            return mProxyActivity.getSharedPreferences(name, mode);
+        }
+    }
+
+    @Override
+    public Context getApplicationContext() {
+        if (mFrom == FROM_INTERNAL) {
+            return super.getApplicationContext();
+        } else {
+            return mProxyActivity.getApplicationContext();
+        }
+    }
+
+    @Override
+    public WindowManager getWindowManager() {
+        if (mFrom == FROM_INTERNAL) {
+            return super.getWindowManager();
+        } else {
+            return mProxyActivity.getWindowManager();
+        }
+    }
+
+    @Override
+    public Window getWindow() {
+        if (mFrom == FROM_INTERNAL) {
+            return super.getWindow();
+        } else {
+            return mProxyActivity.getWindow();
+        }
+    }
+
+    @Override
+    public Object getSystemService(String name) {
+        if (mFrom == FROM_INTERNAL) {
+            return super.getSystemService(name);
+        } else {
+            return mProxyActivity.getSystemService(name);
+        }
+    }
+
+    @Override
+    public void finish() {
+        if (mFrom == FROM_INTERNAL) {
+            super.finish();
+        } else {
+            mProxyActivity.finish();
+        }
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+        if (mFrom == FROM_INTERNAL) {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     @Override
     public void onStart() {
-
+        if (mFrom == FROM_INTERNAL) {
+            super.onStart();
+        }
     }
 
     @Override
     public void onRestart() {
-
-    }
-
-    @Override
-    public void onStop() {
-
-    }
-
-    @Override
-    public void onDestroy() {
-
-    }
-
-    @Override
-    public void onPause() {
-
-    }
-
-    @Override
-    public void onResume() {
-
+        if (mFrom == FROM_INTERNAL) {
+            super.onRestart();
+        }
     }
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
-
+        if (mFrom == FROM_INTERNAL) {
+            super.onRestoreInstanceState(savedInstanceState);
+        }
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        if (mFrom == FROM_INTERNAL) {
+            super.onSaveInstanceState(outState);
+        }
     }
 
     public void onNewIntent(Intent intent) {
+        if (mFrom == FROM_INTERNAL) {
+            super.onNewIntent(intent);
+        }
+    }
 
+    @Override
+    public void onResume() {
+        if (mFrom == FROM_INTERNAL) {
+            super.onResume();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        if (mFrom == FROM_INTERNAL) {
+            super.onPause();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        if (mFrom == FROM_INTERNAL) {
+            super.onStop();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mFrom == FROM_INTERNAL) {
+            super.onDestroy();
+        }
     }
 
     public boolean onTouchEvent(MotionEvent event) {
+        if (mFrom == FROM_INTERNAL) {
+            return super.onTouchEvent(event);
+        }
         return false;
     }
 
     public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (mFrom == FROM_INTERNAL) {
+            return super.onKeyUp(keyCode, event);
+        }
         return false;
     }
 
-    public void onWindowAttributesChanged(LayoutParams params) {
-
+    public void onWindowAttributesChanged(WindowManager.LayoutParams params) {
+        if (mFrom == FROM_INTERNAL) {
+            super.onWindowAttributesChanged(params);
+        }
     }
 
     public void onWindowFocusChanged(boolean hasFocus) {
-
+        if (mFrom == FROM_INTERNAL) {
+            super.onWindowFocusChanged(hasFocus);
+        }
     }
 }
