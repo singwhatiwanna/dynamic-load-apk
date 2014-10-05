@@ -25,4 +25,5 @@ public interface DLPlugin {
     public boolean onKeyUp(int keyCode, KeyEvent event);
     public void onWindowAttributesChanged(LayoutParams params);
     public void onWindowFocusChanged(boolean hasFocus);
+    public void onBackPressed();
 }

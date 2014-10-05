@@ -3,12 +3,13 @@ package com.ryg.dynamicload;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
+import com.ryg.utils.DLConstants;
+
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.res.AssetManager;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.os.Build;
@@ -21,13 +22,6 @@ import android.view.WindowManager.LayoutParams;
 public class DLProxyActivity extends Activity {
 
     private static final String TAG = "DLProxyActivity";
-
-    public static final String FROM = "extra.from";
-    public static final int FROM_INTERNAL = 0;
-    public static final int FROM_EXTERNAL = 1;
-
-    public static final String EXTRA_DEX_PATH = "extra.dex.path";
-    public static final String EXTRA_CLASS = "extra.class";
 
     private String mClass;
     private String mDexPath;
@@ -57,8 +51,8 @@ public class DLProxyActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mDexPath = getIntent().getStringExtra(EXTRA_DEX_PATH);
-        mClass = getIntent().getStringExtra(EXTRA_CLASS);
+        mDexPath = getIntent().getStringExtra(DLConstants.EXTRA_DEX_PATH);
+        mClass = getIntent().getStringExtra(DLConstants.EXTRA_CLASS);
 
         Log.d(TAG, "mClass=" + mClass + " mDexPath=" + mDexPath);
         loadResources();
@@ -94,7 +88,7 @@ public class DLProxyActivity extends Activity {
             mRemoteActivity.setProxy(this, mDexPath);
 
             Bundle bundle = new Bundle();
-            bundle.putInt(FROM, FROM_EXTERNAL);
+            bundle.putInt(DLConstants.FROM, DLConstants.FROM_EXTERNAL);
             mRemoteActivity.onCreate(bundle);
         } catch (Exception e) {
             e.printStackTrace();
@@ -204,6 +198,12 @@ public class DLProxyActivity extends Activity {
     }
 
     @Override
+    public void onBackPressed() {
+        mRemoteActivity.onBackPressed();
+        super.onBackPressed();
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
         super.onTouchEvent(event);
         return mRemoteActivity.onTouchEvent(event);
@@ -225,11 +225,6 @@ public class DLProxyActivity extends Activity {
     public void onWindowFocusChanged(boolean hasFocus) {
         mRemoteActivity.onWindowFocusChanged(hasFocus);
         super.onWindowFocusChanged(hasFocus);
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
     }
 
 }
