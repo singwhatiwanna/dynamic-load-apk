@@ -17,13 +17,11 @@ public class DLClassLoader extends DexClassLoader {
     /**
      * return a available classloader which belongs to different apk
      */
-    public static DLClassLoader getClassLoader(String dexPath, Context context, ClassLoader classLoader) {
+    public static DLClassLoader getClassLoader(String dexPath, String optimizedDirectory, ClassLoader classLoader) {
         DLClassLoader dLClassLoader = loaders.get(dexPath);
         if (dLClassLoader != null)
             return dLClassLoader;
-        File dexOutputDir = context.getDir("dex", Context.MODE_PRIVATE);
-        final String dexOutputPath = dexOutputDir.getAbsolutePath();
-        dLClassLoader = new DLClassLoader(dexPath, dexOutputPath, null, classLoader);
+        dLClassLoader = new DLClassLoader(dexPath, optimizedDirectory, null, classLoader);
         loaders.put(dexPath, dLClassLoader);
         return dLClassLoader;
     }

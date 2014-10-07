@@ -7,6 +7,7 @@ import com.ryg.utils.DLConstants;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.res.AssetManager;
@@ -76,7 +77,7 @@ public class DLProxyActivity extends Activity {
     protected void launchTargetActivity(final String className) {
         Log.d(TAG, "start launchTargetActivity, className=" + className);
         if (mLocalClassLoader == null) {
-            mLocalClassLoader = DLClassLoader.getClassLoader(mDexPath, DLProxyActivity.this, getClassLoader());
+            mLocalClassLoader = DLClassLoader.getClassLoader(mDexPath, this.getDir("dex", Context.MODE_PRIVATE).getAbsolutePath(), getClassLoader());
         }
         try {
             Class<?> localClass = mLocalClassLoader.loadClass(className);
