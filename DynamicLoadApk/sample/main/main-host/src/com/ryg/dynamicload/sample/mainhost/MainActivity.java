@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
@@ -19,8 +20,14 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.ryg.dynamicload.DLBasePluginActivity;
+import com.ryg.dynamicload.DLBasePluginFragmentActivity;
+import com.ryg.dynamicload.DLClassLoader;
 import com.ryg.dynamicload.DLProxyActivity;
+import com.ryg.dynamicload.DLProxyFragmentActivity;
+import com.ryg.utils.DLConstants;
 import com.ryg.utils.DLUtils;
 
 public class MainActivity extends Activity implements OnItemClickListener {
@@ -62,6 +69,9 @@ public class MainActivity extends Activity implements OnItemClickListener {
             PluginItem item = new PluginItem();
             item.pluginPath = plugin.getAbsolutePath();
             item.packageInfo = DLUtils.getPackageInfo(this, item.pluginPath);
+            if (item.packageInfo.activities != null && item.packageInfo.activities.length > 0) {
+                item.launcherActivityName = item.packageInfo.activities[0].name;
+            }
             mPluginItems.add(item);
         }
 
@@ -147,6 +157,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
     public static class PluginItem {
         public PackageInfo packageInfo;
         public String pluginPath;
+        public String launcherActivityName;
 
         public PluginItem() {
         }
@@ -154,9 +165,32 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Intent intent = new Intent(this, DLProxyActivity.class);
-        intent.putExtra(DLProxyActivity.EXTRA_DEX_PATH, mPluginItems.get(position).pluginPath);
-        startActivity(intent);
+        PluginItem item = mPluginItems.get(position);
+        Class<?> proxyCls = null;
+
+        try {
+            Class<?> cls = Class.forName(item.launcherActivityName, false,
+                    DLClassLoader.getClassLoader(item.pluginPath, MainActivity.this.getDir("dex", Context.MODE_PRIVATE).getAbsolutePath(), getClassLoader()));
+            if (cls.asSubclass(DLBasePluginActivity.class) != null) {
+                proxyCls = DLProxyActivity.class;
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            Toast.makeText(this,
+                    "load plugin apk failed, load class " + item.launcherActivityName + " failed.",
+                    Toast.LENGTH_SHORT).show();
+        } catch (ClassCastException e) {
+            // ignored
+        } finally {
+            if (proxyCls == null) {
+                proxyCls = DLProxyFragmentActivity.class;
+            }
+            Intent intent = new Intent(this, proxyCls);
+            intent.putExtra(DLConstants.EXTRA_DEX_PATH,
+                    mPluginItems.get(position).pluginPath);
+            startActivity(intent);
+        }
+
     }
 
 }

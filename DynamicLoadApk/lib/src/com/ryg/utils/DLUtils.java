@@ -1,5 +1,8 @@
 package com.ryg.utils;
 
+import com.ryg.dynamicload.DLBasePluginActivity;
+import com.ryg.dynamicload.DLBasePluginFragmentActivity;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -8,8 +11,10 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.util.Log;
 
 public class DLUtils {
+    private static final String TAG = "DLUtils";
 
     public static PackageInfo getPackageInfo(Context context, String apkFilepath) {
         PackageManager pm = context.getPackageManager();
@@ -56,6 +61,79 @@ public class DLUtils {
         }
 
         return pm.getApplicationLabel(appInfo);
+    }
+
+    public static String getProxyViewAction(String className, ClassLoader classLoader) {
+        int activityType = getActivityType(className, classLoader);
+        return getProxyViewActionByActivityType(activityType);
+    }
+
+    public static String getProxyViewAction(Class<?> cls) {
+        int activityType = getActivityType(cls);
+        return getProxyViewActionByActivityType(activityType);
+    }
+
+    private static String getProxyViewActionByActivityType(int activityType) {
+        String proxyViewAction = null;
+
+        switch (activityType) {
+        case DLConstants.ACTIVITY_TYPE_NORMAL: {
+            proxyViewAction = DLConstants.PROXY_ACTIVITY_VIEW_ACTION;
+            break;
+        }
+        case DLConstants.ACTIVITY_TYPE_FRAGMENT: {
+            proxyViewAction = DLConstants.PROXY_FRAGMENT_ACTIVITY_VIEW_ACTION;
+            break;
+        }
+        case DLConstants.ACTIVITY_TYPE_ACTIONBAR:
+        case DLConstants.ACTIVITY_TYPE_UNKNOWN:
+        default:
+            break;
+        }
+
+        if (proxyViewAction == null) {
+            Log.e(TAG, "unsupported activityType:" + activityType);
+        }
+
+        return proxyViewAction;
+    }
+
+    private static int getActivityType(String className, ClassLoader classLoader) {
+        int activityType = DLConstants.ACTIVITY_TYPE_UNKNOWN;
+
+        try {
+            Class<?> cls = Class.forName(className, false, classLoader);
+            activityType = getActivityType(cls);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return activityType;
+    }
+
+    private static int getActivityType(Class<?> cls) {
+        int activityType = DLConstants.ACTIVITY_TYPE_UNKNOWN;
+
+        try {
+            if (cls.asSubclass(DLBasePluginActivity.class) != null) {
+                activityType = DLConstants.ACTIVITY_TYPE_NORMAL;
+                return activityType;
+            }
+        } catch (ClassCastException e) {
+            // ignored
+        }
+
+        try {
+            if (cls.asSubclass(DLBasePluginFragmentActivity.class) != null) {
+                activityType = DLConstants.ACTIVITY_TYPE_FRAGMENT;
+                return activityType;
+            }
+        } catch (ClassCastException e) {
+            // ignored
+        }
+
+        //TODO: handle other activity types, ActionbarActivity,eg.
+        return activityType;
     }
 
     public static void showDialog(Activity activity, String title, String message) {

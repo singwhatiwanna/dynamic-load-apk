@@ -43,7 +43,7 @@ public class MainActivity extends DLBasePluginActivity {
             public void onClick(View v) {
                 Toast.makeText(context, "you clicked button",
                         Toast.LENGTH_SHORT).show();
-                startActivityForResultByProxy("com.ryg.dynamicload.sample.mainplugin.TestActivity", 0);
+                startActivityForResultByProxy(TestFragmentActivity.class, 0);
             }
         });
         return layout;
