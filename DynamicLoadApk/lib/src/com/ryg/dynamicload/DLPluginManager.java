@@ -6,6 +6,9 @@ import java.util.HashMap;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+
+import com.ryg.utils.DLConstants;
+
 import dalvik.system.DexClassLoader;
 
 public class DLPluginManager {
@@ -55,7 +58,7 @@ public class DLPluginManager {
 			if (className.startsWith(".")) {
 				className = packageName + className;
 			}
-			dlIntent.putExtra(DLProxyActivity.EXTRA_CLASS, className);
+			dlIntent.putExtra(DLConstants.EXTRA_CLASS, className);
 			dlIntent.setClass(context, DLProxyActivity.class);
 			context.startActivity(dlIntent);
 		}

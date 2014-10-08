@@ -23,6 +23,7 @@ import android.widget.TextView;
 import com.ryg.dynamicload.DLProxyActivity;
 import com.ryg.dynamicload.sample.docommon.HostInterfaceManager;
 import com.ryg.dynamicload.sample.doihost.interfacee.HostInterfaceImp;
+import com.ryg.utils.DLConstants;
 import com.ryg.utils.DLUtils;
 
 public class MainActivity extends Activity implements OnItemClickListener {
@@ -159,7 +160,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Intent intent = new Intent(this, DLProxyActivity.class);
-        intent.putExtra(DLProxyActivity.EXTRA_DEX_PATH, mPluginItems.get(position).pluginPath);
+        intent.putExtra(DLConstants.EXTRA_DEX_PATH, mPluginItems.get(position).pluginPath);
         startActivity(intent);
     }
 
