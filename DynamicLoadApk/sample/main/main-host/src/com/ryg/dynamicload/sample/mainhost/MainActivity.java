@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
@@ -170,7 +169,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
         try {
             Class<?> cls = Class.forName(item.launcherActivityName, false,
-                    DLClassLoader.getClassLoader(item.pluginPath, MainActivity.this.getDir("dex", Context.MODE_PRIVATE).getAbsolutePath(), getClassLoader()));
+                    DLClassLoader.getClassLoader(item.pluginPath, getApplicationContext(), getClassLoader()));
             if (cls.asSubclass(DLBasePluginActivity.class) != null) {
                 proxyCls = DLProxyActivity.class;
             }

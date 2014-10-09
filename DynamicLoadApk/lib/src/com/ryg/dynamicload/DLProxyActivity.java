@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2014 singwhatiwanna(任玉刚) <singwhatiwanna@qq.com>
+ *
+ * collaborator:田啸,宋思宇
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.ryg.dynamicload;
 
 import java.lang.reflect.Constructor;
@@ -7,7 +24,6 @@ import com.ryg.utils.DLConstants;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.res.AssetManager;
@@ -30,7 +46,6 @@ public class DLProxyActivity extends Activity {
     private AssetManager mAssetManager;
     private Resources mResources;
     private Theme mTheme;
-    private ClassLoader mLocalClassLoader;
 
     protected DLPlugin mRemoteActivity;
 
@@ -76,11 +91,8 @@ public class DLProxyActivity extends Activity {
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     protected void launchTargetActivity(final String className) {
         Log.d(TAG, "start launchTargetActivity, className=" + className);
-        if (mLocalClassLoader == null) {
-            mLocalClassLoader = DLClassLoader.getClassLoader(mDexPath, this.getDir("dex", Context.MODE_PRIVATE).getAbsolutePath(), getClassLoader());
-        }
         try {
-            Class<?> localClass = mLocalClassLoader.loadClass(className);
+            Class<?> localClass = getClassLoader().loadClass(className);
             Constructor<?> localConstructor = localClass.getConstructor(new Class[] {});
             Object instance = localConstructor.newInstance(new Object[] {});
             setRemoteActivity(instance);
@@ -117,25 +129,7 @@ public class DLProxyActivity extends Activity {
 
     @Override
     public ClassLoader getClassLoader() {
-        ClassLoader classLoader = new ClassLoader(super.getClassLoader()) {
-            @Override
-            public Class<?> loadClass(String className) throws ClassNotFoundException {
-                Class<?> clazz = null;
-                clazz = mLocalClassLoader.loadClass(className);
-                Log.d(TAG, "load class:" + className);
-                if (clazz == null) {
-                    clazz = getParent().loadClass(className);
-                }
-                // still not found
-                if (clazz == null) {
-                    throw new ClassNotFoundException(className);
-                }
-
-                return clazz;
-            }
-        };
-
-        return classLoader;
+        return DLClassLoader.getClassLoader(mDexPath, getApplicationContext(), super.getClassLoader());
     }
 
     @Override
