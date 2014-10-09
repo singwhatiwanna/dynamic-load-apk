@@ -17,50 +17,47 @@
  */
 package com.ryg.dynamicload;
 
+import com.ryg.utils.DLConstants;
+import com.ryg.utils.DLUtils;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.ViewGroup.LayoutParams;
 
-import com.ryg.dynamicload.DLPlugin;
-import com.ryg.utils.DLConstants;
-import com.ryg.utils.DLUtils;
+public class DLBasePluginFragmentActivity extends FragmentActivity implements DLPlugin {
 
-/**
- * note: can use that like this.
- * @see {@link DLBasePluginActivity.that} 
- * @author renyugang
- */
-public class DLBasePluginActivity extends Activity implements DLPlugin {
-
-    private static final String TAG = "DLBasePluginActivity";
+    private static final String TAG = "DLBasePluginFragmentActivity";
 
     /**
-     * 代理activity，可以当作Context来使用，会根据需要来决定是否指向this
+     * 代理FragmentActivity，可以当作Context来使用，会根据需要来决定是否指向this
      */
-    protected Activity mProxyActivity;
+    protected FragmentActivity mProxyActivity;
 
     /**
      * 等同于mProxyActivity，可以当作Context来使用，会根据需要来决定是否指向this<br/>
      * 可以当作this来使用
      */
-    protected Activity that;
+    protected FragmentActivity that;
     protected int mFrom = DLConstants.FROM_INTERNAL;
     protected String mDexPath;
 
     public void setProxy(Activity proxyActivity, String dexPath) {
         Log.d(TAG, "setProxy: proxyActivity= " + proxyActivity + ", dexPath= " + dexPath);
-        mProxyActivity = proxyActivity;
+        mProxyActivity = (FragmentActivity)proxyActivity;
         that = mProxyActivity;
         mDexPath = dexPath;
     }
@@ -249,16 +246,16 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
     }
 
     @Override
-    public void onBackPressed() {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (mFrom == DLConstants.FROM_INTERNAL) {
-            super.onBackPressed();
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onBackPressed() {
         if (mFrom == DLConstants.FROM_INTERNAL) {
-            super.onActivityResult(requestCode, resultCode, data);
+            super.onBackPressed();
         }
     }
 
@@ -349,4 +346,25 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
             super.onWindowFocusChanged(hasFocus);
         }
     }
+
+    // ------------------------------------------------------------------------
+    // methods override from FragmentActivity
+    // ------------------------------------------------------------------------
+
+    @Override
+    public FragmentManager getSupportFragmentManager() {
+        if (mFrom == DLConstants.FROM_INTERNAL) {
+            return super.getSupportFragmentManager();
+        }
+        return mProxyActivity.getSupportFragmentManager();
+    }
+
+    @Override
+    public LoaderManager getSupportLoaderManager() {
+        if (mFrom == DLConstants.FROM_INTERNAL) {
+            return super.getSupportLoaderManager();
+        }
+        return mProxyActivity.getSupportLoaderManager();
+    }
+
 }

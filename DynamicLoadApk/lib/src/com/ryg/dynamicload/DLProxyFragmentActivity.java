@@ -23,7 +23,6 @@ import java.lang.reflect.Method;
 import com.ryg.utils.DLConstants;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.res.AssetManager;
@@ -31,14 +30,15 @@ import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.WindowManager.LayoutParams;
 
-public class DLProxyActivity extends Activity {
+public class DLProxyFragmentActivity extends FragmentActivity {
 
-    private static final String TAG = "DLProxyActivity";
+    private static final String TAG = "DLProxyFragmentActivity";
 
     private String mClass;
     private String mDexPath;
