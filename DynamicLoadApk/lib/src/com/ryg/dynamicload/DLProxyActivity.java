@@ -60,6 +60,11 @@ public class DLProxyActivity extends Activity {
         }
         Resources superRes = super.getResources();
         mResources = new Resources(mAssetManager, superRes.getDisplayMetrics(), superRes.getConfiguration());
+
+        Log.d(TAG, "device brand: " + Build.MANUFACTURER);
+        if (!DLConstants.BRAND_SAMSUNG.equalsIgnoreCase(Build.MANUFACTURER)) {
+            setTheme(R.style.AppTheme);
+        }
         mTheme = mResources.newTheme();
         mTheme.setTo(super.getTheme());
     }
