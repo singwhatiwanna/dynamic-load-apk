@@ -20,14 +20,12 @@ package com.ryg.dynamicload;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-import com.ryg.utils.DLConstants;
-
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
-import android.content.res.Resources.Theme;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -35,6 +33,8 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.WindowManager.LayoutParams;
+
+import com.ryg.utils.DLConstants;
 
 public class DLProxyFragmentActivity extends FragmentActivity {
 
@@ -45,9 +45,10 @@ public class DLProxyFragmentActivity extends FragmentActivity {
 
     private AssetManager mAssetManager;
     private Resources mResources;
-    private Theme mTheme;
 
     protected DLPlugin mRemoteActivity;
+    
+    private ActivityInfo mActivityInfo;
 
     protected void loadResources() {
         try {
@@ -60,8 +61,26 @@ public class DLProxyFragmentActivity extends FragmentActivity {
         }
         Resources superRes = super.getResources();
         mResources = new Resources(mAssetManager, superRes.getDisplayMetrics(), superRes.getConfiguration());
-        mTheme = mResources.newTheme();
-        mTheme.setTo(super.getTheme());
+    }
+    
+    private void initializeActivityInfo() {
+        PackageInfo packageInfo = getPackageManager().getPackageArchiveInfo(mDexPath, 1);
+        if ((packageInfo.activities != null) && (packageInfo.activities.length > 0)) {
+            if (mClass == null) {
+                mClass = packageInfo.activities[0].name;
+            }
+            for (ActivityInfo a : packageInfo.activities) {
+                if (a.name.equals(mClass)) {
+                    mActivityInfo = a;
+                }
+            }
+        }
+    }
+    
+    private void handleActivityInfo() {
+        setTheme(mActivityInfo.theme);
+        
+        //TODO  mActivityInfo.launchMode
     }
 
     @Override
@@ -72,11 +91,9 @@ public class DLProxyFragmentActivity extends FragmentActivity {
 
         Log.d(TAG, "mClass=" + mClass + " mDexPath=" + mDexPath);
         loadResources();
-        if (mClass == null) {
-            launchTargetActivity();
-        } else {
-            launchTargetActivity(mClass);
-        }
+        initializeActivityInfo();
+        handleActivityInfo();
+        launchTargetActivity(mClass);
     }
 
     protected void launchTargetActivity() {
@@ -120,11 +137,6 @@ public class DLProxyFragmentActivity extends FragmentActivity {
     @Override
     public Resources getResources() {
         return mResources == null ? super.getResources() : mResources;
-    }
-
-    @Override
-    public Theme getTheme() {
-        return mTheme == null ? super.getTheme() : mTheme;
     }
 
     @Override
