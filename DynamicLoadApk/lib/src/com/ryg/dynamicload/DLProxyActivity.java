@@ -33,7 +33,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.WindowManager.LayoutParams;
 
 import com.ryg.utils.DLConstants;
@@ -50,7 +49,7 @@ public class DLProxyActivity extends Activity {
     private Theme mTheme;
 
     protected DLPlugin mRemoteActivity;
-    
+
     private ActivityInfo mActivityInfo;
 
     protected void loadResources() {
@@ -65,7 +64,7 @@ public class DLProxyActivity extends Activity {
         Resources superRes = super.getResources();
         mResources = new Resources(mAssetManager, superRes.getDisplayMetrics(), superRes.getConfiguration());
     }
-    
+
     private void initializeActivityInfo() {
         PackageInfo packageInfo = getPackageManager().getPackageArchiveInfo(mDexPath, 1);
         if ((packageInfo.activities != null) && (packageInfo.activities.length > 0)) {
@@ -79,21 +78,16 @@ public class DLProxyActivity extends Activity {
             }
         }
     }
-    
-    @Override
-    public void setContentView(View view) {
-        // TODO Auto-generated method stub
-        super.setContentView(view);
-    }
-    
+
     private void handleActivityInfo() {
+        Log.d(TAG, "handleActivityInfo, theme=" + mActivityInfo.theme);
         if (mActivityInfo.theme > 0) {
             setTheme(mActivityInfo.theme);
         }
         mTheme = mResources.newTheme();
         mTheme.setTo(super.getTheme());
-        
-        //TODO  mActivityInfo.launchMode
+
+        // TODO: handle mActivityInfo.launchMode here.
     }
 
     @Override
@@ -101,19 +95,12 @@ public class DLProxyActivity extends Activity {
         super.onCreate(savedInstanceState);
         mDexPath = getIntent().getStringExtra(DLConstants.EXTRA_DEX_PATH);
         mClass = getIntent().getStringExtra(DLConstants.EXTRA_CLASS);
-
         Log.d(TAG, "mClass=" + mClass + " mDexPath=" + mDexPath);
-        loadResources();
-        
+
         loadResources();
         initializeActivityInfo();
         handleActivityInfo();
         launchTargetActivity(mClass);
-        if (mClass == null) {
-            launchTargetActivity();
-        } else {
-            launchTargetActivity(mClass);
-        }
     }
 
     protected void launchTargetActivity() {
@@ -258,5 +245,5 @@ public class DLProxyActivity extends Activity {
         mRemoteActivity.onWindowFocusChanged(hasFocus);
         super.onWindowFocusChanged(hasFocus);
     }
-    
+
 }

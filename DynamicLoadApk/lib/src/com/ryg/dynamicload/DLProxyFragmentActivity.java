@@ -46,11 +46,11 @@ public class DLProxyFragmentActivity extends FragmentActivity {
 
     private AssetManager mAssetManager;
     private Resources mResources;
+    private Theme mTheme;
 
     protected DLPlugin mRemoteActivity;
-    
+
     private ActivityInfo mActivityInfo;
-    private Theme mTheme;
 
     protected void loadResources() {
         try {
@@ -64,7 +64,7 @@ public class DLProxyFragmentActivity extends FragmentActivity {
         Resources superRes = super.getResources();
         mResources = new Resources(mAssetManager, superRes.getDisplayMetrics(), superRes.getConfiguration());
     }
-    
+
     private void initializeActivityInfo() {
         PackageInfo packageInfo = getPackageManager().getPackageArchiveInfo(mDexPath, 1);
         if ((packageInfo.activities != null) && (packageInfo.activities.length > 0)) {
@@ -78,15 +78,15 @@ public class DLProxyFragmentActivity extends FragmentActivity {
             }
         }
     }
-    
+
     private void handleActivityInfo() {
         if (mActivityInfo.theme > 0) {
             setTheme(mActivityInfo.theme);
         }
         mTheme = mResources.newTheme();
         mTheme.setTo(super.getTheme());
-        
-        //TODO  mActivityInfo.launchMode
+
+        // TODO: handle mActivityInfo.launchMode here.
     }
 
     @Override
@@ -94,8 +94,8 @@ public class DLProxyFragmentActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         mDexPath = getIntent().getStringExtra(DLConstants.EXTRA_DEX_PATH);
         mClass = getIntent().getStringExtra(DLConstants.EXTRA_CLASS);
-
         Log.d(TAG, "mClass=" + mClass + " mDexPath=" + mDexPath);
+
         loadResources();
         initializeActivityInfo();
         handleActivityInfo();
