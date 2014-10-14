@@ -20,10 +20,9 @@ package com.ryg.dynamicload;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-import com.ryg.utils.DLConstants;
-
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -36,6 +35,8 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.WindowManager.LayoutParams;
 
+import com.ryg.utils.DLConstants;
+
 public class DLProxyFragmentActivity extends FragmentActivity {
 
     private static final String TAG = "DLProxyFragmentActivity";
@@ -45,9 +46,11 @@ public class DLProxyFragmentActivity extends FragmentActivity {
 
     private AssetManager mAssetManager;
     private Resources mResources;
-    private Theme mTheme;
 
     protected DLPlugin mRemoteActivity;
+    
+    private ActivityInfo mActivityInfo;
+    private Theme mTheme;
 
     protected void loadResources() {
         try {
@@ -60,13 +63,30 @@ public class DLProxyFragmentActivity extends FragmentActivity {
         }
         Resources superRes = super.getResources();
         mResources = new Resources(mAssetManager, superRes.getDisplayMetrics(), superRes.getConfiguration());
-
-        Log.d(TAG, "device brand: " + Build.MANUFACTURER);
-        if (!DLConstants.BRAND_SAMSUNG.equalsIgnoreCase(Build.MANUFACTURER)) {
-            setTheme(R.style.AppTheme);
+    }
+    
+    private void initializeActivityInfo() {
+        PackageInfo packageInfo = getPackageManager().getPackageArchiveInfo(mDexPath, 1);
+        if ((packageInfo.activities != null) && (packageInfo.activities.length > 0)) {
+            if (mClass == null) {
+                mClass = packageInfo.activities[0].name;
+            }
+            for (ActivityInfo a : packageInfo.activities) {
+                if (a.name.equals(mClass)) {
+                    mActivityInfo = a;
+                }
+            }
+        }
+    }
+    
+    private void handleActivityInfo() {
+        if (mActivityInfo.theme > 0) {
+            setTheme(mActivityInfo.theme);
         }
         mTheme = mResources.newTheme();
         mTheme.setTo(super.getTheme());
+        
+        //TODO  mActivityInfo.launchMode
     }
 
     @Override
@@ -77,11 +97,9 @@ public class DLProxyFragmentActivity extends FragmentActivity {
 
         Log.d(TAG, "mClass=" + mClass + " mDexPath=" + mDexPath);
         loadResources();
-        if (mClass == null) {
-            launchTargetActivity();
-        } else {
-            launchTargetActivity(mClass);
-        }
+        initializeActivityInfo();
+        handleActivityInfo();
+        launchTargetActivity(mClass);
     }
 
     protected void launchTargetActivity() {
