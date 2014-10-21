@@ -1,9 +1,12 @@
 DL : dynamic load framework for android
 ================
 ![mahua](http://www.renyugang.cn/resources/image/DL.png)
+
 support load apk which is not installed.
-host: host apk, a container contains many plugin apks
-plugin: plugin apk, which is invoked by host, also, it can be running when installed.
+
+host : host apk, a container contains many plugin apks
+
+plugin : plugin apk, which is invoked by host, also, it can be running when installed.
 
 ##about DL
 1. plugin can be invoked by host without being installed
@@ -96,10 +99,11 @@ implement DLPlugin in DLProxyActivity
 ...
 ```
 ##How to develop a DL plugin
-1. the key word this is dangerous
-2. use that to instead this when visit Activity's methods
-3. use startActivityByProxy and startActivityForResultByProxy to start activity, also,launchmode is not supported
-4. not support service,broadcast can only be used by register it in code.
+1. import dl-lib.jar
+2. the key word this is dangerous
+3. use that to instead this when visit Activity's methods
+4. use startActivityByProxy and startActivityForResultByProxy to start activity, another, launchmode is not supported
+5. not support service,broadcast can only be used by register it in code.
 
 ##Current job
 1. DLIntent
@@ -110,7 +114,7 @@ implement DLPlugin in DLProxyActivity
 ![mahua](http://img.blog.csdn.net/20140411000445437?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2luZ3doYXRpd2FubmE=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
 
 firstly, host will load all plugin apks located in /mnt/sdcard/DynamicLoadHost, then, plugin can be invoked by clicking list's item. Details can be found in source code.
-###Thanks[nealgao](http://nealgao06.lofter.com) to design the logo for DL.
+###Thanks [nealgao](http://nealgao06.lofter.com) to design the logo for DL.
 ## License
 
     Copyright (C) 2014 singwhatiwanna(任玉刚) <singwhatiwanna@qq.com>
