@@ -1,4 +1,4 @@
-package com.ryg.dynamicload;
+package com.ryg.dynamicload.internal;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 
+import com.ryg.dynamicload.DLProxyActivity;
 import com.ryg.utils.DLConstants;
 
 import dalvik.system.DexClassLoader;
@@ -39,7 +40,7 @@ public class DLPluginManager {
 				getPackageArchiveInfo(dexPath, PackageManager.GET_ACTIVITIES);
 		if (packageInfo == null) 
 			throw new PluginNotFoundException(dexPath + " not found");
-		String packageName = packageInfo.packageName;
+		final String packageName = packageInfo.packageName;
 		
 		DLPluginPackage pluginPackage = packageHolder.get(packageName);
 		
@@ -86,7 +87,7 @@ public class DLPluginManager {
 		if (pluginPackage == null) {
 			//TODO plugin not found
 		} else {
-		    DexClassLoader loader = pluginPackage.getLoader();
+		    DexClassLoader loader = pluginPackage.loader;
 			String className = dlIntent.getPluginClass();
 			if (className.startsWith(".")) {
 				className = packageName + className;

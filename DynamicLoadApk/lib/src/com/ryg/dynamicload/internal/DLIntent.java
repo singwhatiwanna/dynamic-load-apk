@@ -1,26 +1,26 @@
-package com.ryg.dynamicload;
+package com.ryg.dynamicload.internal;
 
 import android.content.Intent;
 
 public class DLIntent extends Intent {
-	private String pluginPackage;
+	private String mPluginPackage;
 	
-	private String pluginClass;
+	private String mPluginClass;
 
 	public String getPluginPackage() {
-		return pluginPackage;
+		return mPluginPackage;
 	}
 
 	public void setPluginPackage(String pluginPackage) {
-		this.pluginPackage = pluginPackage;
+		this.mPluginPackage = pluginPackage;
 	}
 
 	public String getPluginClass() {
-		return pluginClass;
+		return mPluginClass;
 	}
 
 	public void setPluginClass(String pluginClass) {
-		this.pluginClass = pluginClass;
+		this.mPluginClass = pluginClass;
 	}
 
 	
