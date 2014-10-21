@@ -39,7 +39,7 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        >
         <activity
             android:name="com.ryg.dynamicload.sample.doihost.MainActivity"
             android:label="@string/app_name" >
@@ -53,7 +53,7 @@
             android:name="com.ryg.dynamicload.DLProxyActivity"
             android:label="@string/app_name" >
             <intent-filter>
-                <action android:name="com.ryg.dynamicloadhost.VIEW" />
+                <action android:name="com.ryg.dynamicload.proxy.activity.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>

@@ -32,6 +32,9 @@ import android.support.v4.app.LoaderManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -192,6 +195,15 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
     }
 
     @Override
+    public MenuInflater getMenuInflater() {
+        if (mFrom == DLConstants.FROM_INTERNAL) {
+            return super.getMenuInflater();
+        } else {
+            return mProxyActivity.getMenuInflater();
+        }
+    }
+
+    @Override
     public SharedPreferences getSharedPreferences(String name, int mode) {
         if (mFrom == DLConstants.FROM_INTERNAL) {
             return super.getSharedPreferences(name, mode);
@@ -345,6 +357,20 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
         if (mFrom == DLConstants.FROM_INTERNAL) {
             super.onWindowFocusChanged(hasFocus);
         }
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (mFrom == DLConstants.FROM_INTERNAL) {
+            return super.onCreateOptionsMenu(menu);
+        }
+        return true;
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (mFrom == DLConstants.FROM_INTERNAL) {
+            return onOptionsItemSelected(item);
+        }
+        return false;
     }
 
     // ------------------------------------------------------------------------

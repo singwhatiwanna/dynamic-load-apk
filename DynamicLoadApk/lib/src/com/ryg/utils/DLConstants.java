@@ -19,4 +19,5 @@ public class DLConstants {
     public static final String PROXY_FRAGMENT_ACTIVITY_VIEW_ACTION =
             "com.ryg.dynamicload.proxy.fragmentactivity.VIEW";
 
+    public static final String BRAND_SAMSUNG = "samsung";
 }

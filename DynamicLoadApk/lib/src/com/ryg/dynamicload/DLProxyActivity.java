@@ -20,11 +20,10 @@ package com.ryg.dynamicload;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-import com.ryg.utils.DLConstants;
-
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -33,8 +32,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.WindowManager.LayoutParams;
+
+import com.ryg.utils.DLConstants;
 
 public class DLProxyActivity extends Activity {
 
@@ -49,6 +52,8 @@ public class DLProxyActivity extends Activity {
 
     protected DLPlugin mRemoteActivity;
 
+    private ActivityInfo mActivityInfo;
+
     protected void loadResources() {
         try {
             AssetManager assetManager = AssetManager.class.newInstance();
@@ -60,8 +65,31 @@ public class DLProxyActivity extends Activity {
         }
         Resources superRes = super.getResources();
         mResources = new Resources(mAssetManager, superRes.getDisplayMetrics(), superRes.getConfiguration());
+    }
+
+    private void initializeActivityInfo() {
+        PackageInfo packageInfo = getPackageManager().getPackageArchiveInfo(mDexPath, 1);
+        if ((packageInfo.activities != null) && (packageInfo.activities.length > 0)) {
+            if (mClass == null) {
+                mClass = packageInfo.activities[0].name;
+            }
+            for (ActivityInfo a : packageInfo.activities) {
+                if (a.name.equals(mClass)) {
+                    mActivityInfo = a;
+                }
+            }
+        }
+    }
+
+    private void handleActivityInfo() {
+        Log.d(TAG, "handleActivityInfo, theme=" + mActivityInfo.theme);
+        if (mActivityInfo.theme > 0) {
+            setTheme(mActivityInfo.theme);
+        }
         mTheme = mResources.newTheme();
         mTheme.setTo(super.getTheme());
+
+        // TODO: handle mActivityInfo.launchMode here.
     }
 
     @Override
@@ -69,14 +97,12 @@ public class DLProxyActivity extends Activity {
         super.onCreate(savedInstanceState);
         mDexPath = getIntent().getStringExtra(DLConstants.EXTRA_DEX_PATH);
         mClass = getIntent().getStringExtra(DLConstants.EXTRA_CLASS);
-
         Log.d(TAG, "mClass=" + mClass + " mDexPath=" + mDexPath);
+
         loadResources();
-        if (mClass == null) {
-            launchTargetActivity();
-        } else {
-            launchTargetActivity(mClass);
-        }
+        initializeActivityInfo();
+        handleActivityInfo();
+        launchTargetActivity(mClass);
     }
 
     protected void launchTargetActivity() {
@@ -220,6 +246,18 @@ public class DLProxyActivity extends Activity {
     public void onWindowFocusChanged(boolean hasFocus) {
         mRemoteActivity.onWindowFocusChanged(hasFocus);
         super.onWindowFocusChanged(hasFocus);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        mRemoteActivity.onCreateOptionsMenu(menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        mRemoteActivity.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item);
     }
 
 }

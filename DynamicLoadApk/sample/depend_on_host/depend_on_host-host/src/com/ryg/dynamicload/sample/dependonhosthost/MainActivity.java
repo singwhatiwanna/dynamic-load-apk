@@ -20,6 +20,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.ryg.dynamicload.DLProxyActivity;
+import com.ryg.dynamicload.sample.dependonhosthost.R;
 import com.ryg.utils.DLConstants;
 import com.ryg.utils.DLUtils;
 
