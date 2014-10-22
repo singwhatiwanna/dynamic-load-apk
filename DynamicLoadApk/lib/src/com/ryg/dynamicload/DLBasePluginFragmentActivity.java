@@ -17,9 +17,6 @@
  */
 package com.ryg.dynamicload;
 
-import com.ryg.utils.DLConstants;
-import com.ryg.utils.DLUtils;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -37,9 +34,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.ViewGroup.LayoutParams;
+
+import com.ryg.utils.DLConstants;
 
 public class DLBasePluginFragmentActivity extends FragmentActivity implements DLPlugin {
 
@@ -56,13 +55,11 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
      */
     protected FragmentActivity that;
     protected int mFrom = DLConstants.FROM_INTERNAL;
-    protected String mDexPath;
 
-    public void setProxy(Activity proxyActivity, String dexPath) {
-        Log.d(TAG, "setProxy: proxyActivity= " + proxyActivity + ", dexPath= " + dexPath);
+    public void setProxy(Activity proxyActivity) {
+        Log.d(TAG, "setProxy: proxyActivity= " + proxyActivity);
         mProxyActivity = (FragmentActivity)proxyActivity;
         that = mProxyActivity;
-        mDexPath = dexPath;
     }
 
     @Override
@@ -77,40 +74,6 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
         }
 
         Log.d(TAG, "onCreate: from= " + (mFrom == DLConstants.FROM_INTERNAL ? "DLConstants.FROM_INTERNAL" : "FROM_EXTERNAL"));
-    }
-
-    protected void startActivityByProxy(Class<?> cls) {
-        startActivityByProxy(cls.getName());
-    }
-
-    protected void startActivityForResultByProxy(Class<?> cls, int requestCode) {
-        startActivityForResultByProxy(cls.getName(), requestCode);
-    }
-
-    protected void startActivityByProxy(String className) {
-        if (mFrom == DLConstants.FROM_INTERNAL) {
-            Intent intent = new Intent();
-            intent.setClassName(this, className);
-            mProxyActivity.startActivity(intent);
-        } else {
-            Intent intent = new Intent(DLUtils.getProxyViewAction(className, getClassLoader()));
-            intent.putExtra(DLConstants.EXTRA_DEX_PATH, mDexPath);
-            intent.putExtra(DLConstants.EXTRA_CLASS, className);
-            mProxyActivity.startActivity(intent);
-        }
-    }
-
-    public void startActivityForResultByProxy(String className, int requestCode) {
-        if (mFrom == DLConstants.FROM_INTERNAL) {
-            Intent intent = new Intent();
-            intent.setClassName(this, className);
-            mProxyActivity.startActivityForResult(intent, requestCode);
-        } else {
-            Intent intent = new Intent(DLUtils.getProxyViewAction(className, getClassLoader()));
-            intent.putExtra(DLConstants.EXTRA_DEX_PATH, mDexPath);
-            intent.putExtra(DLConstants.EXTRA_CLASS, className);
-            mProxyActivity.startActivityForResult(intent, requestCode);
-        }
     }
 
     @Override

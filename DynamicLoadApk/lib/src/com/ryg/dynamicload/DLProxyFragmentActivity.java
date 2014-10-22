@@ -123,7 +123,7 @@ public class DLProxyFragmentActivity extends FragmentActivity {
             setRemoteActivity(instance);
             Log.d(TAG, "instance = " + instance);
 
-            mRemoteActivity.setProxy(this, mDexPath);
+            mRemoteActivity.setProxy(this);
 
             Bundle bundle = new Bundle();
             bundle.putInt(DLConstants.FROM, DLConstants.FROM_EXTERNAL);

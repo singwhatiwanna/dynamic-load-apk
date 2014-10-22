@@ -4,27 +4,37 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.util.Log;
 
+import com.ryg.dynamicload.DLBasePluginActivity;
+import com.ryg.dynamicload.DLBasePluginFragmentActivity;
 import com.ryg.dynamicload.DLProxyActivity;
+import com.ryg.dynamicload.DLProxyFragmentActivity;
 import com.ryg.utils.DLConstants;
 
 import dalvik.system.DexClassLoader;
 
-public class DLPluginManager {
+public class DLPluginManager implements DLContext {
+    
+    private static final String TAG = "PluginManager";
 	
-	public class PluginNotFoundException extends Exception {
+	DLPluginManager() {
+	    
+	}
+	
+	private static DLPluginManager sInstance;
 
-		private static final long serialVersionUID = -1736885553981751955L;
-
-		public PluginNotFoundException(String string) {
-			super(string);
-		}
-		
+	public static synchronized DLPluginManager getInstance() {
+	    if (sInstance == null) {
+	        sInstance = new DLPluginManager();
+	    }
+	    return sInstance;
 	}
 	
 	private final HashMap<String, DLPluginPackage> packageHolder = new HashMap<String, DLPluginPackage>();
@@ -35,11 +45,11 @@ public class DLPluginManager {
 	 * @param dexPath
 	 * @throws PluginNotFoundException
 	 */
-	public void loadApk(Context context, String dexPath) throws PluginNotFoundException {
+	public void loadApk(Context context, String dexPath) throws PluginException {
 		PackageInfo packageInfo = context.getPackageManager().
 				getPackageArchiveInfo(dexPath, PackageManager.GET_ACTIVITIES);
 		if (packageInfo == null) 
-			throw new PluginNotFoundException(dexPath + " not found");
+			throw new PluginException(dexPath + " not found");
 		final String packageName = packageInfo.packageName;
 		
 		DLPluginPackage pluginPackage = packageHolder.get(packageName);
@@ -48,7 +58,7 @@ public class DLPluginManager {
 		    DexClassLoader dexClassLoader = createDexClassLoader(context, dexPath);
 		    AssetManager assetManager = createAssetManager(dexPath);
 		    Resources resources = createResources(context, assetManager);
-		    pluginPackage = new DLPluginPackage(packageName, dexPath, dexClassLoader, assetManager, resources);
+		    pluginPackage = new DLPluginPackage(packageName, dexPath, dexClassLoader, assetManager, resources, packageInfo);
 		    packageHolder.put(packageName, pluginPackage);
 		}
 	}
@@ -73,18 +83,24 @@ public class DLPluginManager {
 	    
 	}
 	
+	public DLPluginPackage getPackage(String packageName) {
+	    return packageHolder.get(packageName);
+	}
+	
 	private Resources createResources(Context context, AssetManager assetManager) {
 	    Resources superRes = context.getResources();
 	    Resources resources = new Resources(assetManager, superRes.getDisplayMetrics(), superRes.getConfiguration());
 	    return resources;
 	}
 	
-	public void startActivity(Context context, DLIntent dlIntent) {
+	@Override
+	public void startPluginActivity(Context context, DLIntent dlIntent) {
 		String packageName = dlIntent.getPluginPackage();
 		if (packageName == null) throw new NullPointerException("package name is null");
 		DLPluginPackage pluginPackage = packageHolder.get(packageName);
 		
 		if (pluginPackage == null) {
+		    throw new PluginException("plugin not found , packageName=" + packageName);
 			//TODO plugin not found
 		} else {
 		    DexClassLoader loader = pluginPackage.loader;
@@ -92,10 +108,32 @@ public class DLPluginManager {
 			if (className.startsWith(".")) {
 				className = packageName + className;
 			}
+			Class clazz = null;
+			try {
+			    clazz = loader.loadClass(className);
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+                throw new PluginException("class not found, className=" + className);
+                //TODO class not found
+            }
+			
+			Class<? extends Activity> activityClass = null;
+			if (DLBasePluginActivity.class.isAssignableFrom(clazz)) {
+			    activityClass = DLProxyActivity.class;
+			} else if (DLBasePluginFragmentActivity.class.isAssignableFrom(clazz)) {
+			    activityClass = DLProxyFragmentActivity.class;
+			} else {
+			    throw new PluginException("class type error, className=" 
+			            + className + " is type of " 
+			            + clazz.getName());
+			  //TODO class type error
+			}
+			
 			dlIntent.putExtra(DLConstants.EXTRA_CLASS, className);
 			dlIntent.putExtra(DLConstants.EXTRA_PACKAGE, packageName);
-			dlIntent.setClass(context, DLProxyActivity.class);
+			dlIntent.setClass(context, activityClass);
 			context.startActivity(dlIntent);
 		}
 	}
+
 }

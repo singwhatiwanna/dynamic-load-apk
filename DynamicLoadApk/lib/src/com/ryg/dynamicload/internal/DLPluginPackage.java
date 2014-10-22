@@ -1,5 +1,6 @@
 package com.ryg.dynamicload.internal;
 
+import android.content.pm.PackageInfo;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import dalvik.system.DexClassLoader;
@@ -19,13 +20,16 @@ public class DLPluginPackage {
     
     public Resources resources;
     
+    public PackageInfo packageInfo;
+    
     public DLPluginPackage(String packageName, String path, DexClassLoader loader, AssetManager assetManager,
-            Resources resources) {
+            Resources resources, PackageInfo packageInfo) {
         super();
         this.packageName = packageName;
         this.path = path;
         this.loader = loader;
         this.assetManager = assetManager;
         this.resources = resources;
+        this.packageInfo = packageInfo;
     }
 }

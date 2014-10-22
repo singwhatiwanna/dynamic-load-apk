@@ -35,16 +35,18 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.ryg.dynamicload.DLPlugin;
+import com.ryg.dynamicload.internal.DLContext;
+import com.ryg.dynamicload.internal.DLIntent;
+import com.ryg.dynamicload.internal.DLPluginActivityImpl;
+import com.ryg.dynamicload.internal.PluginException;
 import com.ryg.utils.DLConstants;
-import com.ryg.utils.DLUtils;
 
 /**
  * note: can use that like this.
  * @see {@link DLBasePluginActivity.that} 
  * @author renyugang
  */
-public class DLBasePluginActivity extends Activity implements DLPlugin {
+public class DLBasePluginActivity extends Activity implements DLPlugin, DLContext {
 
     private static final String TAG = "DLBasePluginActivity";
 
@@ -52,6 +54,8 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
      * 代理activity，可以当作Context来使用，会根据需要来决定是否指向this
      */
     protected Activity mProxyActivity;
+    
+    private DLPluginActivityImpl mImpl;
 
     /**
      * 等同于mProxyActivity，可以当作Context来使用，会根据需要来决定是否指向this<br/>
@@ -59,13 +63,11 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
      */
     protected Activity that;
     protected int mFrom = DLConstants.FROM_INTERNAL;
-    protected String mDexPath;
 
-    public void setProxy(Activity proxyActivity, String dexPath) {
-        Log.d(TAG, "setProxy: proxyActivity= " + proxyActivity + ", dexPath= " + dexPath);
+    public void setProxy(Activity proxyActivity) {
+        Log.d(TAG, "setProxy: proxyActivity= " + proxyActivity);
         mProxyActivity = proxyActivity;
         that = mProxyActivity;
-        mDexPath = dexPath;
     }
 
     @Override
@@ -78,42 +80,8 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
             mProxyActivity = this;
             that = mProxyActivity;
         }
-
+        
         Log.d(TAG, "onCreate: from= " + (mFrom == DLConstants.FROM_INTERNAL ? "DLConstants.FROM_INTERNAL" : "FROM_EXTERNAL"));
-    }
-
-    protected void startActivityByProxy(Class<?> cls) {
-        startActivityByProxy(cls.getName());
-    }
-
-    protected void startActivityForResultByProxy(Class<?> cls, int requestCode) {
-        startActivityForResultByProxy(cls.getName(), requestCode);
-    }
-
-    protected void startActivityByProxy(String className) {
-        if (mFrom == DLConstants.FROM_INTERNAL) {
-            Intent intent = new Intent();
-            intent.setClassName(this, className);
-            mProxyActivity.startActivity(intent);
-        } else {
-            Intent intent = new Intent(DLUtils.getProxyViewAction(className, getClassLoader()));
-            intent.putExtra(DLConstants.EXTRA_DEX_PATH, mDexPath);
-            intent.putExtra(DLConstants.EXTRA_CLASS, className);
-            mProxyActivity.startActivity(intent);
-        }
-    }
-
-    public void startActivityForResultByProxy(String className, int requestCode) {
-        if (mFrom == DLConstants.FROM_INTERNAL) {
-            Intent intent = new Intent();
-            intent.setClassName(this, className);
-            mProxyActivity.startActivityForResult(intent, requestCode);
-        } else {
-            Intent intent = new Intent(DLUtils.getProxyViewAction(className, getClassLoader()));
-            intent.putExtra(DLConstants.EXTRA_DEX_PATH, mDexPath);
-            intent.putExtra(DLConstants.EXTRA_CLASS, className);
-            mProxyActivity.startActivityForResult(intent, requestCode);
-        }
     }
 
     @Override
@@ -374,6 +342,16 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
             return onOptionsItemSelected(item);
         }
         return false;
+    }
+
+    @Override
+    public void startPluginActivity(Context context, DLIntent intent) {
+        
+    }
+
+    @Override
+    public void loadApk(Context context, String dexPath) throws PluginException {
+        
     }
 
 }

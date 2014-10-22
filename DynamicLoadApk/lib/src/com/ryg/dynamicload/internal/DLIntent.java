@@ -7,7 +7,13 @@ public class DLIntent extends Intent {
 	
 	private String mPluginClass;
 
-	public String getPluginPackage() {
+	public DLIntent(String pluginPackage, String pluginClass) {
+        super();
+        this.mPluginPackage = pluginPackage;
+        this.mPluginClass = pluginClass;
+    }
+
+    public String getPluginPackage() {
 		return mPluginPackage;
 	}
 

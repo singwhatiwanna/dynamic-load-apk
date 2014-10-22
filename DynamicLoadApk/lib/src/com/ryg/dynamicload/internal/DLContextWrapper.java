@@ -7,7 +7,7 @@ public class DLContextWrapper implements DLContext {
     private DLContext mBaseContext;
     
     public DLContextWrapper() {
-        mBaseContext = DLContextImpl.createInstance();
+        mBaseContext = DLPluginManager.getInstance();
     }
 
     @Override
@@ -16,8 +16,8 @@ public class DLContextWrapper implements DLContext {
     }
 
     @Override
-    public DLPluginManager getPluginManager() {
-        return mBaseContext.getPluginManager();
+    public void loadApk(Context context, String dexPath) throws PluginException {
+        mBaseContext.loadApk(context, dexPath);
     }
 
 }

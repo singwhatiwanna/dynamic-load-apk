@@ -37,6 +37,8 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.WindowManager.LayoutParams;
 
+import com.ryg.dynamicload.internal.DLPluginManager;
+import com.ryg.dynamicload.internal.DLPluginPackage;
 import com.ryg.utils.DLConstants;
 
 public class DLProxyActivity extends Activity {
@@ -44,7 +46,9 @@ public class DLProxyActivity extends Activity {
     private static final String TAG = "DLProxyActivity";
 
     private String mClass;
-    private String mDexPath;
+    private String mPackageName;
+    
+    private DLPluginPackage mDLPluginPackage;
 
     private AssetManager mAssetManager;
     private Resources mResources;
@@ -55,20 +59,12 @@ public class DLProxyActivity extends Activity {
     private ActivityInfo mActivityInfo;
 
     protected void loadResources() {
-        try {
-            AssetManager assetManager = AssetManager.class.newInstance();
-            Method addAssetPath = assetManager.getClass().getMethod("addAssetPath", String.class);
-            addAssetPath.invoke(assetManager, mDexPath);
-            mAssetManager = assetManager;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        Resources superRes = super.getResources();
-        mResources = new Resources(mAssetManager, superRes.getDisplayMetrics(), superRes.getConfiguration());
+        mAssetManager = mDLPluginPackage.assetManager;
+        mResources = mDLPluginPackage.resources;
     }
 
     private void initializeActivityInfo() {
-        PackageInfo packageInfo = getPackageManager().getPackageArchiveInfo(mDexPath, 1);
+        PackageInfo packageInfo = mDLPluginPackage.packageInfo;
         if ((packageInfo.activities != null) && (packageInfo.activities.length > 0)) {
             if (mClass == null) {
                 mClass = packageInfo.activities[0].name;
@@ -95,36 +91,30 @@ public class DLProxyActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mDexPath = getIntent().getStringExtra(DLConstants.EXTRA_DEX_PATH);
+        mPackageName = getIntent().getStringExtra(DLConstants.EXTRA_PACKAGE);
         mClass = getIntent().getStringExtra(DLConstants.EXTRA_CLASS);
-        Log.d(TAG, "mClass=" + mClass + " mDexPath=" + mDexPath);
+        Log.d(TAG, "mClass=" + mClass + " mPackageName=" + mPackageName);
 
-        loadResources();
+        DLPluginManager pluginManager = DLPluginManager.getInstance();
+        mDLPluginPackage = pluginManager.getPackage(mPackageName);
+        mAssetManager = mDLPluginPackage.assetManager;
+        mResources = mDLPluginPackage.resources;
+        
         initializeActivityInfo();
         handleActivityInfo();
-        launchTargetActivity(mClass);
+        launchTargetActivity();
     }
-
-    protected void launchTargetActivity() {
-        PackageInfo packageInfo = getPackageManager().getPackageArchiveInfo(mDexPath, 1);
-        if ((packageInfo.activities != null) && (packageInfo.activities.length > 0)) {
-            String activityName = packageInfo.activities[0].name;
-            mClass = activityName;
-            launchTargetActivity(mClass);
-        }
-    }
-
+    
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    protected void launchTargetActivity(final String className) {
-        Log.d(TAG, "start launchTargetActivity, className=" + className);
+    protected void launchTargetActivity() {
         try {
-            Class<?> localClass = getClassLoader().loadClass(className);
+            Class<?> localClass = getClassLoader().loadClass(mClass);
             Constructor<?> localConstructor = localClass.getConstructor(new Class[] {});
             Object instance = localConstructor.newInstance(new Object[] {});
             setRemoteActivity(instance);
             Log.d(TAG, "instance = " + instance);
 
-            mRemoteActivity.setProxy(this, mDexPath);
+            mRemoteActivity.setProxy(this);
 
             Bundle bundle = new Bundle();
             bundle.putInt(DLConstants.FROM, DLConstants.FROM_EXTERNAL);
@@ -155,7 +145,7 @@ public class DLProxyActivity extends Activity {
 
     @Override
     public ClassLoader getClassLoader() {
-        return DLClassLoader.getClassLoader(mDexPath, getApplicationContext(), super.getClassLoader());
+        return mDLPluginPackage.loader;
     }
 
     @Override

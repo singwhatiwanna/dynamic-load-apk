@@ -36,7 +36,7 @@ public interface DLPlugin {
     public void onPause();
     public void onStop();
     public void onDestroy();
-    public void setProxy(Activity proxyActivity, String dexPath);
+    public void setProxy(Activity proxyActivity);
     public void onSaveInstanceState(Bundle outState);
     public void onNewIntent(Intent intent);
     public void onRestoreInstanceState(Bundle savedInstanceState);
