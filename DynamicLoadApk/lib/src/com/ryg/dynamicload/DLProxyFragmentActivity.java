@@ -32,6 +32,8 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.WindowManager.LayoutParams;
 
@@ -243,6 +245,18 @@ public class DLProxyFragmentActivity extends FragmentActivity {
     public void onWindowFocusChanged(boolean hasFocus) {
         mRemoteActivity.onWindowFocusChanged(hasFocus);
         super.onWindowFocusChanged(hasFocus);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        mRemoteActivity.onCreateOptionsMenu(menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        mRemoteActivity.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item);
     }
 
 }

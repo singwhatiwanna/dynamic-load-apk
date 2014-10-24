@@ -32,6 +32,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.WindowManager.LayoutParams;
 
@@ -244,6 +246,18 @@ public class DLProxyActivity extends Activity {
     public void onWindowFocusChanged(boolean hasFocus) {
         mRemoteActivity.onWindowFocusChanged(hasFocus);
         super.onWindowFocusChanged(hasFocus);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        mRemoteActivity.onCreateOptionsMenu(menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        mRemoteActivity.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item);
     }
 
 }
