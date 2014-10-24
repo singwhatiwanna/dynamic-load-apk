@@ -117,7 +117,7 @@ firstly, host will load all plugin apks located in /mnt/sdcard/DynamicLoadHost, 
 ###Thanks [nealgao](http://nealgao06.lofter.com) to design the logo for DL.
 ## License
 
-    Copyright (C) 2014 singwhatiwanna(任玉刚) <singwhatiwanna@qq.com>
+    Copyright (C) 2014 singwhatiwanna(任玉刚) <singwhatiwanna@gmail.com>
 
     collaborator:田啸,宋思宇
 
