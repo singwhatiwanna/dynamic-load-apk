@@ -33,7 +33,7 @@ implements OnClickListener{
             
             @Override
             public void onClick(View v) {
-                Toast.makeText(that, "quit : " + mDexPath, Toast.LENGTH_SHORT).show();
+                Toast.makeText(that, "quit", Toast.LENGTH_SHORT).show();
                 that.setResult(RESULT_FIRST_USER);
                 that.finish();
             }

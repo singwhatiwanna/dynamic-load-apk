@@ -1,5 +1,6 @@
 package com.ryg.dynamicload.internal;
 
+import android.app.Activity;
 import android.content.Intent;
 
 public class DLIntent extends Intent {
@@ -11,6 +12,11 @@ public class DLIntent extends Intent {
         super();
         this.mPluginPackage = pluginPackage;
         this.mPluginClass = pluginClass;
+    }
+	
+	public DLIntent(Class<? extends Activity> clazz) {
+        super();
+        this.mPluginClass = clazz.getName();
     }
 
     public String getPluginPackage() {

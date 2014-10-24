@@ -37,7 +37,6 @@ import android.view.WindowManager;
 
 import com.ryg.dynamicload.internal.DLContext;
 import com.ryg.dynamicload.internal.DLIntent;
-import com.ryg.dynamicload.internal.DLPluginActivityImpl;
 import com.ryg.dynamicload.internal.PluginException;
 import com.ryg.utils.DLConstants;
 
@@ -55,19 +54,19 @@ public class DLBasePluginActivity extends Activity implements DLPlugin, DLContex
      */
     protected Activity mProxyActivity;
     
-    private DLPluginActivityImpl mImpl;
-
     /**
      * 等同于mProxyActivity，可以当作Context来使用，会根据需要来决定是否指向this<br/>
      * 可以当作this来使用
      */
     protected Activity that;
+    protected DLContext mBaseContext;
     protected int mFrom = DLConstants.FROM_INTERNAL;
 
     public void setProxy(Activity proxyActivity) {
         Log.d(TAG, "setProxy: proxyActivity= " + proxyActivity);
         mProxyActivity = proxyActivity;
         that = mProxyActivity;
+        mBaseContext = (DLContext) mProxyActivity;
     }
 
     @Override
@@ -345,13 +344,34 @@ public class DLBasePluginActivity extends Activity implements DLPlugin, DLContex
     }
 
     @Override
-    public void startPluginActivity(Context context, DLIntent intent) {
+    public void startPluginActivity(Activity base, DLIntent dlIntent) {
+        if (mFrom == DLConstants.FROM_INTERNAL) {
+            dlIntent.setClassName(this, dlIntent.getPluginClass());
+            startActivity(dlIntent);
+        } else {
+            mBaseContext.startPluginActivity(base, dlIntent);
+        }
         
     }
 
     @Override
-    public void loadApk(Context context, String dexPath) throws PluginException {
-        
+    public void loadApk(String dexPath) throws PluginException {
+        if (mFrom != DLConstants.FROM_INTERNAL) {
+            mBaseContext.loadApk(dexPath);
+        }
     }
 
+    @Override
+    public void startPluginActivityForResult(Activity base, DLIntent dlIntent, int requestCode) {
+        if (mFrom == DLConstants.FROM_INTERNAL) {
+            dlIntent.setClassName(this, dlIntent.getPluginClass());
+            startActivityForResult(dlIntent, requestCode);
+        } else {
+            mBaseContext.startPluginActivityForResult(base, dlIntent, requestCode);
+        }
+    }
+    
+    public void startPluginActivityForResult(DLIntent dlIntent, int requestCode) {
+        startPluginActivityForResult(null, dlIntent, requestCode);
+    }
 }

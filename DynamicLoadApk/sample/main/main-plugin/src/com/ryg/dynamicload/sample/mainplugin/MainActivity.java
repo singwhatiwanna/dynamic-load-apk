@@ -1,6 +1,7 @@
 package com.ryg.dynamicload.sample.mainplugin;
 
 import com.ryg.dynamicload.DLBasePluginActivity;
+import com.ryg.dynamicload.internal.DLIntent;
 
 import android.content.Context;
 import android.content.Intent;
@@ -43,7 +44,7 @@ public class MainActivity extends DLBasePluginActivity {
             public void onClick(View v) {
                 Toast.makeText(context, "you clicked button",
                         Toast.LENGTH_SHORT).show();
-                startActivityForResultByProxy(TestFragmentActivity.class, 0);
+                startPluginActivityForResult(new DLIntent(TestFragmentActivity.class), 0);
             }
         });
         return layout;

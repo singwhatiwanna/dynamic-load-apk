@@ -17,135 +17,57 @@
  */
 package com.ryg.dynamicload;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageInfo;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
-import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.WindowManager.LayoutParams;
 
+import com.ryg.dynamicload.internal.DLContext;
+import com.ryg.dynamicload.internal.DLIntent;
 import com.ryg.dynamicload.internal.DLPluginManager;
-import com.ryg.dynamicload.internal.DLPluginPackage;
-import com.ryg.utils.DLConstants;
+import com.ryg.dynamicload.internal.DLProxyImpl;
+import com.ryg.dynamicload.internal.DLProxyImpl.DLProxy;
+import com.ryg.dynamicload.internal.PluginException;
 
-public class DLProxyActivity extends Activity {
-
-    private static final String TAG = "DLProxyActivity";
-
-    private String mClass;
-    private String mPackageName;
-    
-    private DLPluginPackage mDLPluginPackage;
-
-    private AssetManager mAssetManager;
-    private Resources mResources;
-    private Theme mTheme;
+public class DLProxyActivity extends Activity implements DLProxy, DLContext {
 
     protected DLPlugin mRemoteActivity;
+    
+    private DLProxyImpl impl = new DLProxyImpl(this);
 
-    private ActivityInfo mActivityInfo;
-
-    protected void loadResources() {
-        mAssetManager = mDLPluginPackage.assetManager;
-        mResources = mDLPluginPackage.resources;
-    }
-
-    private void initializeActivityInfo() {
-        PackageInfo packageInfo = mDLPluginPackage.packageInfo;
-        if ((packageInfo.activities != null) && (packageInfo.activities.length > 0)) {
-            if (mClass == null) {
-                mClass = packageInfo.activities[0].name;
-            }
-            for (ActivityInfo a : packageInfo.activities) {
-                if (a.name.equals(mClass)) {
-                    mActivityInfo = a;
-                }
-            }
-        }
-    }
-
-    private void handleActivityInfo() {
-        Log.d(TAG, "handleActivityInfo, theme=" + mActivityInfo.theme);
-        if (mActivityInfo.theme > 0) {
-            setTheme(mActivityInfo.theme);
-        }
-        mTheme = mResources.newTheme();
-        mTheme.setTo(super.getTheme());
-
-        // TODO: handle mActivityInfo.launchMode here.
-    }
-
+    private DLPluginManager mPluginManager;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPackageName = getIntent().getStringExtra(DLConstants.EXTRA_PACKAGE);
-        mClass = getIntent().getStringExtra(DLConstants.EXTRA_CLASS);
-        Log.d(TAG, "mClass=" + mClass + " mPackageName=" + mPackageName);
-
-        DLPluginManager pluginManager = DLPluginManager.getInstance();
-        mDLPluginPackage = pluginManager.getPackage(mPackageName);
-        mAssetManager = mDLPluginPackage.assetManager;
-        mResources = mDLPluginPackage.resources;
-        
-        initializeActivityInfo();
-        handleActivityInfo();
-        launchTargetActivity();
+        impl.onCreate(getIntent());
     }
     
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    protected void launchTargetActivity() {
-        try {
-            Class<?> localClass = getClassLoader().loadClass(mClass);
-            Constructor<?> localConstructor = localClass.getConstructor(new Class[] {});
-            Object instance = localConstructor.newInstance(new Object[] {});
-            setRemoteActivity(instance);
-            Log.d(TAG, "instance = " + instance);
-
-            mRemoteActivity.setProxy(this);
-
-            Bundle bundle = new Bundle();
-            bundle.putInt(DLConstants.FROM, DLConstants.FROM_EXTERNAL);
-            mRemoteActivity.onCreate(bundle);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    protected void setRemoteActivity(Object activity) {
-        mRemoteActivity = (DLPlugin) activity;
-    }
-
     @Override
     public AssetManager getAssets() {
-        return mAssetManager == null ? super.getAssets() : mAssetManager;
+        return impl.getAssets() == null ? super.getAssets() : impl.getAssets();
     }
 
     @Override
     public Resources getResources() {
-        return mResources == null ? super.getResources() : mResources;
+        return impl.getResources() == null ? super.getResources() : impl.getResources();
     }
 
     @Override
     public Theme getTheme() {
-        return mTheme == null ? super.getTheme() : mTheme;
+        return impl.getTheme() == null ? super.getTheme() : impl.getTheme();
     }
 
     @Override
     public ClassLoader getClassLoader() {
-        return mDLPluginPackage.loader;
+        return impl.getClassLoader();
     }
 
     @Override
@@ -248,6 +170,27 @@ public class DLProxyActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         mRemoteActivity.onOptionsItemSelected(item);
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void attach(DLPlugin remoteActivity, DLPluginManager pluginManager) {
+        mRemoteActivity = remoteActivity;
+        mPluginManager = pluginManager;
+    }
+
+    @Override
+    public void startPluginActivity(Activity base, DLIntent intent) {
+        impl.startPluginActivity(base, intent);
+    }
+
+    @Override
+    public void loadApk(String dexPath) throws PluginException {
+        mPluginManager.loadApk(dexPath);
+    }
+
+    @Override
+    public void startPluginActivityForResult(Activity base, DLIntent dlIntent, int requestCode) {
+        impl.startPluginActivityForResult(this, dlIntent, requestCode);
     }
 
 }
