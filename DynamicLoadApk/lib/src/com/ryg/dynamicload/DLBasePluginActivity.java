@@ -356,10 +356,11 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
         
     }
 
-    public void loadApk(String dexPath) throws PluginException {
+    public DLPluginPackage loadApk(String dexPath) {
         if (mFrom != DLConstants.FROM_INTERNAL) {
-            mPluginManager.loadApk(dexPath);
+            return mPluginManager.loadApk(dexPath);
         }
+        return null;
     }
 
     public void startPluginActivityForResult(DLIntent dlIntent, int requestCode) {

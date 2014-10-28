@@ -11,6 +11,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.sax.StartElementListener;
 
 import com.ryg.dynamicload.DLBasePluginActivity;
 import com.ryg.dynamicload.DLBasePluginFragmentActivity;
@@ -23,6 +24,34 @@ import dalvik.system.DexClassLoader;
 public class DLPluginManager {
     
     private static final String TAG = "PluginManager";
+    
+    /**
+     * return value of {@link #startPluginActivity(Activity, DLIntent)}
+     * 
+     * start success
+     */
+    public static final int START_RESULT_SUCCESS = 0;
+    
+    /**
+     * return value of {@link #startPluginActivity(Activity, DLIntent)}
+     * 
+     * package not found
+     */
+    public static final int START_RESULT_NO_PKG = 1;
+    
+    /**
+     * return value of {@link #startPluginActivity(Activity, DLIntent)}
+     * 
+     * class not found
+     */
+    public static final int START_RESULT_NO_CLASS = 2;
+    
+    /**
+     * return value of {@link #startPluginActivity(Activity, DLIntent)}
+     * 
+     * class type error
+     */
+    public static final int START_RESULT_TYPE_ERROR = 3;
 	
     private Context mContext;
     
@@ -40,7 +69,7 @@ public class DLPluginManager {
 	
 	private static DLPluginManager sInstance;
 
-	public static synchronized DLPluginManager getInstance() {
+	public static DLPluginManager getInstance() {
 	    if (sInstance == null) {
 	        throw new RuntimeException("You must call DLPluginManager.init() first.");
 	    }
@@ -54,11 +83,11 @@ public class DLPluginManager {
 	 * @param dexPath
 	 * @throws PluginNotFoundException
 	 */
-	public void loadApk(String dexPath) throws PluginException {
+	public DLPluginPackage loadApk(String dexPath) {
 		PackageInfo packageInfo = mContext.getPackageManager().
 				getPackageArchiveInfo(dexPath, PackageManager.GET_ACTIVITIES);
 		if (packageInfo == null) 
-			throw new PluginException(dexPath + " not found");
+			return null;
 		final String packageName = packageInfo.packageName;
 		
 		DLPluginPackage pluginPackage = packageHolder.get(packageName);
@@ -70,6 +99,7 @@ public class DLPluginManager {
 		    pluginPackage = new DLPluginPackage(packageName, dexPath, dexClassLoader, assetManager, resources, packageInfo);
 		    packageHolder.put(packageName, pluginPackage);
 		}
+		return pluginPackage;
 	}
 	
 	private DexClassLoader createDexClassLoader(String dexPath) {
@@ -102,18 +132,32 @@ public class DLPluginManager {
 	    return resources;
 	}
 	
-	public void startPluginActivity(Activity base, DLIntent dlIntent) {
-		startPluginActivityForResult(base, dlIntent, -1);
+	/**
+	 * {@link #startPluginActivityForResult(Activity, DLIntent, int)}
+     */
+	public int startPluginActivity(Activity base, DLIntent dlIntent) {
+		return startPluginActivityForResult(base, dlIntent, -1);
 	}
 
-    public void startPluginActivityForResult(Activity base, DLIntent dlIntent, int requestCode) {
+	
+	/**
+	 * 
+	 * @param base
+	 * @param dlIntent
+	 * @param requestCode
+	 * @return One of below:
+	 * {@link #START_RESULT_SUCCESS}
+	 * {@link #START_RESULT_NO_PKG}
+	 * {@link #START_RESULT_NO_CLASS}
+	 * {@link #START_RESULT_TYPE_ERROR}
+	 */
+    public int startPluginActivityForResult(Activity base, DLIntent dlIntent, int requestCode) {
         String packageName = dlIntent.getPluginPackage();
         if (packageName == null) throw new NullPointerException("package name is null");
         DLPluginPackage pluginPackage = packageHolder.get(packageName);
         
         if (pluginPackage == null) {
-            throw new PluginException("plugin not found , packageName=" + packageName);
-            //TODO plugin not found
+            return START_RESULT_NO_PKG;
         } else {
             DexClassLoader loader = pluginPackage.loader;
             String className = dlIntent.getPluginClass();
@@ -125,8 +169,7 @@ public class DLPluginManager {
                 clazz = loader.loadClass(className);
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
-                throw new PluginException("class not found, className=" + className);
-                //TODO class not found
+                return START_RESULT_NO_CLASS;
             }
             
             Class<? extends Activity> activityClass = null;
@@ -135,10 +178,7 @@ public class DLPluginManager {
             } else if (DLBasePluginFragmentActivity.class.isAssignableFrom(clazz)) {
                 activityClass = DLProxyFragmentActivity.class;
             } else {
-                throw new PluginException("class type error, className=" 
-                        + className + " is type of " 
-                        + clazz.getName());
-              //TODO class type error
+                return START_RESULT_TYPE_ERROR;
             }
             
             dlIntent.putExtra(DLConstants.EXTRA_CLASS, className);
@@ -146,6 +186,7 @@ public class DLPluginManager {
             dlIntent.setClass(mContext, activityClass);
             
             base.startActivityForResult(dlIntent, requestCode);
+            return START_RESULT_SUCCESS;
         }
     }
 

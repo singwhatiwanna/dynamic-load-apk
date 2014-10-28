@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import com.ryg.dynamicload.internal.DLIntent;
 import com.ryg.dynamicload.internal.DLPluginManager;
+import com.ryg.dynamicload.internal.DLPluginPackage;
 import com.ryg.utils.DLUtils;
 
 public class MainActivity extends Activity implements OnItemClickListener {
@@ -161,8 +162,8 @@ public class MainActivity extends Activity implements OnItemClickListener {
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         PluginItem item = mPluginItems.get(position);
         DLPluginManager pluginManager = DLPluginManager.getInstance();
-        pluginManager.loadApk(item.pluginPath);
-        pluginManager.startPluginActivity(this, new DLIntent(item.packageInfo.packageName, item.launcherActivityName));
+        DLPluginPackage pluginPackage = pluginManager.loadApk(item.pluginPath);
+        pluginManager.startPluginActivity(this, new DLIntent(pluginPackage.packageName, item.launcherActivityName));
     }
 
 }
