@@ -20,7 +20,7 @@ import com.ryg.utils.DLConstants;
 
 import dalvik.system.DexClassLoader;
 
-public class DLPluginManager implements DLContext {
+public class DLPluginManager {
     
     private static final String TAG = "PluginManager";
 	
@@ -102,12 +102,10 @@ public class DLPluginManager implements DLContext {
 	    return resources;
 	}
 	
-	@Override
 	public void startPluginActivity(Activity base, DLIntent dlIntent) {
 		startPluginActivityForResult(base, dlIntent, -1);
 	}
 
-    @Override
     public void startPluginActivityForResult(Activity base, DLIntent dlIntent, int requestCode) {
         String packageName = dlIntent.getPluginPackage();
         if (packageName == null) throw new NullPointerException("package name is null");

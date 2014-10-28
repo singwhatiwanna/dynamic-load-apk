@@ -29,14 +29,14 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.WindowManager.LayoutParams;
 
-import com.ryg.dynamicload.internal.DLContext;
 import com.ryg.dynamicload.internal.DLIntent;
 import com.ryg.dynamicload.internal.DLPluginManager;
+import com.ryg.dynamicload.internal.DLPluginPackage;
 import com.ryg.dynamicload.internal.DLProxyImpl;
 import com.ryg.dynamicload.internal.DLProxyImpl.DLProxy;
 import com.ryg.dynamicload.internal.PluginException;
 
-public class DLProxyActivity extends Activity implements DLProxy, DLContext {
+public class DLProxyActivity extends Activity implements DLProxy {
 
     protected DLPlugin mRemoteActivity;
     
@@ -176,21 +176,6 @@ public class DLProxyActivity extends Activity implements DLProxy, DLContext {
     public void attach(DLPlugin remoteActivity, DLPluginManager pluginManager) {
         mRemoteActivity = remoteActivity;
         mPluginManager = pluginManager;
-    }
-
-    @Override
-    public void startPluginActivity(Activity base, DLIntent intent) {
-        impl.startPluginActivity(base, intent);
-    }
-
-    @Override
-    public void loadApk(String dexPath) throws PluginException {
-        mPluginManager.loadApk(dexPath);
-    }
-
-    @Override
-    public void startPluginActivityForResult(Activity base, DLIntent dlIntent, int requestCode) {
-        impl.startPluginActivityForResult(this, dlIntent, requestCode);
     }
 
 }

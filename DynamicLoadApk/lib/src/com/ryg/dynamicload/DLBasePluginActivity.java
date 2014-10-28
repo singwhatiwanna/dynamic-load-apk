@@ -35,8 +35,9 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.ryg.dynamicload.internal.DLContext;
 import com.ryg.dynamicload.internal.DLIntent;
+import com.ryg.dynamicload.internal.DLPluginManager;
+import com.ryg.dynamicload.internal.DLPluginPackage;
 import com.ryg.dynamicload.internal.PluginException;
 import com.ryg.utils.DLConstants;
 
@@ -45,7 +46,7 @@ import com.ryg.utils.DLConstants;
  * @see {@link DLBasePluginActivity.that} 
  * @author renyugang
  */
-public class DLBasePluginActivity extends Activity implements DLPlugin, DLContext {
+public class DLBasePluginActivity extends Activity implements DLPlugin {
 
     private static final String TAG = "DLBasePluginActivity";
 
@@ -59,14 +60,16 @@ public class DLBasePluginActivity extends Activity implements DLPlugin, DLContex
      * 可以当作this来使用
      */
     protected Activity that;
-    protected DLContext mBaseContext;
     protected int mFrom = DLConstants.FROM_INTERNAL;
+    protected DLPluginManager mPluginManager;
+    protected DLPluginPackage mPluginPackage;
 
-    public void setProxy(Activity proxyActivity) {
+    @Override
+    public void attach(Activity proxyActivity, DLPluginPackage pluginPackage) {
         Log.d(TAG, "setProxy: proxyActivity= " + proxyActivity);
-        mProxyActivity = proxyActivity;
+        mProxyActivity = (Activity)proxyActivity;
         that = mProxyActivity;
-        mBaseContext = (DLContext) mProxyActivity;
+        mPluginPackage = pluginPackage;
     }
 
     @Override
@@ -79,7 +82,7 @@ public class DLBasePluginActivity extends Activity implements DLPlugin, DLContex
             mProxyActivity = this;
             that = mProxyActivity;
         }
-        
+        mPluginManager = DLPluginManager.getInstance();
         Log.d(TAG, "onCreate: from= " + (mFrom == DLConstants.FROM_INTERNAL ? "DLConstants.FROM_INTERNAL" : "FROM_EXTERNAL"));
     }
 
@@ -343,35 +346,31 @@ public class DLBasePluginActivity extends Activity implements DLPlugin, DLContex
         return false;
     }
 
-    @Override
-    public void startPluginActivity(Activity base, DLIntent dlIntent) {
+    public void startPluginActivity(DLIntent dlIntent) {
         if (mFrom == DLConstants.FROM_INTERNAL) {
             dlIntent.setClassName(this, dlIntent.getPluginClass());
             startActivity(dlIntent);
         } else {
-            mBaseContext.startPluginActivity(base, dlIntent);
+            mPluginManager.startPluginActivity(that, dlIntent);
         }
         
     }
 
-    @Override
     public void loadApk(String dexPath) throws PluginException {
         if (mFrom != DLConstants.FROM_INTERNAL) {
-            mBaseContext.loadApk(dexPath);
+            mPluginManager.loadApk(dexPath);
         }
     }
 
-    @Override
-    public void startPluginActivityForResult(Activity base, DLIntent dlIntent, int requestCode) {
+    public void startPluginActivityForResult(DLIntent dlIntent, int requestCode) {
         if (mFrom == DLConstants.FROM_INTERNAL) {
             dlIntent.setClassName(this, dlIntent.getPluginClass());
             startActivityForResult(dlIntent, requestCode);
         } else {
-            mBaseContext.startPluginActivityForResult(base, dlIntent, requestCode);
+            if (dlIntent.getPluginPackage() == null) {
+                dlIntent.setPluginPackage(mPluginPackage.packageName);
+            }
+            mPluginManager.startPluginActivityForResult(that, dlIntent, requestCode);
         }
-    }
-    
-    public void startPluginActivityForResult(DLIntent dlIntent, int requestCode) {
-        startPluginActivityForResult(null, dlIntent, requestCode);
     }
 }

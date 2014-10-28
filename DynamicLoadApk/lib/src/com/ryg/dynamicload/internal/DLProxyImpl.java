@@ -93,7 +93,7 @@ public class DLProxyImpl {
             ((DLProxy) mActivity).attach(mRemoteActivity, mPluginManager);
             Log.d(TAG, "instance = " + instance);
 
-            mRemoteActivity.setProxy(mActivity);
+            mRemoteActivity.attach(mActivity, mPluginPackage);
 
             Bundle bundle = new Bundle();
             bundle.putInt(DLConstants.FROM, DLConstants.FROM_EXTERNAL);
@@ -124,21 +124,7 @@ public class DLProxyImpl {
         return mRemoteActivity;
     }
     
-    public void startPluginActivity(Activity base, DLIntent dlIntent) {
-        startPluginActivityForResult(base, dlIntent, -1);
-    }
-    
-    
     public interface DLProxy {
         public void attach(DLPlugin remoteActivity, DLPluginManager pluginManager);
-    }
-
-
-    public void startPluginActivityForResult(Activity base, DLIntent dlIntent,
-            int requestCode) {
-        if (dlIntent.getPluginPackage() == null) {
-            dlIntent.setPluginPackage(mPluginPackage.packageName);
-        }
-        mPluginManager.startPluginActivityForResult(base, dlIntent, requestCode);
     }
 }

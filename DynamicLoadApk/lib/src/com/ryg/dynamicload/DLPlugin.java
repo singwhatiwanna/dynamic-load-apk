@@ -17,6 +17,8 @@
  */
 package com.ryg.dynamicload;
 
+import com.ryg.dynamicload.internal.DLPluginPackage;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -36,7 +38,7 @@ public interface DLPlugin {
     public void onPause();
     public void onStop();
     public void onDestroy();
-    public void setProxy(Activity proxyActivity);
+    public void attach(Activity proxyActivity, DLPluginPackage pluginPackage);
     public void onSaveInstanceState(Bundle outState);
     public void onNewIntent(Intent intent);
     public void onRestoreInstanceState(Bundle savedInstanceState);

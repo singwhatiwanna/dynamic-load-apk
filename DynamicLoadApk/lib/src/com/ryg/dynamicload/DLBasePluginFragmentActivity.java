@@ -38,12 +38,13 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.ryg.dynamicload.internal.DLContext;
 import com.ryg.dynamicload.internal.DLIntent;
+import com.ryg.dynamicload.internal.DLPluginManager;
+import com.ryg.dynamicload.internal.DLPluginPackage;
 import com.ryg.dynamicload.internal.PluginException;
 import com.ryg.utils.DLConstants;
 
-public class DLBasePluginFragmentActivity extends FragmentActivity implements DLPlugin, DLContext {
+public class DLBasePluginFragmentActivity extends FragmentActivity implements DLPlugin {
 
     private static final String TAG = "DLBasePluginFragmentActivity";
 
@@ -57,13 +58,16 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
      * 可以当作this来使用
      */
     protected FragmentActivity that;
-    protected DLContext mBaseContext;
     protected int mFrom = DLConstants.FROM_INTERNAL;
+    protected DLPluginManager mPluginManager;
+    protected DLPluginPackage mPluginPackage;
 
-    public void setProxy(Activity proxyActivity) {
+    @Override
+    public void attach(Activity proxyActivity, DLPluginPackage pluginPackage) {
         Log.d(TAG, "setProxy: proxyActivity= " + proxyActivity);
         mProxyActivity = (FragmentActivity)proxyActivity;
         that = mProxyActivity;
+        mPluginPackage = pluginPackage;
     }
 
     @Override
@@ -75,7 +79,6 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
             super.onCreate(savedInstanceState);
             mProxyActivity = this;
             that = mProxyActivity;
-            mBaseContext = (DLContext) that;
         }
 
         Log.d(TAG, "onCreate: from= " + (mFrom == DLConstants.FROM_INTERNAL ? "DLConstants.FROM_INTERNAL" : "FROM_EXTERNAL"));
@@ -341,37 +344,33 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
         return false;
     }
     
-    @Override
-    public void startPluginActivity(Activity base, DLIntent intent) {
+    public void startPluginActivity(DLIntent intent) {
         if (mFrom == DLConstants.FROM_INTERNAL) {
             intent.setClassName(this, intent.getPluginClass());
             startActivity(intent);
         } else {
-            mBaseContext.startPluginActivity(base, intent);
+            mPluginManager.startPluginActivity(that, intent);
         }
     }
 
-    @Override
     public void loadApk(String dexPath) throws PluginException {
         if (mFrom != DLConstants.FROM_INTERNAL) {
-            mBaseContext.loadApk(dexPath);
-        }
-    }
-    
-    @Override
-    public void startPluginActivityForResult(Activity base, DLIntent dlIntent, int requestCode) {
-        if (mFrom == DLConstants.FROM_INTERNAL) {
-            dlIntent.setClassName(this, dlIntent.getPluginClass());
-            startActivityForResult(dlIntent, requestCode);
-        } else {
-            mBaseContext.startPluginActivityForResult(base, dlIntent, requestCode);
+            mPluginManager.loadApk(dexPath);
         }
     }
     
     public void startPluginActivityForResult(DLIntent dlIntent, int requestCode) {
-        startPluginActivityForResult(null, dlIntent, requestCode);
+        if (mFrom == DLConstants.FROM_INTERNAL) {
+            dlIntent.setClassName(this, dlIntent.getPluginClass());
+            startActivityForResult(dlIntent, requestCode);
+        } else {
+            if (dlIntent.getPluginPackage() == null) {
+                dlIntent.setPluginPackage(mPluginPackage.packageName);
+            }
+            mPluginManager.startPluginActivityForResult(that, dlIntent, requestCode);
+        }
     }
-
+    
     // ------------------------------------------------------------------------
     // methods override from FragmentActivity
     // ------------------------------------------------------------------------
