@@ -73,7 +73,7 @@ public class DLProxyImpl {
         mClass = intent.getStringExtra(DLConstants.EXTRA_CLASS);
         Log.d(TAG, "mClass=" + mClass + " mPackageName=" + mPackageName);
 
-        mPluginManager = DLPluginManager.getInstance();
+        mPluginManager = DLPluginManager.getInstance(mActivity);
         mPluginPackage = mPluginManager.getPackage(mPackageName);
         mAssetManager = mPluginPackage.assetManager;
         mResources = mPluginPackage.resources;

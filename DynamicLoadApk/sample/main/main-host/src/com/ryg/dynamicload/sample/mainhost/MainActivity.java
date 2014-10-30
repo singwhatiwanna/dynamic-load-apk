@@ -37,7 +37,6 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        DLPluginManager.init(getApplication());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
@@ -67,7 +66,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
                 item.launcherActivityName = item.packageInfo.activities[0].name;
             }
             mPluginItems.add(item);
-            DLPluginManager.getInstance().loadApk(item.pluginPath);
+            DLPluginManager.getInstance(this).loadApk(item.pluginPath);
         }
 
         mListView.setAdapter(mPluginAdapter);
@@ -161,7 +160,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         PluginItem item = mPluginItems.get(position);
-        DLPluginManager pluginManager = DLPluginManager.getInstance();
+        DLPluginManager pluginManager = DLPluginManager.getInstance(this);
         pluginManager.startPluginActivity(this, new DLIntent(item.packageInfo.packageName, item.launcherActivityName));
     }
 

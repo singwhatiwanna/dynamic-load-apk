@@ -81,7 +81,7 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
             mProxyActivity = this;
             that = mProxyActivity;
         }
-        mPluginManager = DLPluginManager.getInstance();
+        mPluginManager = DLPluginManager.getInstance(that);
         Log.d(TAG, "onCreate: from= " + (mFrom == DLConstants.FROM_INTERNAL ? "DLConstants.FROM_INTERNAL" : "FROM_EXTERNAL"));
     }
 

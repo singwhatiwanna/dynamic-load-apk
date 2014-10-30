@@ -59,20 +59,16 @@ public class DLPluginManager {
     private final HashMap<String, DLPluginPackage> packageHolder = new HashMap<String, DLPluginPackage>();
     
 	DLPluginManager(Context context) {
-	    mContext = context;
+	    mContext = context.getApplicationContext();
 	}
 	
-	/**
-	 * 必须使用Application，防止内存泄露
-	 * @param application
-	 */
-	public static void init(Application application) {
-	    sInstance = new DLPluginManager(application);
-	}
-	
-	public static DLPluginManager getInstance() {
+	public static DLPluginManager getInstance(Context context) {
 	    if (sInstance == null) {
-	        throw new RuntimeException("You must call DLPluginManager.init() first.");
+	        synchronized(DLPluginManager.class) {
+                if (sInstance == null) {
+                    sInstance = new DLPluginManager(context);
+                }
+            }
 	    }
 	    return sInstance;
 	}

@@ -80,7 +80,7 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
             that = mProxyActivity;
         }
 
-        mPluginManager = DLPluginManager.getInstance();
+        mPluginManager = DLPluginManager.getInstance(that);
         Log.d(TAG, "onCreate: from= " + (mFrom == DLConstants.FROM_INTERNAL ? "DLConstants.FROM_INTERNAL" : "FROM_EXTERNAL"));
     }
 
