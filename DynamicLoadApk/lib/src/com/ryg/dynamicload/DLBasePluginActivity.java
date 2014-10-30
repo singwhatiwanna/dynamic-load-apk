@@ -38,7 +38,6 @@ import android.view.WindowManager;
 import com.ryg.dynamicload.internal.DLIntent;
 import com.ryg.dynamicload.internal.DLPluginManager;
 import com.ryg.dynamicload.internal.DLPluginPackage;
-import com.ryg.dynamicload.internal.PluginException;
 import com.ryg.utils.DLConstants;
 
 /**
@@ -346,14 +345,8 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
         return false;
     }
 
-    public void startPluginActivity(DLIntent dlIntent) {
-        if (mFrom == DLConstants.FROM_INTERNAL) {
-            dlIntent.setClassName(this, dlIntent.getPluginClass());
-            startActivity(dlIntent);
-        } else {
-            mPluginManager.startPluginActivity(that, dlIntent);
-        }
-        
+    public int startPluginActivity(DLIntent dlIntent) {
+        return startPluginActivityForResult(dlIntent, -1);
     }
 
     public DLPluginPackage loadApk(String dexPath) {
@@ -363,15 +356,16 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
         return null;
     }
 
-    public void startPluginActivityForResult(DLIntent dlIntent, int requestCode) {
+    public int startPluginActivityForResult(DLIntent dlIntent, int requestCode) {
         if (mFrom == DLConstants.FROM_INTERNAL) {
             dlIntent.setClassName(this, dlIntent.getPluginClass());
             startActivityForResult(dlIntent, requestCode);
+            return DLPluginManager.START_RESULT_SUCCESS;
         } else {
             if (dlIntent.getPluginPackage() == null) {
                 dlIntent.setPluginPackage(mPluginPackage.packageName);
             }
-            mPluginManager.startPluginActivityForResult(that, dlIntent, requestCode);
+            return mPluginManager.startPluginActivityForResult(that, dlIntent, requestCode);
         }
     }
 }

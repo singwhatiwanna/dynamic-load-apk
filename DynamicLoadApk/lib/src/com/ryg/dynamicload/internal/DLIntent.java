@@ -18,6 +18,11 @@ public class DLIntent extends Intent {
         super();
         this.mPluginClass = clazz.getName();
     }
+	
+	public DLIntent(String packageName) {
+        super();
+        this.mPluginPackage = packageName;
+    }
 
     public String getPluginPackage() {
 		return mPluginPackage;

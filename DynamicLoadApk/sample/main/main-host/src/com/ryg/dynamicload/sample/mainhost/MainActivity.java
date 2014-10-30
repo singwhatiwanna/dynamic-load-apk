@@ -68,6 +68,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
                 item.launcherActivityName = item.packageInfo.activities[0].name;
             }
             mPluginItems.add(item);
+            DLPluginManager.getInstance().loadApk(item.pluginPath);
         }
 
         mListView.setAdapter(mPluginAdapter);
@@ -162,8 +163,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         PluginItem item = mPluginItems.get(position);
         DLPluginManager pluginManager = DLPluginManager.getInstance();
-        DLPluginPackage pluginPackage = pluginManager.loadApk(item.pluginPath);
-        pluginManager.startPluginActivity(this, new DLIntent(pluginPackage.packageName, item.launcherActivityName));
+        pluginManager.startPluginActivity(this, new DLIntent(item.packageInfo.packageName, item.launcherActivityName));
     }
 
 }

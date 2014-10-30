@@ -81,6 +81,7 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
             that = mProxyActivity;
         }
 
+        mPluginManager = DLPluginManager.getInstance();
         Log.d(TAG, "onCreate: from= " + (mFrom == DLConstants.FROM_INTERNAL ? "DLConstants.FROM_INTERNAL" : "FROM_EXTERNAL"));
     }
 
@@ -344,13 +345,8 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
         return false;
     }
     
-    public void startPluginActivity(DLIntent intent) {
-        if (mFrom == DLConstants.FROM_INTERNAL) {
-            intent.setClassName(this, intent.getPluginClass());
-            startActivity(intent);
-        } else {
-            mPluginManager.startPluginActivity(that, intent);
-        }
+    public int startPluginActivity(DLIntent dlIntent) {
+        return startPluginActivityForResult(dlIntent, -1);
     }
 
     public DLPluginPackage loadApk(String dexPath) {
@@ -360,15 +356,16 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
         return null;
     }
     
-    public void startPluginActivityForResult(DLIntent dlIntent, int requestCode) {
+    public int startPluginActivityForResult(DLIntent dlIntent, int requestCode) {
         if (mFrom == DLConstants.FROM_INTERNAL) {
             dlIntent.setClassName(this, dlIntent.getPluginClass());
             startActivityForResult(dlIntent, requestCode);
+            return DLPluginManager.START_RESULT_SUCCESS;
         } else {
             if (dlIntent.getPluginPackage() == null) {
                 dlIntent.setPluginPackage(mPluginPackage.packageName);
             }
-            mPluginManager.startPluginActivityForResult(that, dlIntent, requestCode);
+            return mPluginManager.startPluginActivityForResult(that, dlIntent, requestCode);
         }
     }
     

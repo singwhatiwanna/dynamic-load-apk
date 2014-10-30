@@ -135,7 +135,7 @@ public class DLPluginManager {
 	/**
 	 * {@link #startPluginActivityForResult(Activity, DLIntent, int)}
      */
-	public int startPluginActivity(Activity base, DLIntent dlIntent) {
+	public int startPluginActivity(Context base, DLIntent dlIntent) {
 		return startPluginActivityForResult(base, dlIntent, -1);
 	}
 
@@ -151,7 +151,7 @@ public class DLPluginManager {
 	 * {@link #START_RESULT_NO_CLASS}
 	 * {@link #START_RESULT_TYPE_ERROR}
 	 */
-    public int startPluginActivityForResult(Activity base, DLIntent dlIntent, int requestCode) {
+    public int startPluginActivityForResult(Context base, DLIntent dlIntent, int requestCode) {
         String packageName = dlIntent.getPluginPackage();
         if (packageName == null) throw new NullPointerException("package name is null");
         DLPluginPackage pluginPackage = packageHolder.get(packageName);
@@ -161,6 +161,7 @@ public class DLPluginManager {
         } else {
             DexClassLoader loader = pluginPackage.loader;
             String className = dlIntent.getPluginClass();
+            className = className == null ? pluginPackage.getDefaultActivity() : className;
             if (className.startsWith(".")) {
                 className = packageName + className;
             }
@@ -185,7 +186,11 @@ public class DLPluginManager {
             dlIntent.putExtra(DLConstants.EXTRA_PACKAGE, packageName);
             dlIntent.setClass(mContext, activityClass);
             
-            base.startActivityForResult(dlIntent, requestCode);
+            if (base instanceof Activity) {
+                ((Activity) base).startActivityForResult(dlIntent, requestCode);
+            } else {
+                base.startActivity(dlIntent);
+            }
             return START_RESULT_SUCCESS;
         }
     }

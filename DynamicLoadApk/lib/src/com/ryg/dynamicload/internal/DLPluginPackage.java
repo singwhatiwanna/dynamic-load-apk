@@ -22,6 +22,8 @@ public class DLPluginPackage {
     
     public PackageInfo packageInfo;
     
+    private String mDefaultActivity;
+    
     public DLPluginPackage(String packageName, String path, DexClassLoader loader, AssetManager assetManager,
             Resources resources, PackageInfo packageInfo) {
         super();
@@ -31,5 +33,12 @@ public class DLPluginPackage {
         this.assetManager = assetManager;
         this.resources = resources;
         this.packageInfo = packageInfo;
+    }
+    
+    public String getDefaultActivity() {
+        if (packageInfo.activities != null && packageInfo.activities.length > 0) {
+            mDefaultActivity = packageInfo.activities[0].name;
+        }
+        return mDefaultActivity;
     }
 }
