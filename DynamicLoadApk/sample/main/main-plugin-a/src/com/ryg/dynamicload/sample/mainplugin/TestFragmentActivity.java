@@ -15,7 +15,6 @@ import com.ryg.dynamicload.DLBasePluginFragmentActivity;
 import com.ryg.dynamicload.internal.DLIntent;
 import com.ryg.dynamicload.internal.DLPluginManager;
 import com.ryg.dynamicload.sample.mainplugina.R;
-import com.ryg.utils.DLConstants;
 
 public class TestFragmentActivity extends DLBasePluginFragmentActivity
 implements OnClickListener{
@@ -27,18 +26,20 @@ implements OnClickListener{
     private Button mShowFragmentButton;
 
     private Button mStartPluginB;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.test);
+        Toast.makeText(that, getIntent().getStringExtra("dl_extra"), Toast.LENGTH_SHORT).show();
         TestButton button = (TestButton)findViewById(R.id.button1);
         button.setText(that.getResources().getString(R.string.test));
         button.setOnClickListener(new OnClickListener() {
             
             @Override
             public void onClick(View v) {
-                Toast.makeText(that, "quit : ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(that, "quit", Toast.LENGTH_SHORT).show();
                 that.setResult(RESULT_FIRST_USER);
                 that.finish();
             }
@@ -55,9 +56,7 @@ implements OnClickListener{
 
     @Override
     public void onResume() {
-        if (mFrom == DLConstants.FROM_INTERNAL) { 
-            super.onResume();
-        }
+        super.onResume();
         mImageView = (ImageView)findViewById(R.id.imageView1);
         mImageView.setImageResource(R.drawable.ppmm);
         Log.d(TAG, "onResume");
@@ -65,10 +64,8 @@ implements OnClickListener{
     
     @Override
     public void onPause() {
+        super.onPause();
         Log.d(TAG, "onPause");
-        if (mFrom == DLConstants.FROM_INTERNAL) { 
-            super.onPause();
-        }
     }
 
     @Override
@@ -82,7 +79,7 @@ implements OnClickListener{
         } else if (v == mStartPluginB ) {
             int result = startPluginActivity(new DLIntent("com.ryg.dynamicload.sample.mainpluginb", ".MainActivity"));
             if (result != DLPluginManager.START_RESULT_SUCCESS) {
-                Toast.makeText(this, "start Activity failed", Toast.LENGTH_SHORT);
+                Toast.makeText(this, "start Activity failed", Toast.LENGTH_SHORT).show();
             }
         }
         

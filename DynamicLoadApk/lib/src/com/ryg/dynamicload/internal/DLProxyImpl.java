@@ -23,7 +23,7 @@ public class DLProxyImpl {
 
     private String mClass;
     private String mPackageName;
-    
+
     private DLPluginPackage mPluginPackage;
     private DLPluginManager mPluginManager;
 
@@ -31,17 +31,14 @@ public class DLProxyImpl {
     private Resources mResources;
     private Theme mTheme;
 
-
     private ActivityInfo mActivityInfo;
-    
-    protected DLPlugin mRemoteActivity;
-    
     private Activity mActivity;
-    
+    protected DLPlugin mRemoteActivity;
+
     public DLProxyImpl(Activity activity) {
         mActivity = activity;
     }
-    
+
     private void initializeActivityInfo() {
         PackageInfo packageInfo = mPluginPackage.packageInfo;
         if ((packageInfo.activities != null) && (packageInfo.activities.length > 0)) {
@@ -65,7 +62,7 @@ public class DLProxyImpl {
         mTheme = mResources.newTheme();
         mTheme.setTo(superTheme);
 
-        // TODO: handle mActivityInfo.launchMode here.
+        // TODO: handle mActivityInfo.launchMode here in the future.
     }
 
     public void onCreate(Intent intent) {
@@ -77,12 +74,12 @@ public class DLProxyImpl {
         mPluginPackage = mPluginManager.getPackage(mPackageName);
         mAssetManager = mPluginPackage.assetManager;
         mResources = mPluginPackage.resources;
-        
+
         initializeActivityInfo();
         handleActivityInfo();
         launchTargetActivity();
     }
-    
+
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     protected void launchTargetActivity() {
         try {
@@ -102,12 +99,11 @@ public class DLProxyImpl {
             e.printStackTrace();
         }
     }
-    
+
     public ClassLoader getClassLoader() {
-        return mPluginPackage.loader;
+        return mPluginPackage.classLoader;
     }
 
-    
     public AssetManager getAssets() {
         return mAssetManager;
     }
@@ -119,11 +115,11 @@ public class DLProxyImpl {
     public Theme getTheme() {
         return mTheme;
     }
-    
+
     public DLPlugin getRemoteActivity() {
         return mRemoteActivity;
     }
-    
+
     public interface DLProxy {
         public void attach(DLPlugin remoteActivity, DLPluginManager pluginManager);
     }

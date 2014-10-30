@@ -53,19 +53,20 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
      * 代理activity，可以当作Context来使用，会根据需要来决定是否指向this
      */
     protected Activity mProxyActivity;
-    
+
     /**
      * 等同于mProxyActivity，可以当作Context来使用，会根据需要来决定是否指向this<br/>
      * 可以当作this来使用
      */
     protected Activity that;
-    protected int mFrom = DLConstants.FROM_INTERNAL;
     protected DLPluginManager mPluginManager;
     protected DLPluginPackage mPluginPackage;
 
+    protected int mFrom = DLConstants.FROM_INTERNAL;
+
     @Override
     public void attach(Activity proxyActivity, DLPluginPackage pluginPackage) {
-        Log.d(TAG, "setProxy: proxyActivity= " + proxyActivity);
+        Log.d(TAG, "attach: proxyActivity= " + proxyActivity);
         mProxyActivity = (Activity)proxyActivity;
         that = mProxyActivity;
         mPluginPackage = pluginPackage;
@@ -80,8 +81,9 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
             super.onCreate(savedInstanceState);
             mProxyActivity = this;
             that = mProxyActivity;
+        } else {
+            mPluginManager = DLPluginManager.getInstance(that);
         }
-        mPluginManager = DLPluginManager.getInstance(that);
         Log.d(TAG, "onCreate: from= " + (mFrom == DLConstants.FROM_INTERNAL ? "DLConstants.FROM_INTERNAL" : "FROM_EXTERNAL"));
     }
 
@@ -345,17 +347,20 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
         return false;
     }
 
+    /**
+     * @param dlIntent
+     * @return may be {@link #START_RESULT_SUCCESS}, {@link #START_RESULT_NO_PKG},
+     *    {@link #START_RESULT_NO_CLASS}, {@link #START_RESULT_TYPE_ERROR}
+     */
     public int startPluginActivity(DLIntent dlIntent) {
         return startPluginActivityForResult(dlIntent, -1);
     }
 
-    public DLPluginPackage loadApk(String dexPath) {
-        if (mFrom != DLConstants.FROM_INTERNAL) {
-            return mPluginManager.loadApk(dexPath);
-        }
-        return null;
-    }
-
+    /**
+     * @param dlIntent
+     * @return may be {@link #START_RESULT_SUCCESS}, {@link #START_RESULT_NO_PKG},
+     *    {@link #START_RESULT_NO_CLASS}, {@link #START_RESULT_TYPE_ERROR}
+     */
     public int startPluginActivityForResult(DLIntent dlIntent, int requestCode) {
         if (mFrom == DLConstants.FROM_INTERNAL) {
             dlIntent.setClassName(this, dlIntent.getPluginClass());

@@ -63,8 +63,8 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
 
     @Override
     public void attach(Activity proxyActivity, DLPluginPackage pluginPackage) {
-        Log.d(TAG, "setProxy: proxyActivity= " + proxyActivity);
-        mProxyActivity = (FragmentActivity)proxyActivity;
+        Log.d(TAG, "attach: proxyActivity= " + proxyActivity);
+        mProxyActivity = (FragmentActivity) proxyActivity;
         that = mProxyActivity;
         mPluginPackage = pluginPackage;
     }
@@ -78,10 +78,12 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
             super.onCreate(savedInstanceState);
             mProxyActivity = this;
             that = mProxyActivity;
+        } else {
+            mPluginManager = DLPluginManager.getInstance(that);
         }
 
-        mPluginManager = DLPluginManager.getInstance(that);
-        Log.d(TAG, "onCreate: from= " + (mFrom == DLConstants.FROM_INTERNAL ? "DLConstants.FROM_INTERNAL" : "FROM_EXTERNAL"));
+        Log.d(TAG, "onCreate: from= "
+                + (mFrom == DLConstants.FROM_INTERNAL ? "DLConstants.FROM_INTERNAL" : "FROM_EXTERNAL"));
     }
 
     @Override
@@ -343,18 +345,21 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
         }
         return false;
     }
-    
+
+    /**
+     * @param dlIntent
+     * @return may be {@link #START_RESULT_SUCCESS}, {@link #START_RESULT_NO_PKG},
+     *         {@link #START_RESULT_NO_CLASS}, {@link #START_RESULT_TYPE_ERROR}
+     */
     public int startPluginActivity(DLIntent dlIntent) {
         return startPluginActivityForResult(dlIntent, -1);
     }
 
-    public DLPluginPackage loadApk(String dexPath) {
-        if (mFrom != DLConstants.FROM_INTERNAL) {
-            return mPluginManager.loadApk(dexPath);
-        }
-        return null;
-    }
-    
+    /**
+     * @param dlIntent
+     * @return may be {@link #START_RESULT_SUCCESS}, {@link #START_RESULT_NO_PKG},
+     *         {@link #START_RESULT_NO_CLASS}, {@link #START_RESULT_TYPE_ERROR}
+     */
     public int startPluginActivityForResult(DLIntent dlIntent, int requestCode) {
         if (mFrom == DLConstants.FROM_INTERNAL) {
             dlIntent.setClassName(this, dlIntent.getPluginClass());
@@ -367,7 +372,7 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
             return mPluginManager.startPluginActivityForResult(that, dlIntent, requestCode);
         }
     }
-    
+
     // ------------------------------------------------------------------------
     // methods override from FragmentActivity
     // ------------------------------------------------------------------------

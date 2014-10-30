@@ -35,18 +35,22 @@ import com.ryg.dynamicload.internal.DLProxyImpl.DLProxy;
 
 public class DLProxyFragmentActivity extends FragmentActivity implements DLProxy {
 
-protected DLPlugin mRemoteActivity;
-    
+    protected DLPlugin mRemoteActivity;
     private DLProxyImpl impl = new DLProxyImpl(this);
-
     private DLPluginManager mPluginManager;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         impl.onCreate(getIntent());
     }
-    
+
+    @Override
+    public void attach(DLPlugin remoteActivity, DLPluginManager pluginManager) {
+        mRemoteActivity = remoteActivity;
+        mPluginManager = pluginManager;
+    }
+
     @Override
     public AssetManager getAssets() {
         return impl.getAssets() == null ? super.getAssets() : impl.getAssets();
@@ -167,12 +171,6 @@ protected DLPlugin mRemoteActivity;
     public boolean onOptionsItemSelected(MenuItem item) {
         mRemoteActivity.onOptionsItemSelected(item);
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void attach(DLPlugin remoteActivity, DLPluginManager pluginManager) {
-        mRemoteActivity = remoteActivity;
-        mPluginManager = pluginManager;
     }
 
 }
