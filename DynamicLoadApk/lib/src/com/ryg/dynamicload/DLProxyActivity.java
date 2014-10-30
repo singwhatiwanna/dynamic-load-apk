@@ -29,12 +29,9 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.WindowManager.LayoutParams;
 
-import com.ryg.dynamicload.internal.DLIntent;
 import com.ryg.dynamicload.internal.DLPluginManager;
-import com.ryg.dynamicload.internal.DLPluginPackage;
 import com.ryg.dynamicload.internal.DLProxyImpl;
 import com.ryg.dynamicload.internal.DLProxyImpl.DLProxy;
-import com.ryg.dynamicload.internal.PluginException;
 
 public class DLProxyActivity extends Activity implements DLProxy {
 

@@ -11,7 +11,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
-import android.sax.StartElementListener;
 
 import com.ryg.dynamicload.DLBasePluginActivity;
 import com.ryg.dynamicload.DLBasePluginFragmentActivity;
@@ -52,8 +51,12 @@ public class DLPluginManager {
      * class type error
      */
     public static final int START_RESULT_TYPE_ERROR = 3;
+    
+    private static DLPluginManager sInstance;
 	
     private Context mContext;
+    
+    private final HashMap<String, DLPluginPackage> packageHolder = new HashMap<String, DLPluginPackage>();
     
 	DLPluginManager(Context context) {
 	    mContext = context;
@@ -67,8 +70,6 @@ public class DLPluginManager {
 	    sInstance = new DLPluginManager(application);
 	}
 	
-	private static DLPluginManager sInstance;
-
 	public static DLPluginManager getInstance() {
 	    if (sInstance == null) {
 	        throw new RuntimeException("You must call DLPluginManager.init() first.");
@@ -76,8 +77,6 @@ public class DLPluginManager {
 	    return sInstance;
 	}
 	
-	private final HashMap<String, DLPluginPackage> packageHolder = new HashMap<String, DLPluginPackage>();
-
 	/**
 	 * Load a apk. Before start a plugin Activity, we should do this first.
 	 * @param dexPath

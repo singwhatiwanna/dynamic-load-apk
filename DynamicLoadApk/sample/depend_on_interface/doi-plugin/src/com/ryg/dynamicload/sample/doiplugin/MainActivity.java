@@ -10,7 +10,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.ryg.dynamicload.DLBasePluginActivity;
 import com.ryg.dynamicload.sample.docommon.HostInterface;

@@ -21,7 +21,6 @@ import android.widget.TextView;
 
 import com.ryg.dynamicload.internal.DLIntent;
 import com.ryg.dynamicload.internal.DLPluginManager;
-import com.ryg.dynamicload.internal.DLPluginPackage;
 import com.ryg.utils.DLUtils;
 
 public class MainActivity extends Activity implements OnItemClickListener {
