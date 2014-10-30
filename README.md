@@ -163,7 +163,7 @@ public interface DLPlugin {
 ###特别感谢[nealgao](http://nealgao06.lofter.com)为本项目设计的logo。
 ## License
 
-    Copyright (C) 2014 singwhatiwanna(任玉刚) <singwhatiwanna@qq.com>
+    Copyright (C) 2014 singwhatiwanna(任玉刚) <singwhatiwanna@gmail.com>
 
     collaborator:田啸,宋思宇
 
