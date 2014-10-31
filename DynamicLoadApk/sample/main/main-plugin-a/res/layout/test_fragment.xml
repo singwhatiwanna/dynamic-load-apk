@@ -16,4 +16,10 @@
         android:layout_height="wrap_content"
         android:text="this is fragment" />
 
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="start MainActivity from fragment" />
+
 </LinearLayout>

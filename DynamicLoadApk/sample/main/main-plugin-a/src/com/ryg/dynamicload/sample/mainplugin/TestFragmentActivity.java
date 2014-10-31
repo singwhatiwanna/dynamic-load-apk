@@ -73,7 +73,7 @@ implements OnClickListener{
         if (v == mShowFragmentButton) {
             FragmentManager manager= getSupportFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
-            transaction.add(R.id.fragment_container, new TestFragment());
+            transaction.add(R.id.fragment_container, new TestFragment().setPluginPackageName(getPackageName()));
             transaction.addToBackStack("TestFragment#1");
             transaction.commit();
         } else if (v == mStartPluginB ) {

@@ -29,6 +29,7 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.os.Build;
+import android.util.Log;
 
 import com.ryg.dynamicload.DLBasePluginActivity;
 import com.ryg.dynamicload.DLBasePluginFragmentActivity;
@@ -67,6 +68,8 @@ public class DLPluginManager {
     private Context mContext;
     private final HashMap<String, DLPluginPackage> mPackagesHolder = new HashMap<String, DLPluginPackage>();
 
+    private int mFrom = DLConstants.FROM_INTERNAL;
+
     private DLPluginManager(Context context) {
         mContext = context.getApplicationContext();
     }
@@ -83,12 +86,14 @@ public class DLPluginManager {
     }
 
     /**
-     * Load a apk. Before start a plugin Activity, we should do this first.
-     * 
+     * Load a apk. Before start a plugin Activity, we should do this first.<br/>
+     * NOTE : will only be called by host apk.
      * @param dexPath
-     * @throws PluginNotFoundException
      */
     public DLPluginPackage loadApk(String dexPath) {
+        // when loadApk is called by host apk, we assume that plugin is invoked by host.
+        mFrom = DLConstants.FROM_EXTERNAL;
+
         PackageInfo packageInfo = mContext.getPackageManager().
                 getPackageArchiveInfo(dexPath, PackageManager.GET_ACTIVITIES);
         if (packageInfo == null)
@@ -141,19 +146,25 @@ public class DLPluginManager {
     /**
      * {@link #startPluginActivityForResult(Activity, DLIntent, int)}
      */
-    public int startPluginActivity(Context base, DLIntent dlIntent) {
-        return startPluginActivityForResult(base, dlIntent, -1);
+    public int startPluginActivity(Context context, DLIntent dlIntent) {
+        return startPluginActivityForResult(context, dlIntent, -1);
     }
 
     /**
-     * @param base
+     * @param context
      * @param dlIntent
      * @param requestCode
      * @return One of below: {@link #START_RESULT_SUCCESS} {@link #START_RESULT_NO_PKG}
      *         {@link #START_RESULT_NO_CLASS} {@link #START_RESULT_TYPE_ERROR}
      */
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    public int startPluginActivityForResult(Context base, DLIntent dlIntent, int requestCode) {
+    public int startPluginActivityForResult(Context context, DLIntent dlIntent, int requestCode) {
+        if (mFrom == DLConstants.FROM_INTERNAL) {
+            dlIntent.setClassName(context, dlIntent.getPluginClass());
+            performStartActivityForResult(context, dlIntent, requestCode);
+            return DLPluginManager.START_RESULT_SUCCESS;
+        }
+
         String packageName = dlIntent.getPluginPackage();
         if (packageName == null) {
             throw new NullPointerException("disallow null packageName.");
@@ -189,13 +200,17 @@ public class DLPluginManager {
         dlIntent.putExtra(DLConstants.EXTRA_CLASS, className);
         dlIntent.putExtra(DLConstants.EXTRA_PACKAGE, packageName);
         dlIntent.setClass(mContext, activityClass);
-        if (base instanceof Activity) {
-            ((Activity) base).startActivityForResult(dlIntent, requestCode);
-        } else {
-            base.startActivity(dlIntent);
-        }
+        performStartActivityForResult(context, dlIntent, requestCode);
         return START_RESULT_SUCCESS;
+    }
 
+    private void performStartActivityForResult(Context context, DLIntent dlIntent, int requestCode) {
+        Log.d(TAG, "launch " + dlIntent.getPluginClass());
+        if (context instanceof Activity) {
+            ((Activity) context).startActivityForResult(dlIntent, requestCode);
+        } else {
+            context.startActivity(dlIntent);
+        }
     }
 
 }
