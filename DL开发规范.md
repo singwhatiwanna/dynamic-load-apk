@@ -1,9 +1,0 @@
-DL 1.0开发规范：
-
-1. 目前不支持service
-2. 目前只支持动态注册广播
-3. 目前支持Activity和FragmentActivity，这也是常用的activity
-4. 目前不支持插件中的assets
-5. 调用Context的时候，请适当使用that，大部分常用api是不需要用that的，但是一些不常用api还是需要用that来访问。that是apk中activity的基类BaseActivity系列中的一个成员，它在apk安装运行的时候指向this，而在未安装的时候指向宿主程序中的代理activity，由于that的动态分配特性，通过that去调用activity的成员方法，在apk安装以后仍然可以正常运行。
-6. 慎重使用this，因为this指向的是当前对象，即apk中的activity，但是由于activity已经不是常规意义上的activity，所以this是没有意义的，但是，当this表示的不是Context对象的时候除外，比如this表示一个由activity实现的接口。
-7. 目前支持style和系统主题，暂不支持自定义主题
