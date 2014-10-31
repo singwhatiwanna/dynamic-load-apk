@@ -1,7 +1,12 @@
-package com.ryg.dynamicload.sample.doiplugin;
+package com.ryg.dynamicload.sample.mainplugin;
+
+import com.ryg.dynamicload.DLBasePluginActivity;
+import com.ryg.dynamicload.internal.DLIntent;
+import com.ryg.dynamicload.sample.mainplugina.R;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -10,14 +15,11 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.LinearLayout;
-
-import com.ryg.dynamicload.DLBasePluginActivity;
-import com.ryg.dynamicload.sample.docommon.HostInterface;
-import com.ryg.dynamicload.sample.docommon.HostInterfaceManager;
+import android.widget.Toast;
 
 public class MainActivity extends DLBasePluginActivity {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "Client-MainActivity";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -33,15 +35,19 @@ public class MainActivity extends DLBasePluginActivity {
         LinearLayout layout = new LinearLayout(context);
         layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT));
+        layout.setBackgroundColor(Color.parseColor("#F79AB5"));
         Button button = new Button(context);
-        button.setText("Invoke host method");
+        button.setText("Start TestActivity");
         layout.addView(button, LayoutParams.MATCH_PARENT,
                 LayoutParams.WRAP_CONTENT);
         button.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                HostInterface hostInterface = HostInterfaceManager.getHostInterface();
-                hostInterface.hostMethod(that);
+                Toast.makeText(context, "you clicked button",
+                        Toast.LENGTH_SHORT).show();
+                DLIntent intent = new DLIntent(TestFragmentActivity.class);
+                intent.putExtra("dl_extra", "from DL framework");
+                startPluginActivityForResult(intent, 0);
             }
         });
         return layout;
@@ -62,5 +68,4 @@ public class MainActivity extends DLBasePluginActivity {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
-    
 }

@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
 import android.os.Environment;
@@ -20,10 +19,10 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.ryg.dynamicload.DLProxyActivity;
+import com.ryg.dynamicload.internal.DLIntent;
+import com.ryg.dynamicload.internal.DLPluginManager;
 import com.ryg.dynamicload.sample.docommon.HostInterfaceManager;
 import com.ryg.dynamicload.sample.doihost.interfacee.HostInterfaceImp;
-import com.ryg.utils.DLConstants;
 import com.ryg.utils.DLUtils;
 
 public class MainActivity extends Activity implements OnItemClickListener {
@@ -68,6 +67,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
             item.pluginPath = plugin.getAbsolutePath();
             item.packageInfo = DLUtils.getPackageInfo(this, item.pluginPath);
             mPluginItems.add(item);
+            DLPluginManager.getInstance(this).loadApk(item.pluginPath);
         }
 
         mListView.setAdapter(mPluginAdapter);
@@ -159,9 +159,10 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Intent intent = new Intent(this, DLProxyActivity.class);
-        intent.putExtra(DLConstants.EXTRA_DEX_PATH, mPluginItems.get(position).pluginPath);
-        startActivity(intent);
+        PluginItem item = mPluginItems.get(position);
+        DLPluginManager pluginManager = DLPluginManager.getInstance(this);
+        pluginManager.startPluginActivity(this, new DLIntent(item.packageInfo.packageName));
+        
     }
 
 }

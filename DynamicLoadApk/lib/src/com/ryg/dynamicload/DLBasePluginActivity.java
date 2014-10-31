@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 singwhatiwanna(任玉刚) <singwhatiwanna@qq.com>
+ * Copyright (C) 2014 singwhatiwanna(任玉刚) <singwhatiwanna@gmail.com>
  *
  * collaborator:田啸,宋思宇
  *
@@ -26,15 +26,19 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.ryg.dynamicload.DLPlugin;
+import com.ryg.dynamicload.internal.DLIntent;
+import com.ryg.dynamicload.internal.DLPluginManager;
+import com.ryg.dynamicload.internal.DLPluginPackage;
 import com.ryg.utils.DLConstants;
-import com.ryg.utils.DLUtils;
 
 /**
  * note: can use that like this.
@@ -55,14 +59,17 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
      * 可以当作this来使用
      */
     protected Activity that;
-    protected int mFrom = DLConstants.FROM_INTERNAL;
-    protected String mDexPath;
+    protected DLPluginManager mPluginManager;
+    protected DLPluginPackage mPluginPackage;
 
-    public void setProxy(Activity proxyActivity, String dexPath) {
-        Log.d(TAG, "setProxy: proxyActivity= " + proxyActivity + ", dexPath= " + dexPath);
-        mProxyActivity = proxyActivity;
+    protected int mFrom = DLConstants.FROM_INTERNAL;
+
+    @Override
+    public void attach(Activity proxyActivity, DLPluginPackage pluginPackage) {
+        Log.d(TAG, "attach: proxyActivity= " + proxyActivity);
+        mProxyActivity = (Activity)proxyActivity;
         that = mProxyActivity;
-        mDexPath = dexPath;
+        mPluginPackage = pluginPackage;
     }
 
     @Override
@@ -76,41 +83,8 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
             that = mProxyActivity;
         }
 
+        mPluginManager = DLPluginManager.getInstance(that);
         Log.d(TAG, "onCreate: from= " + (mFrom == DLConstants.FROM_INTERNAL ? "DLConstants.FROM_INTERNAL" : "FROM_EXTERNAL"));
-    }
-
-    protected void startActivityByProxy(Class<?> cls) {
-        startActivityByProxy(cls.getName());
-    }
-
-    protected void startActivityForResultByProxy(Class<?> cls, int requestCode) {
-        startActivityForResultByProxy(cls.getName(), requestCode);
-    }
-
-    protected void startActivityByProxy(String className) {
-        if (mFrom == DLConstants.FROM_INTERNAL) {
-            Intent intent = new Intent();
-            intent.setClassName(this, className);
-            mProxyActivity.startActivity(intent);
-        } else {
-            Intent intent = new Intent(DLUtils.getProxyViewAction(className, getClassLoader()));
-            intent.putExtra(DLConstants.EXTRA_DEX_PATH, mDexPath);
-            intent.putExtra(DLConstants.EXTRA_CLASS, className);
-            mProxyActivity.startActivity(intent);
-        }
-    }
-
-    public void startActivityForResultByProxy(String className, int requestCode) {
-        if (mFrom == DLConstants.FROM_INTERNAL) {
-            Intent intent = new Intent();
-            intent.setClassName(this, className);
-            mProxyActivity.startActivityForResult(intent, requestCode);
-        } else {
-            Intent intent = new Intent(DLUtils.getProxyViewAction(className, getClassLoader()));
-            intent.putExtra(DLConstants.EXTRA_DEX_PATH, mDexPath);
-            intent.putExtra(DLConstants.EXTRA_CLASS, className);
-            mProxyActivity.startActivityForResult(intent, requestCode);
-        }
     }
 
     @Override
@@ -186,11 +160,29 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
     }
 
     @Override
+    public String getPackageName() {
+        if (mFrom == DLConstants.FROM_INTERNAL) {
+            return super.getPackageName();
+        } else {
+            return mPluginPackage.packageName;
+        }
+    }
+
+    @Override
     public LayoutInflater getLayoutInflater() {
         if (mFrom == DLConstants.FROM_INTERNAL) {
             return super.getLayoutInflater();
         } else {
             return mProxyActivity.getLayoutInflater();
+        }
+    }
+
+    @Override
+    public MenuInflater getMenuInflater() {
+        if (mFrom == DLConstants.FROM_INTERNAL) {
+            return super.getMenuInflater();
+        } else {
+            return mProxyActivity.getMenuInflater();
         }
     }
 
@@ -349,4 +341,42 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
             super.onWindowFocusChanged(hasFocus);
         }
     }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (mFrom == DLConstants.FROM_INTERNAL) {
+            return super.onCreateOptionsMenu(menu);
+        }
+        return true;
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (mFrom == DLConstants.FROM_INTERNAL) {
+            return onOptionsItemSelected(item);
+        }
+        return false;
+    }
+
+    /**
+     * @param dlIntent
+     * @return may be {@link #START_RESULT_SUCCESS}, {@link #START_RESULT_NO_PKG},
+     *    {@link #START_RESULT_NO_CLASS}, {@link #START_RESULT_TYPE_ERROR}
+     */
+    public int startPluginActivity(DLIntent dlIntent) {
+        return startPluginActivityForResult(dlIntent, -1);
+    }
+
+    /**
+     * @param dlIntent
+     * @return may be {@link #START_RESULT_SUCCESS}, {@link #START_RESULT_NO_PKG},
+     *    {@link #START_RESULT_NO_CLASS}, {@link #START_RESULT_TYPE_ERROR}
+     */
+    public int startPluginActivityForResult(DLIntent dlIntent, int requestCode) {
+        if (mFrom == DLConstants.FROM_EXTERNAL) {
+            if (dlIntent.getPluginPackage() == null) {
+                dlIntent.setPluginPackage(mPluginPackage.packageName);
+            }
+        }
+        return mPluginManager.startPluginActivityForResult(that, dlIntent, requestCode);
+    }
+
 }

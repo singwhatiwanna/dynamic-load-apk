@@ -1,8 +1,5 @@
 package com.ryg.utils;
 
-import com.ryg.dynamicload.DLBasePluginActivity;
-import com.ryg.dynamicload.DLBasePluginFragmentActivity;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -12,6 +9,9 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.Log;
+
+import com.ryg.dynamicload.DLBasePluginActivity;
+import com.ryg.dynamicload.DLBasePluginFragmentActivity;
 
 public class DLUtils {
     private static final String TAG = "DLUtils";

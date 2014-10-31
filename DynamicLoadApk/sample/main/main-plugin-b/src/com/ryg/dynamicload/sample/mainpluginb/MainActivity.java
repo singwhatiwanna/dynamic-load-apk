@@ -1,4 +1,4 @@
-package com.ryg.dynamicload.sample.doiplugin;
+package com.ryg.dynamicload.sample.mainpluginb;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,10 +10,10 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.ryg.dynamicload.DLBasePluginActivity;
-import com.ryg.dynamicload.sample.docommon.HostInterface;
-import com.ryg.dynamicload.sample.docommon.HostInterfaceManager;
+import com.ryg.dynamicload.sample.mainhost.TestHostClass;
 
 public class MainActivity extends DLBasePluginActivity {
 
@@ -31,6 +31,7 @@ public class MainActivity extends DLBasePluginActivity {
 
     private View generateContentView(final Context context) {
         LinearLayout layout = new LinearLayout(context);
+        layout.setOrientation(LinearLayout.VERTICAL);
         layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT));
         Button button = new Button(context);
@@ -40,10 +41,16 @@ public class MainActivity extends DLBasePluginActivity {
         button.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                HostInterface hostInterface = HostInterfaceManager.getHostInterface();
-                hostInterface.hostMethod(that);
+                TestHostClass testHostClass = new TestHostClass();
+                testHostClass.testMethod(that);
             }
         });
+        
+        TextView textView = new TextView(context);
+        textView.setText("Hello, I'm Plugin B.");
+        textView.setTextSize(30);
+        layout.addView(textView, LayoutParams.MATCH_PARENT,
+                LayoutParams.WRAP_CONTENT);
         return layout;
     }
 
@@ -62,5 +69,4 @@ public class MainActivity extends DLBasePluginActivity {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
-    
 }
