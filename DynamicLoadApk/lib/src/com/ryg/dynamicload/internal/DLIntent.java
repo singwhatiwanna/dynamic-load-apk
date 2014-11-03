@@ -24,25 +24,24 @@ public class DLIntent extends Intent {
     private String mPluginPackage;
     private String mPluginClass;
 
+    public DLIntent() {
+        super();
+    }
+
+    public DLIntent(String pluginPackage) {
+        super();
+        this.mPluginPackage = pluginPackage;
+    }
+
     public DLIntent(String pluginPackage, String pluginClass) {
         super();
         this.mPluginPackage = pluginPackage;
         this.mPluginClass = pluginClass;
     }
 
-    public DLIntent(String packageName, Class<?> clazz) {
+    public DLIntent(String pluginPackage, Class<?> clazz) {
         super();
-        this.mPluginPackage = packageName;
-        this.mPluginClass = clazz.getName();
-    }
-
-    public DLIntent(String pluginClass) {
-        super();
-        this.mPluginClass = pluginClass;
-    }
-
-    public DLIntent(Class<?> clazz) {
-        super();
+        this.mPluginPackage = pluginPackage;
         this.mPluginClass = clazz.getName();
     }
 
@@ -60,6 +59,10 @@ public class DLIntent extends Intent {
 
     public void setPluginClass(String pluginClass) {
         this.mPluginClass = pluginClass;
+    }
+
+    public void setPluginClass(Class<?> clazz) {
+        this.mPluginClass = clazz.getName();
     }
 
 }
