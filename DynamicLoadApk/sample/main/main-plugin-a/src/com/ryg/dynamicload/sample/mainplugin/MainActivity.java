@@ -45,7 +45,7 @@ public class MainActivity extends DLBasePluginActivity {
             public void onClick(View v) {
                 Toast.makeText(context, "you clicked button",
                         Toast.LENGTH_SHORT).show();
-                DLIntent intent = new DLIntent(TestFragmentActivity.class);
+                DLIntent intent = new DLIntent(getPackageName(), TestFragmentActivity.class);
                 intent.putExtra("dl_extra", "from DL framework");
                 startPluginActivityForResult(intent, 0);
             }
