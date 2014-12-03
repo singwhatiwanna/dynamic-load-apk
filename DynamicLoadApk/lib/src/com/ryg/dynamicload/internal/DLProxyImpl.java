@@ -40,6 +40,7 @@ public class DLProxyImpl {
 
     private String mClass;
     private String mPackageName;
+    private String mDexPath;
 
     private DLPluginPackage mPluginPackage;
     private DLPluginManager mPluginManager;
@@ -85,10 +86,17 @@ public class DLProxyImpl {
     public void onCreate(Intent intent) {
         mPackageName = intent.getStringExtra(DLConstants.EXTRA_PACKAGE);
         mClass = intent.getStringExtra(DLConstants.EXTRA_CLASS);
-        Log.d(TAG, "mClass=" + mClass + " mPackageName=" + mPackageName);
+        mDexPath = intent.getStringExtra(DLConstants.EXTRA_DEX_PATH);
+        Log.d(TAG, "mClass=" + mClass + " mPackageName=" + mPackageName
+                + " mDexPath=" + mDexPath);
 
         mPluginManager = DLPluginManager.getInstance(mActivity);
         mPluginPackage = mPluginManager.getPackage(mPackageName);
+        if (mPluginPackage == null) {
+            Log.d(TAG, "load apk, dexPath=" + mDexPath);
+            mPluginManager.loadApk(mDexPath);
+            mPluginPackage = mPluginManager.getPackage(mPackageName);
+        }
         mAssetManager = mPluginPackage.assetManager;
         mResources = mPluginPackage.resources;
 

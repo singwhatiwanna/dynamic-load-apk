@@ -21,6 +21,7 @@ import android.content.Intent;
 
 public class DLIntent extends Intent {
 
+    private String mDexPath;
     private String mPluginPackage;
     private String mPluginClass;
 
@@ -63,6 +64,14 @@ public class DLIntent extends Intent {
 
     public void setPluginClass(Class<?> clazz) {
         this.mPluginClass = clazz.getName();
+    }
+
+    public void setDexPath(String dexPath) {
+        mDexPath = dexPath;
+    }
+
+    public String getDexPath() {
+        return mDexPath;
     }
 
 }

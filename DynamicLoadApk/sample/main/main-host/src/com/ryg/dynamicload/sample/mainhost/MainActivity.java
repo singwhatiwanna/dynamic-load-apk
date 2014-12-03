@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,6 +25,7 @@ import com.ryg.dynamicload.internal.DLPluginManager;
 import com.ryg.utils.DLUtils;
 
 public class MainActivity extends Activity implements OnItemClickListener {
+    private static final String TAG = "MainActivity";
 
     public static final String FROM = "extra.from";
     public static final int FROM_INTERNAL = 0;
@@ -159,9 +161,25 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        PluginItem item = mPluginItems.get(position);
-        DLPluginManager pluginManager = DLPluginManager.getInstance(this);
-        pluginManager.startPluginActivity(this, new DLIntent(item.packageInfo.packageName, item.launcherActivityName));
+        final PluginItem item = mPluginItems.get(position);
+        final DLPluginManager pluginManager = DLPluginManager.getInstance(this);
+        int loadedVersionCode = pluginManager.getPackage(item.packageInfo.packageName).packageInfo.versionCode;
+        int pluginVersionCode = item.packageInfo.versionCode;
+        if (item.packageInfo.versionCode != loadedVersionCode) {
+            Log.d(TAG, "plugin versionCode unmatched, old:" + loadedVersionCode + " new:" + pluginVersionCode);
+            Log.d(TAG, "kill DL process,restart it.");
+            DLUtils.killDLProcess(this);
+        }
+        mListView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                DLIntent dlIntent = new DLIntent(item.packageInfo.packageName,
+                        item.launcherActivityName);
+                dlIntent.setDexPath(item.pluginPath);
+                pluginManager.startPluginActivity(MainActivity.this, dlIntent);
+            }
+        }, 100);
+
     }
 
 }

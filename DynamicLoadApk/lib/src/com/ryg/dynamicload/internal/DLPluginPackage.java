@@ -29,8 +29,9 @@ import dalvik.system.DexClassLoader;
  */
 public class DLPluginPackage {
 
-    public String packageName;
     private String mDefaultActivity;
+
+    public String packageName;
     public String path;
 
     public DexClassLoader classLoader;

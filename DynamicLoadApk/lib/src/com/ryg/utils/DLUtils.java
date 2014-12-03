@@ -1,6 +1,10 @@
 package com.ryg.utils;
 
+import java.util.List;
+
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -8,6 +12,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Process;
 import android.util.Log;
 
 import com.ryg.dynamicload.DLBasePluginActivity;
@@ -140,4 +145,22 @@ public class DLUtils {
         new AlertDialog.Builder(activity).setTitle(title).setMessage(message)
                 .setPositiveButton("确定", null).show();
     }
+
+    public static boolean killDLProcess(Context context) {
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<RunningAppProcessInfo> appProcessList = manager.getRunningAppProcesses();
+
+        for (RunningAppProcessInfo appProcessInfo : appProcessList) {
+            int pid = appProcessInfo.pid;
+            String processName = appProcessInfo.processName;
+            if (processName.equals(context.getPackageName() + ":DL")) {
+                Process.killProcess(pid);
+                Log.i(TAG, "kill process, pid:" + pid);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 }

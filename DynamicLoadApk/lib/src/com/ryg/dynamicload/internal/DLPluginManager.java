@@ -199,6 +199,7 @@ public class DLPluginManager {
 
         dlIntent.putExtra(DLConstants.EXTRA_CLASS, className);
         dlIntent.putExtra(DLConstants.EXTRA_PACKAGE, packageName);
+        dlIntent.putExtra(DLConstants.EXTRA_DEX_PATH, dlIntent.getDexPath());
         dlIntent.setClass(mContext, activityClass);
         performStartActivityForResult(context, dlIntent, requestCode);
         return START_RESULT_SUCCESS;
