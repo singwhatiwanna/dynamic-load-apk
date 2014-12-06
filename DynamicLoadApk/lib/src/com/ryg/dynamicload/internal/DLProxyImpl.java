@@ -91,11 +91,10 @@ public class DLProxyImpl {
                 + " mDexPath=" + mDexPath);
 
         mPluginManager = DLPluginManager.getInstance(mActivity);
-        mPluginPackage = mPluginManager.getPackage(mPackageName);
+        mPluginPackage = mPluginManager.peekPackage(mPackageName);
         if (mPluginPackage == null) {
-            Log.d(TAG, "load apk, dexPath=" + mDexPath);
             mPluginManager.loadApk(mDexPath);
-            mPluginPackage = mPluginManager.getPackage(mPackageName);
+            mPluginPackage = mPluginManager.peekPackage(mPackageName);
         }
         mAssetManager = mPluginPackage.assetManager;
         mResources = mPluginPackage.resources;

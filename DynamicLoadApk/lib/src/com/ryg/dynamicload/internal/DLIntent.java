@@ -17,7 +17,10 @@
  */
 package com.ryg.dynamicload.internal;
 
+
 import android.content.Intent;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 public class DLIntent extends Intent {
 
@@ -72,6 +75,43 @@ public class DLIntent extends Intent {
 
     public String getDexPath() {
         return mDexPath;
+    }
+
+
+    public static final Parcelable.Creator<DLIntent> CREATOR = new Parcelable.Creator<DLIntent>() {
+
+        public DLIntent createFromParcel(Parcel in) {
+            return new DLIntent(in);
+        }
+
+        public DLIntent[] newArray(int size) {
+            return new DLIntent[size];
+        }
+
+    };
+
+    private DLIntent(Parcel in) {
+        readFromParcel(in);
+    }
+
+    @Override
+    public int describeContents() {
+        return super.describeContents();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mDexPath);
+        dest.writeString(mPluginPackage);
+        dest.writeString(mPluginClass);
+        super.writeToParcel(dest, flags);
+    }
+
+    public void readFromParcel(Parcel in) {
+        mDexPath = in.readString();
+        mPluginPackage = in.readString();
+        mPluginClass = in.readString();
+        super.readFromParcel(in);
     }
 
 }

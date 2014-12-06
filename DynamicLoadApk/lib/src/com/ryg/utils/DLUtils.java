@@ -2,6 +2,7 @@ package com.ryg.utils;
 
 import java.util.List;
 
+import android.R.anim;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
@@ -12,11 +13,13 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.os.Process;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.ryg.dynamicload.DLBasePluginActivity;
 import com.ryg.dynamicload.DLBasePluginFragmentActivity;
+import com.ryg.dynamicload.internal.DLPluginManager;
+import com.ryg.dynamicload.internal.DLPluginPackage;
 
 public class DLUtils {
     private static final String TAG = "DLUtils";
@@ -147,19 +150,50 @@ public class DLUtils {
     }
 
     public static boolean killDLProcess(Context context) {
+        boolean isDLProcessAlive = false;
+        int dlPid = 0;
+        final String dlProcessName = context.getPackageName() + ":DL";
+        final int TIME_OUT = 500;// ms
+
+        ActivityManager manager = (ActivityManager) context
+                .getSystemService(Context.ACTIVITY_SERVICE);
+        List<RunningAppProcessInfo> appProcessList = manager
+                .getRunningAppProcesses();
+        for (RunningAppProcessInfo appProcessInfo : appProcessList) {
+            dlPid = appProcessInfo.pid;
+            String processName = appProcessInfo.processName;
+            if (processName.equals(dlProcessName)) {
+                isDLProcessAlive = true;
+                // async kill process
+                android.os.Process.killProcess(dlPid);
+                Log.i(TAG, "kill DL process, pid:" + dlPid);
+                break;
+            }
+        }
+
+        int waitForDLStopTime = 0;
+        while (isDLProcessAlive && waitForDLStopTime <= TIME_OUT) {
+            isDLProcessAlive = isPidAlive(context, dlPid);
+            if (!isDLProcessAlive) {
+                Log.i(TAG, "DL process has dead, wait time(ms) : " + waitForDLStopTime);
+                break;
+            }
+            SystemClock.sleep(10);
+            waitForDLStopTime += 10;
+        }
+
+        return !isDLProcessAlive;
+    }
+
+    private static boolean isPidAlive(Context context, int pid) {
         ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<RunningAppProcessInfo> appProcessList = manager.getRunningAppProcesses();
 
         for (RunningAppProcessInfo appProcessInfo : appProcessList) {
-            int pid = appProcessInfo.pid;
-            String processName = appProcessInfo.processName;
-            if (processName.equals(context.getPackageName() + ":DL")) {
-                Process.killProcess(pid);
-                Log.i(TAG, "kill process, pid:" + pid);
+            if (pid == appProcessInfo.pid) {
                 return true;
             }
         }
-
         return false;
     }
 

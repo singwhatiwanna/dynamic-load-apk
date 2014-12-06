@@ -24,6 +24,7 @@ import java.util.HashMap;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -36,6 +37,7 @@ import com.ryg.dynamicload.DLBasePluginFragmentActivity;
 import com.ryg.dynamicload.DLProxyActivity;
 import com.ryg.dynamicload.DLProxyFragmentActivity;
 import com.ryg.utils.DLConstants;
+import com.ryg.utils.DLUtils;
 
 import dalvik.system.DexClassLoader;
 
@@ -64,7 +66,7 @@ public class DLPluginManager {
     public static final int START_RESULT_TYPE_ERROR = 3;
 
 
-    private static DLPluginManager sInstance;
+    private static volatile DLPluginManager sInstance;
     private Context mContext;
     private final HashMap<String, DLPluginPackage> mPackagesHolder = new HashMap<String, DLPluginPackage>();
 
@@ -100,16 +102,26 @@ public class DLPluginManager {
             return null;
 
         final String packageName = packageInfo.packageName;
-        DLPluginPackage pluginPackage = mPackagesHolder.get(packageName);
-        if (pluginPackage == null) {
-            DexClassLoader dexClassLoader = createDexClassLoader(dexPath);
-            AssetManager assetManager = createAssetManager(dexPath);
-            Resources resources = createResources(assetManager);
-            pluginPackage = new DLPluginPackage(packageName, dexPath, dexClassLoader, assetManager,
-                    resources, packageInfo);
-            mPackagesHolder.put(packageName, pluginPackage);
+        synchronized (mPackagesHolder) {
+            DLPluginPackage pluginPackage = mPackagesHolder.get(packageName);
+            if (pluginPackage == null) {
+                Log.d(TAG, "load apk, dexPath=" + dexPath);
+                DexClassLoader dexClassLoader = createDexClassLoader(dexPath);
+                AssetManager assetManager = createAssetManager(dexPath);
+                Resources resources = createResources(assetManager);
+                pluginPackage = new DLPluginPackage(packageName, dexPath,
+                        dexClassLoader, assetManager, resources, packageInfo);
+                mPackagesHolder.put(packageName, pluginPackage);
+            }
+            return pluginPackage;
         }
-        return pluginPackage;
+    }
+
+    public void reLoadApk(String dexPath, String packageName) {
+        synchronized (mPackagesHolder) {
+            mPackagesHolder.remove(packageName);
+        }
+        loadApk(dexPath);
     }
 
     private DexClassLoader createDexClassLoader(String dexPath) {
@@ -132,8 +144,19 @@ public class DLPluginManager {
 
     }
 
-    public DLPluginPackage getPackage(String packageName) {
-        return mPackagesHolder.get(packageName);
+    public DLPluginPackage peekPackage(String packageName) {
+        synchronized (mPackagesHolder) {
+            return mPackagesHolder.get(packageName);
+        }
+    }
+
+    public DLPluginPackage getPackage(String packageName, String dexPath) {
+        DLPluginPackage pluginPackage = peekPackage(packageName);
+        if (pluginPackage == null) {
+            loadApk(dexPath);
+            pluginPackage = peekPackage(packageName);
+        }
+        return pluginPackage;
     }
 
     private Resources createResources(AssetManager assetManager) {
@@ -144,7 +167,18 @@ public class DLPluginManager {
     }
 
     /**
-     * {@link #startPluginActivityForResult(Activity, DLIntent, int)}
+     * {@link #startPluginActivity(Activity, DLIntent)}<br/>
+     * NOTE: activity will run in DL process.
+     */
+    public void launchPluginActivity(DLIntent dlIntent) {
+        Intent service = new Intent(mContext, DLIntentService.class);
+        service.setAction(DLConstants.ACTION_LAUNCH_PLUGIN);
+        service.putExtra(DLConstants.EXTRA_DLINTENT, dlIntent);
+        mContext.startService(service);
+    }
+
+    /**
+     * {@link #startPluginActivityForResult(Activity, DLIntent, int)}<br/>
      */
     public int startPluginActivity(Context context, DLIntent dlIntent) {
         return startPluginActivityForResult(context, dlIntent, -1);
@@ -169,10 +203,13 @@ public class DLPluginManager {
         if (packageName == null) {
             throw new NullPointerException("disallow null packageName.");
         }
-        DLPluginPackage pluginPackage = mPackagesHolder.get(packageName);
+        DLPluginPackage pluginPackage = null;
+        synchronized (mPackagesHolder) {
+            pluginPackage = mPackagesHolder.get(packageName);
+        }
         if (pluginPackage == null) {
             return START_RESULT_NO_PKG;
-        } 
+        }
 
         DexClassLoader classLoader = pluginPackage.classLoader;
         String className = dlIntent.getPluginClass();
@@ -197,21 +234,61 @@ public class DLPluginManager {
             return START_RESULT_TYPE_ERROR;
         }
 
-        dlIntent.putExtra(DLConstants.EXTRA_CLASS, className);
-        dlIntent.putExtra(DLConstants.EXTRA_PACKAGE, packageName);
-        dlIntent.putExtra(DLConstants.EXTRA_DEX_PATH, dlIntent.getDexPath());
-        dlIntent.setClass(mContext, activityClass);
-        performStartActivityForResult(context, dlIntent, requestCode);
+        Intent intent = new Intent();
+        intent.setClass(mContext, activityClass);
+        if (dlIntent.getExtras() != null) {
+            intent.putExtras(dlIntent.getExtras());
+        }
+        intent.putExtra(DLConstants.EXTRA_CLASS, className);
+        intent.putExtra(DLConstants.EXTRA_PACKAGE, packageName);
+        intent.putExtra(DLConstants.EXTRA_DEX_PATH, dlIntent.getDexPath());
+        intent.setFlags(dlIntent.getFlags());
+        Log.d(TAG, "launch " + className);
+        performStartActivityForResult(context, intent, requestCode);
         return START_RESULT_SUCCESS;
     }
 
-    private void performStartActivityForResult(Context context, DLIntent dlIntent, int requestCode) {
-        Log.d(TAG, "launch " + dlIntent.getPluginClass());
+    private void performStartActivityForResult(Context context, Intent intent, int requestCode) {
         if (context instanceof Activity) {
-            ((Activity) context).startActivityForResult(dlIntent, requestCode);
+            ((Activity) context).startActivityForResult(intent, requestCode);
         } else {
-            context.startActivity(dlIntent);
+            context.startActivity(intent);
         }
+    }
+
+    /**
+     * verify plugin, return false means verify plugin failed,the plugin can not
+     * be loaded.
+     * @param context
+     * @param pluginPath
+     * @param packageInfo
+     * @return true : plugin is verified, false otherwise.
+     */
+    public boolean verifyPlugin(String pluginPath, PackageInfo packageInfo) {
+        DLPluginPackage pluginPackage = getPackage(packageInfo.packageName, pluginPath);
+        if (pluginPackage == null) {
+            Log.e(TAG, "should never be happened.");
+            return false;
+        }
+        int loadedPluginVersionCode = pluginPackage.packageInfo.versionCode;
+        int currentPluginVersionCode = packageInfo.versionCode;
+        Log.d(TAG, "plugin versionCode, old:" + loadedPluginVersionCode
+                + " new:" + currentPluginVersionCode);
+        if (packageInfo.versionCode != loadedPluginVersionCode) {
+            Log.d(TAG, "plugin versionCode unmatched, old:"
+                    + loadedPluginVersionCode + " new:"
+                    + currentPluginVersionCode);
+            Log.d(TAG, "kill DL process,restart it then.");
+            reLoadApk(pluginPath, pluginPackage.packageName);
+            boolean success = DLUtils.killDLProcess(mContext);
+            if (!success) {
+                // TODO : handle it.
+                Log.w(TAG, "DL process is still not dead, wait it to stop.");
+                return false;
+            }
+        }
+
+        return true;
     }
 
 }

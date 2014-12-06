@@ -68,7 +68,6 @@ public class MainActivity extends Activity implements OnItemClickListener {
                 item.launcherActivityName = item.packageInfo.activities[0].name;
             }
             mPluginItems.add(item);
-            DLPluginManager.getInstance(this).loadApk(item.pluginPath);
         }
 
         mListView.setAdapter(mPluginAdapter);
@@ -161,25 +160,17 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        final PluginItem item = mPluginItems.get(position);
-        final DLPluginManager pluginManager = DLPluginManager.getInstance(this);
-        int loadedVersionCode = pluginManager.getPackage(item.packageInfo.packageName).packageInfo.versionCode;
-        int pluginVersionCode = item.packageInfo.versionCode;
-        if (item.packageInfo.versionCode != loadedVersionCode) {
-            Log.d(TAG, "plugin versionCode unmatched, old:" + loadedVersionCode + " new:" + pluginVersionCode);
-            Log.d(TAG, "kill DL process,restart it.");
-            DLUtils.killDLProcess(this);
+        PluginItem item = mPluginItems.get(position);
+        DLPluginManager pluginManager = DLPluginManager.getInstance(this);
+        if (!pluginManager.verifyPlugin(item.pluginPath, item.packageInfo)) {
+            Log.e(TAG, "verify plugin failed: " + item.pluginPath);
+            return;
         }
-        mListView.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                DLIntent dlIntent = new DLIntent(item.packageInfo.packageName,
-                        item.launcherActivityName);
-                dlIntent.setDexPath(item.pluginPath);
-                pluginManager.startPluginActivity(MainActivity.this, dlIntent);
-            }
-        }, 100);
 
+        DLIntent dlIntent = new DLIntent(item.packageInfo.packageName,
+                item.launcherActivityName);
+        dlIntent.setDexPath(item.pluginPath);
+        pluginManager.launchPluginActivity(dlIntent);
     }
 
 }

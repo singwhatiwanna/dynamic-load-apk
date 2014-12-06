@@ -8,6 +8,9 @@ public class DLConstants {
     public static final String EXTRA_DEX_PATH = "extra.dex.path";
     public static final String EXTRA_CLASS = "extra.class";
     public static final String EXTRA_PACKAGE = "extra.package";
+    public static final String EXTRA_DLINTENT = "extra.dlintent";
+
+    public static final String ACTION_LAUNCH_PLUGIN = "action.launch_plugin";
 
     public static final int ACTIVITY_TYPE_UNKNOWN = -1;
     public static final int ACTIVITY_TYPE_NORMAL = 1;
