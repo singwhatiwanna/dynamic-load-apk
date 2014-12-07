@@ -1,9 +1,11 @@
 DL : Apk动态加载框架
 ================
 ![mahua](http://www.renyugang.cn/resources/image/DL.png)
-##开发文档(Development Help)
-[APK动态加载框架（DL）解析](http://blog.csdn.net/singwhatiwanna/article/details/39937639)
+##开发文档 (Development Help)
 [English README](https://github.com/singwhatiwanna/dynamic-load-apk/blob/master/README-en.md)
+
+[APK动态加载框架（DL）解析](http://blog.csdn.net/singwhatiwanna/article/details/39937639)
+
 DL 2.0支持多进程模式，插件可以运行在单独的DL进程中(lab分支)
 ##DL支持的功能
 1. plugin无需安装即可由宿主调起。
