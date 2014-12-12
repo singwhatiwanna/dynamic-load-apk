@@ -18,8 +18,15 @@
 package com.ryg.dynamicload.internal;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -36,6 +43,8 @@ import com.ryg.dynamicload.DLBasePluginFragmentActivity;
 import com.ryg.dynamicload.DLProxyActivity;
 import com.ryg.dynamicload.DLProxyFragmentActivity;
 import com.ryg.utils.DLConstants;
+import com.ryg.utils.DLUtils;
+import com.ryg.utils.SharedPreferenceHelper;
 
 import dalvik.system.DexClassLoader;
 
@@ -69,6 +78,8 @@ public class DLPluginManager {
     private final HashMap<String, DLPluginPackage> mPackagesHolder = new HashMap<String, DLPluginPackage>();
 
     private int mFrom = DLConstants.FROM_INTERNAL;
+    
+    private String soLibDir=null;
 
     private DLPluginManager(Context context) {
         mContext = context.getApplicationContext();
@@ -88,34 +99,125 @@ public class DLPluginManager {
     /**
      * Load a apk. Before start a plugin Activity, we should do this first.<br/>
      * NOTE : will only be called by host apk.
+     * if your plugin has so lib,you should use {@link DLPluginManager#loadApk(String, boolean)}
      * @param dexPath
      */
     public DLPluginPackage loadApk(String dexPath) {
         // when loadApk is called by host apk, we assume that plugin is invoked by host.
-        mFrom = DLConstants.FROM_EXTERNAL;
+       return loadApk(dexPath,false);
+    }
+    
+    /**
+     * @param dexPath
+     *        plugin path
+     * @param hassolib
+     *        whether exist so lib in plugin
+     * @return
+     */
+    public DLPluginPackage loadApk(final String dexPath,boolean hassolib)
+    {
+      mFrom = DLConstants.FROM_EXTERNAL;
 
-        PackageInfo packageInfo = mContext.getPackageManager().
-                getPackageArchiveInfo(dexPath, PackageManager.GET_ACTIVITIES);
-        if (packageInfo == null)
-            return null;
+      PackageInfo packageInfo = mContext.getPackageManager().
+              getPackageArchiveInfo(dexPath, PackageManager.GET_ACTIVITIES);
+      if (packageInfo == null)
+          return null;
 
-        final String packageName = packageInfo.packageName;
-        DLPluginPackage pluginPackage = mPackagesHolder.get(packageName);
-        if (pluginPackage == null) {
-            DexClassLoader dexClassLoader = createDexClassLoader(dexPath);
-            AssetManager assetManager = createAssetManager(dexPath);
-            Resources resources = createResources(assetManager);
-            pluginPackage = new DLPluginPackage(packageName, dexPath, dexClassLoader, assetManager,
-                    resources, packageInfo);
-            mPackagesHolder.put(packageName, pluginPackage);
+      final String packageName = packageInfo.packageName;
+      DLPluginPackage pluginPackage = mPackagesHolder.get(packageName);
+      if (pluginPackage == null) {
+          DexClassLoader dexClassLoader = createDexClassLoader(dexPath);
+          AssetManager assetManager = createAssetManager(dexPath);
+          Resources resources = createResources(assetManager);
+          pluginPackage = new DLPluginPackage(packageName, dexPath, dexClassLoader, assetManager,
+                  resources, packageInfo);
+          mPackagesHolder.put(packageName, pluginPackage);
+      }
+      
+      if(hassolib)
+      {
+        soLibDir=mContext.getDir("pluginlib",Context.MODE_PRIVATE).toString();
+        new Thread()
+        {
+          public void run() {
+            copyPluginSoLib(dexPath, DLUtils.getCpuName());
+          };
+        }.start();
+      }
+      return pluginPackage;
+    }
+    
+    /**
+     * copy so lib to  specify  directory(/data/data/host_pack_name/pluginlib)
+     * @param dexPath
+     *    plugin path
+     * @param cpuName
+     *    cpuName CPU_X86,CPU_MIPS,CPU_ARMEABI
+     */
+    private void copyPluginSoLib(String dexPath,String cpuName)
+    {
+      String parseFileName=DLConstants.CPU_ARMEABI;
+      if(cpuName.toLowerCase().contains("arm"))
+      {
+        parseFileName=DLConstants.CPU_ARMEABI;
+      }else if(cpuName.toLowerCase().contains("x86"))
+      {
+        parseFileName=DLConstants.CPU_X86;
+      }else if(cpuName.toLowerCase().contains("mips"))
+      {
+        parseFileName=DLConstants.CPU_MIPS;
+      }
+      Log.d(TAG,"parseFileName---->"+parseFileName);
+      InputStream ins=null;
+      FileOutputStream fos=null;
+      try {
+        ZipFile zip = new ZipFile(dexPath);
+        Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zip.entries();
+        while (entries.hasMoreElements()) {
+          ZipEntry ze = (ZipEntry) entries.nextElement();
+          if(ze.getName().endsWith(".so") && ze.getName().contains(parseFileName))
+          {
+            String lastModify=String.valueOf(ze.getTime());
+            if(lastModify.equals(SharedPreferenceHelper.getInstance(mContext).getString(ze.getName(), "")))
+            {
+              //exist and no change
+              Log.d(TAG, "the so lib is exist and not change!!!!");
+              return;
+            }
+            String libName=ze.getName().substring(ze.getName().lastIndexOf("/")+1);
+            ins = zip.getInputStream(ze);
+            fos = new FileOutputStream(new File(soLibDir, libName));
+            
+            byte[] buf = new byte[2048];
+            int len = -1;
+
+            while ((len = ins.read(buf)) != -1) {
+              fos.write(buf, 0, len);
+            }
+            ins.close();
+            fos.close();
+            SharedPreferenceHelper.getInstance(mContext).setString(ze.getName(),lastModify);
+            Log.d(TAG, ze.getName()+" copy success");
+            break;
+          }
         }
-        return pluginPackage;
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      
+      
     }
 
     private DexClassLoader createDexClassLoader(String dexPath) {
         File dexOutputDir = mContext.getDir("dex", Context.MODE_PRIVATE);
         final String dexOutputPath = dexOutputDir.getAbsolutePath();
-        DexClassLoader loader = new DexClassLoader(dexPath, dexOutputPath, null, mContext.getClassLoader());
+        //设置ClassLoader的本地so路径
+        if(soLibDir==null)
+        {
+          soLibDir=mContext.getDir("pluginlib", Context.MODE_PRIVATE).toString();
+        }
+       
+        DexClassLoader loader = new DexClassLoader(dexPath, dexOutputPath, mFrom==DLConstants.FROM_EXTERNAL ? soLibDir : null, mContext.getClassLoader());
         return loader;
     }
 
@@ -182,7 +284,8 @@ public class DLPluginManager {
         }
         Class<?> clazz = null;
         try {
-            clazz = classLoader.loadClass(className);
+            //clazz = classLoader.loadClass(className);
+            clazz=Class.forName(className, true, classLoader);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             return START_RESULT_NO_CLASS;
