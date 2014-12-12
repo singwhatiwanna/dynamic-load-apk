@@ -20,4 +20,10 @@ public class DLConstants {
             "com.ryg.dynamicload.proxy.fragmentactivity.VIEW";
 
     public static final String BRAND_SAMSUNG = "samsung";
+    
+    public static final String CPU_ARMEABI="armeabi";
+    
+    public static final String CPU_X86="x86";
+    
+    public static final String CPU_MIPS="mips";
 }
