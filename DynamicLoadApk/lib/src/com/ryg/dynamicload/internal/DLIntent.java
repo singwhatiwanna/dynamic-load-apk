@@ -17,7 +17,6 @@
  */
 package com.ryg.dynamicload.internal;
 
-import android.content.Context;
 import android.content.Intent;
 
 public class DLIntent extends Intent {
@@ -64,13 +63,6 @@ public class DLIntent extends Intent {
 
     public void setPluginClass(Class<?> clazz) {
         this.mPluginClass = clazz.getName();
-    }
-    
-    @Override
-    public Intent setClass(Context packageContext, Class<?> cls) 
-    {
-      setPluginClass(cls);
-      return super.setClass(packageContext, cls);
     }
 
 }
