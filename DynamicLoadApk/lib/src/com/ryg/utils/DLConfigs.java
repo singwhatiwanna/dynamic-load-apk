@@ -11,7 +11,6 @@ import android.os.Build;
  * @author yuanzeyao <br/>
  *         create at 2014年12月11日 下午5:55:59
  */
-@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class DLConfigs {
     public static final String PREFERENCE_NAME = "dynamic_load_configs";
 
@@ -24,6 +23,7 @@ public class DLConfigs {
         prefs.edit().putLong(soName, time).apply();
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static long getSoLastModifiedTime(Context cxt, String soName) {
         SharedPreferences prefs = cxt.getSharedPreferences(PREFERENCE_NAME,
                 Context.MODE_PRIVATE | Context.MODE_MULTI_PROCESS);
