@@ -7,8 +7,11 @@ DL : Apk动态加载框架
 [APK动态加载框架（DL）解析](http://blog.csdn.net/singwhatiwanna/article/details/39937639)
 
 DL 2.0的新特性
+
 1. 支持多进程模式，插件可以运行在单独的DL进程中(代码在lab分支)
+
 2. 支持插件中的so库(代码在dev分支)
+
 ##DL支持的功能
 1. plugin无需安装即可由宿主调起。
 2. 支持用R访问plugin资源
