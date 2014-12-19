@@ -20,7 +20,6 @@ package com.ryg.dynamicload.internal;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
@@ -36,7 +35,7 @@ import com.ryg.dynamicload.DLBasePluginFragmentActivity;
 import com.ryg.dynamicload.DLProxyActivity;
 import com.ryg.dynamicload.DLProxyFragmentActivity;
 import com.ryg.utils.DLConstants;
-
+import com.ryg.utils.DLUtils;
 import dalvik.system.DexClassLoader;
 
 public class DLPluginManager {
@@ -70,8 +69,11 @@ public class DLPluginManager {
 
     private int mFrom = DLConstants.FROM_INTERNAL;
 
+    private String mNativeLibDir=null;
+
     private DLPluginManager(Context context) {
         mContext = context.getApplicationContext();
+        mNativeLibDir = mContext.getDir("pluginlib", Context.MODE_PRIVATE).getAbsolutePath();
     }
 
     public static DLPluginManager getInstance(Context context) {
@@ -92,22 +94,44 @@ public class DLPluginManager {
      */
     public DLPluginPackage loadApk(String dexPath) {
         // when loadApk is called by host apk, we assume that plugin is invoked by host.
-        mFrom = DLConstants.FROM_EXTERNAL;
+        return loadApk(dexPath,true);
+    }
+    
+    /**
+     * @param dexPath
+     *        plugin path
+     * @param hasSoLib
+     *        whether exist so lib in plugin
+     * @return
+     */
+    public DLPluginPackage loadApk(final String dexPath,boolean hasSoLib)
+    {
+      mFrom = DLConstants.FROM_EXTERNAL;
 
-        PackageInfo packageInfo = mContext.getPackageManager().
-                getPackageArchiveInfo(dexPath, PackageManager.GET_ACTIVITIES);
-        if (packageInfo == null)
-            return null;
+      PackageInfo packageInfo = mContext.getPackageManager().
+              getPackageArchiveInfo(dexPath, PackageManager.GET_ACTIVITIES);
+      if (packageInfo == null)
+          return null;
 
-        final String packageName = packageInfo.packageName;
-        DLPluginPackage pluginPackage = mPackagesHolder.get(packageName);
-        if (pluginPackage == null) {
-            DexClassLoader dexClassLoader = createDexClassLoader(dexPath);
-            AssetManager assetManager = createAssetManager(dexPath);
-            Resources resources = createResources(assetManager);
-            pluginPackage = new DLPluginPackage(packageName, dexPath, dexClassLoader, assetManager,
-                    resources, packageInfo);
-            mPackagesHolder.put(packageName, pluginPackage);
+      final String packageName = packageInfo.packageName;
+      DLPluginPackage pluginPackage = mPackagesHolder.get(packageName);
+      if (pluginPackage == null) {
+          DexClassLoader dexClassLoader = createDexClassLoader(dexPath);
+          AssetManager assetManager = createAssetManager(dexPath);
+          Resources resources = createResources(assetManager);
+          pluginPackage = new DLPluginPackage(packageName, dexPath, dexClassLoader, assetManager,
+                  resources, packageInfo);
+          mPackagesHolder.put(packageName, pluginPackage);
+      }
+
+        if (hasSoLib) {
+            //TODO: copy so lib async will lead to bugs maybe, waiting for resolved later.
+            new Thread("DL#CopyPluginSoLib") {
+                @Override
+                public void run() {
+                    DLUtils.copyPluginSoLib(mContext, dexPath, mNativeLibDir);
+                };
+            }.start();
         }
         return pluginPackage;
     }
@@ -115,7 +139,7 @@ public class DLPluginManager {
     private DexClassLoader createDexClassLoader(String dexPath) {
         File dexOutputDir = mContext.getDir("dex", Context.MODE_PRIVATE);
         final String dexOutputPath = dexOutputDir.getAbsolutePath();
-        DexClassLoader loader = new DexClassLoader(dexPath, dexOutputPath, null, mContext.getClassLoader());
+        DexClassLoader loader = new DexClassLoader(dexPath, dexOutputPath, mNativeLibDir, mContext.getClassLoader());
         return loader;
     }
 
@@ -182,7 +206,7 @@ public class DLPluginManager {
         }
         Class<?> clazz = null;
         try {
-            clazz = classLoader.loadClass(className);
+            clazz = Class.forName(className, true, classLoader);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             return START_RESULT_NO_CLASS;
