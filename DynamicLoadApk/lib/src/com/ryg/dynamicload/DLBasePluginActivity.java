@@ -164,7 +164,11 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
 
     @Override
     public String getPackageName() {
-        return mContextProxy.getPackageName();
+        if (mFrom == DLConstants.FROM_INTERNAL) {
+            return super.getPackageName();
+        } else {
+            return mPluginPackage.packageName;
+        }
     }
 
     @Override

@@ -52,17 +52,19 @@ public class DLProxyActivity extends Activity implements DLProxy {
 
     @Override
     public AssetManager getAssets() {
-        return impl.getAssets();
+        return impl.getAssets() == null ? super.getAssets() :
+                impl.getAssets();
     }
 
     @Override
     public Resources getResources() {
-        return impl.getResources();
+        return impl.getResources() == null ? super.getResources() :
+                impl.getResources();
     }
 
     @Override
     public Theme getTheme() {
-        return impl.getTheme();
+        return impl.getTheme() == null ? super.getTheme() : impl.getTheme();
     }
 
     @Override

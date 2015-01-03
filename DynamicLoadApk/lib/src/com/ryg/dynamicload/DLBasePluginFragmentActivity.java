@@ -160,7 +160,11 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
 
     @Override
     public String getPackageName() {
-        return mContextProxy.getPackageName();
+        if (mFrom == DLConstants.FROM_INTERNAL) {
+            return super.getPackageName();
+        } else {
+            return mPluginPackage.packageName;
+        }
     }
 
     @Override

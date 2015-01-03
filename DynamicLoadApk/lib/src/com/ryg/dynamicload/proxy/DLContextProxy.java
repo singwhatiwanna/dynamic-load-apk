@@ -83,10 +83,6 @@ public final class DLContextProxy {
         return mBaseContext.getClassLoader();
     }
 
-    public String getPackageName() {
-        return mBaseContext.getPackageName();
-    }
-
     public SharedPreferences getSharedPreferences(String name, int mode) {
         return mBaseContext.getSharedPreferences(name, mode);
     }

@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.ryg.dynamicload;
 
 import android.content.Intent;
@@ -56,7 +57,8 @@ public class DLProxyFragmentActivity extends FragmentActivity implements DLProxy
 
     @Override
     public Resources getResources() {
-        return impl.getResources() == null ? super.getResources() : impl.getResources();
+        return impl.getResources() == null ? super.getResources() :
+                impl.getResources();
     }
 
     @Override

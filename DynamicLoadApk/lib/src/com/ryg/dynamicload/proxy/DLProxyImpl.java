@@ -125,15 +125,15 @@ public class DLProxyImpl {
     }
 
     public AssetManager getAssets() {
-        return mAssetManager != null ? mAssetManager : getResources().getAssets();
+        return mAssetManager;
     }
 
     public Resources getResources() {
-        return mResources != null ? mResources : mActivity.getBaseContext().getResources();
+        return mResources;
     }
 
     public Theme getTheme() {
-        return mTheme != null ? mTheme : mActivity.getBaseContext().getTheme();
+        return mTheme;
     }
 
     public DLPlugin getRemoteActivity() {
