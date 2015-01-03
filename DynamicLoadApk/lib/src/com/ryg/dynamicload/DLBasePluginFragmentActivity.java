@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.ryg.dynamicload;
 
 import android.app.Activity;
@@ -41,6 +42,7 @@ import android.view.WindowManager;
 import com.ryg.dynamicload.internal.DLIntent;
 import com.ryg.dynamicload.internal.DLPluginManager;
 import com.ryg.dynamicload.internal.DLPluginPackage;
+import com.ryg.dynamicload.proxy.DLContextProxy;
 import com.ryg.utils.DLConstants;
 
 public class DLBasePluginFragmentActivity extends FragmentActivity implements DLPlugin {
@@ -60,6 +62,10 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
     protected int mFrom = DLConstants.FROM_INTERNAL;
     protected DLPluginManager mPluginManager;
     protected DLPluginPackage mPluginPackage;
+    /**
+     * Context方法调用的代理类,代理Context相关的方法,消除代码重复
+     */
+    DLContextProxy mContextProxy;
 
     @Override
     public void attach(Activity proxyActivity, DLPluginPackage pluginPackage) {
@@ -81,8 +87,7 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
         }
 
         mPluginManager = DLPluginManager.getInstance(that);
-        Log.d(TAG, "onCreate: from= "
-                + (mFrom == DLConstants.FROM_INTERNAL ? "DLConstants.FROM_INTERNAL" : "FROM_EXTERNAL"));
+        mContextProxy = new DLContextProxy(mProxyActivity);
     }
 
     @Override
@@ -150,29 +155,17 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
 
     @Override
     public Resources getResources() {
-        if (mFrom == DLConstants.FROM_INTERNAL) {
-            return super.getResources();
-        } else {
-            return mProxyActivity.getResources();
-        }
+        return mContextProxy.getResources();
     }
 
     @Override
     public String getPackageName() {
-        if (mFrom == DLConstants.FROM_INTERNAL) {
-            return super.getPackageName();
-        } else {
-            return mPluginPackage.packageName;
-        }
+        return mContextProxy.getPackageName();
     }
 
     @Override
     public LayoutInflater getLayoutInflater() {
-        if (mFrom == DLConstants.FROM_INTERNAL) {
-            return super.getLayoutInflater();
-        } else {
-            return mProxyActivity.getLayoutInflater();
-        }
+        return mContextProxy.getLayoutInflater();
     }
 
     @Override
@@ -186,20 +179,12 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
 
     @Override
     public SharedPreferences getSharedPreferences(String name, int mode) {
-        if (mFrom == DLConstants.FROM_INTERNAL) {
-            return super.getSharedPreferences(name, mode);
-        } else {
-            return mProxyActivity.getSharedPreferences(name, mode);
-        }
+        return mContextProxy.getSharedPreferences(name, mode);
     }
 
     @Override
     public Context getApplicationContext() {
-        if (mFrom == DLConstants.FROM_INTERNAL) {
-            return super.getApplicationContext();
-        } else {
-            return mProxyActivity.getApplicationContext();
-        }
+        return mContextProxy.getApplicationContext();
     }
 
     @Override
@@ -356,8 +341,9 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
 
     /**
      * @param dlIntent
-     * @return may be {@link #START_RESULT_SUCCESS}, {@link #START_RESULT_NO_PKG},
-     *         {@link #START_RESULT_NO_CLASS}, {@link #START_RESULT_TYPE_ERROR}
+     * @return may be {@link #START_RESULT_SUCCESS},
+     *         {@link #START_RESULT_NO_PKG}, {@link #START_RESULT_NO_CLASS},
+     *         {@link #START_RESULT_TYPE_ERROR}
      */
     public int startPluginActivity(DLIntent dlIntent) {
         return startPluginActivityForResult(dlIntent, -1);
@@ -365,8 +351,9 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
 
     /**
      * @param dlIntent
-     * @return may be {@link #START_RESULT_SUCCESS}, {@link #START_RESULT_NO_PKG},
-     *         {@link #START_RESULT_NO_CLASS}, {@link #START_RESULT_TYPE_ERROR}
+     * @return may be {@link #START_RESULT_SUCCESS},
+     *         {@link #START_RESULT_NO_PKG}, {@link #START_RESULT_NO_CLASS},
+     *         {@link #START_RESULT_TYPE_ERROR}
      */
     public int startPluginActivityForResult(DLIntent dlIntent, int requestCode) {
         if (mFrom == DLConstants.FROM_EXTERNAL) {

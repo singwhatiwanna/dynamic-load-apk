@@ -15,7 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.ryg.dynamicload.internal;
+
+package com.ryg.dynamicload.proxy;
 
 import java.lang.reflect.Constructor;
 
@@ -32,6 +33,8 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.ryg.dynamicload.DLPlugin;
+import com.ryg.dynamicload.internal.DLPluginManager;
+import com.ryg.dynamicload.internal.DLPluginPackage;
 import com.ryg.utils.DLConstants;
 
 public class DLProxyImpl {
@@ -122,22 +125,18 @@ public class DLProxyImpl {
     }
 
     public AssetManager getAssets() {
-        return mAssetManager;
+        return mAssetManager != null ? mAssetManager : getResources().getAssets();
     }
 
     public Resources getResources() {
-        return mResources;
+        return mResources != null ? mResources : mActivity.getBaseContext().getResources();
     }
 
     public Theme getTheme() {
-        return mTheme;
+        return mTheme != null ? mTheme : mActivity.getBaseContext().getTheme();
     }
 
     public DLPlugin getRemoteActivity() {
         return mRemoteActivity;
-    }
-
-    public interface DLProxy {
-        public void attach(DLPlugin remoteActivity, DLPluginManager pluginManager);
     }
 }
