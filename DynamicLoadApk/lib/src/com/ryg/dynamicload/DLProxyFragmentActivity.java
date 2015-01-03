@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.ryg.dynamicload;
 
 import android.content.Intent;
@@ -30,14 +31,13 @@ import android.view.MotionEvent;
 import android.view.WindowManager.LayoutParams;
 
 import com.ryg.dynamicload.internal.DLPluginManager;
-import com.ryg.dynamicload.internal.DLProxyImpl;
-import com.ryg.dynamicload.internal.DLProxyImpl.DLProxy;
+import com.ryg.dynamicload.proxy.DLProxy;
+import com.ryg.dynamicload.proxy.DLProxyImpl;
 
 public class DLProxyFragmentActivity extends FragmentActivity implements DLProxy {
 
     protected DLPlugin mRemoteActivity;
     private DLProxyImpl impl = new DLProxyImpl(this);
-    private DLPluginManager mPluginManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +48,6 @@ public class DLProxyFragmentActivity extends FragmentActivity implements DLProxy
     @Override
     public void attach(DLPlugin remoteActivity, DLPluginManager pluginManager) {
         mRemoteActivity = remoteActivity;
-        mPluginManager = pluginManager;
     }
 
     @Override
@@ -58,7 +57,8 @@ public class DLProxyFragmentActivity extends FragmentActivity implements DLProxy
 
     @Override
     public Resources getResources() {
-        return impl.getResources() == null ? super.getResources() : impl.getResources();
+        return impl.getResources() == null ? super.getResources() :
+                impl.getResources();
     }
 
     @Override
