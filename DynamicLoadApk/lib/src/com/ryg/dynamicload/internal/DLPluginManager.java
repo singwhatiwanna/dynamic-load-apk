@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.ryg.dynamicload.internal;
 
 import java.io.File;
@@ -46,25 +47,28 @@ public class DLPluginManager {
     private static final String TAG = "DLPluginManager";
 
     /**
-     * return value of {@link #startPluginActivity(Activity, DLIntent)} start success
+     * return value of {@link #startPluginActivity(Activity, DLIntent)} start
+     * success
      */
     public static final int START_RESULT_SUCCESS = 0;
 
     /**
-     * return value of {@link #startPluginActivity(Activity, DLIntent)} package not found
+     * return value of {@link #startPluginActivity(Activity, DLIntent)} package
+     * not found
      */
     public static final int START_RESULT_NO_PKG = 1;
 
     /**
-     * return value of {@link #startPluginActivity(Activity, DLIntent)} class not found
+     * return value of {@link #startPluginActivity(Activity, DLIntent)} class
+     * not found
      */
     public static final int START_RESULT_NO_CLASS = 2;
 
     /**
-     * return value of {@link #startPluginActivity(Activity, DLIntent)} class type error
+     * return value of {@link #startPluginActivity(Activity, DLIntent)} class
+     * type error
      */
     public static final int START_RESULT_TYPE_ERROR = 3;
-
 
     private static volatile DLPluginManager sInstance;
     private Context mContext;
@@ -90,10 +94,12 @@ public class DLPluginManager {
     /**
      * Load a apk. Before start a plugin Activity, we should do this first.<br/>
      * NOTE : will only be called by host apk.
+     * 
      * @param dexPath
      */
     public DLPluginPackage loadApk(String dexPath) {
-        // when loadApk is called by host apk, we assume that plugin is invoked by host.
+        // when loadApk is called by host apk, we assume that plugin is invoked
+        // by host.
         mFrom = DLConstants.FROM_EXTERNAL;
 
         PackageInfo packageInfo = mContext.getPackageManager().
@@ -127,7 +133,8 @@ public class DLPluginManager {
     private DexClassLoader createDexClassLoader(String dexPath) {
         File dexOutputDir = mContext.getDir("dex", Context.MODE_PRIVATE);
         final String dexOutputPath = dexOutputDir.getAbsolutePath();
-        DexClassLoader loader = new DexClassLoader(dexPath, dexOutputPath, null, mContext.getClassLoader());
+        DexClassLoader loader = new DexClassLoader(dexPath, dexOutputPath, null,
+                mContext.getClassLoader());
         return loader;
     }
 
@@ -173,6 +180,7 @@ public class DLPluginManager {
     public void launchPluginActivity(DLIntent dlIntent) {
         Intent service = new Intent(mContext, DLIntentService.class);
         service.setAction(DLConstants.ACTION_LAUNCH_PLUGIN);
+        service.setExtrasClassLoader(dlIntent.getPathClassLoader());
         service.putExtra(DLConstants.EXTRA_DLINTENT, dlIntent);
         mContext.startService(service);
     }
@@ -188,8 +196,9 @@ public class DLPluginManager {
      * @param context
      * @param dlIntent
      * @param requestCode
-     * @return One of below: {@link #START_RESULT_SUCCESS} {@link #START_RESULT_NO_PKG}
-     *         {@link #START_RESULT_NO_CLASS} {@link #START_RESULT_TYPE_ERROR}
+     * @return One of below: {@link #START_RESULT_SUCCESS}
+     *         {@link #START_RESULT_NO_PKG} {@link #START_RESULT_NO_CLASS}
+     *         {@link #START_RESULT_TYPE_ERROR}
      */
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     public int startPluginActivityForResult(Context context, DLIntent dlIntent, int requestCode) {
@@ -236,13 +245,18 @@ public class DLPluginManager {
 
         Intent intent = new Intent();
         intent.setClass(mContext, activityClass);
-        if (dlIntent.getExtras() != null) {
-            intent.putExtras(dlIntent.getExtras());
-        }
         intent.putExtra(DLConstants.EXTRA_CLASS, className);
         intent.putExtra(DLConstants.EXTRA_PACKAGE, packageName);
         intent.putExtra(DLConstants.EXTRA_DEX_PATH, dlIntent.getDexPath());
         intent.setFlags(dlIntent.getFlags());
+
+        // 将dlIntent中的参数设置到intent中
+        if (dlIntent.getExtras() != null) {
+            // 设置ClassLoader,避免出现通过Intent传递Parcelable参数时出现Class Not Found异常
+            dlIntent.setExtrasClassLoader(dlIntent.getPathClassLoader());
+            intent.putExtras(dlIntent.getExtras());
+        }
+
         Log.d(TAG, "launch " + className);
         performStartActivityForResult(context, intent, requestCode);
         return START_RESULT_SUCCESS;
@@ -259,6 +273,7 @@ public class DLPluginManager {
     /**
      * verify plugin, return false means verify plugin failed,the plugin can not
      * be loaded.
+     * 
      * @param context
      * @param pluginPath
      * @param packageInfo

@@ -1,3 +1,4 @@
+
 package com.ryg.dynamicload.sample.mainplugin;
 
 import com.ryg.dynamicload.DLBasePluginActivity;
@@ -25,6 +26,23 @@ public class MainActivity extends DLBasePluginActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initView(savedInstanceState);
+
+
+        Log.d(TAG, "on create start.");
+        Bundle extras = getIntent().getExtras();
+        try {
+            Class.forName("com.ryg.dynamicload.sample.mainhost.MainActivity$Person");
+            Log.d(TAG, "### 插件A找到Person");
+            if (extras != null && extras.containsKey("person")) {
+                Log.d("### person ", extras.getParcelable("person") + "");
+            }
+            
+            Log.d(TAG, "### 参数 : " + extras.getString("key")) ;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Log.d(TAG, "on create finish.");
     }
 
     private void initView(Bundle savedInstanceState) {
@@ -61,7 +79,7 @@ public class MainActivity extends DLBasePluginActivity {
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

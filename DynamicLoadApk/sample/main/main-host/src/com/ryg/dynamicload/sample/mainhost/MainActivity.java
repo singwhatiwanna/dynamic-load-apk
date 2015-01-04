@@ -1,12 +1,12 @@
-package com.ryg.dynamicload.sample.mainhost;
 
-import java.io.File;
-import java.util.ArrayList;
+package com.ryg.dynamicload.sample.mainhost;
 
 import android.app.Activity;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,6 +23,9 @@ import android.widget.TextView;
 import com.ryg.dynamicload.internal.DLIntent;
 import com.ryg.dynamicload.internal.DLPluginManager;
 import com.ryg.utils.DLUtils;
+
+import java.io.File;
+import java.util.ArrayList;
 
 public class MainActivity extends Activity implements OnItemClickListener {
     private static final String TAG = "MainActivity";
@@ -48,7 +51,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
     private void initView() {
         mPluginAdapter = new PluginAdapter();
         mListView = (ListView) findViewById(R.id.plugin_list);
-        mNoPluginTextView = (TextView)findViewById(R.id.no_plugin);
+        mNoPluginTextView = (TextView) findViewById(R.id.no_plugin);
     }
 
     private void initData() {
@@ -85,12 +88,13 @@ public class MainActivity extends Activity implements OnItemClickListener {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.action_settings:
-            DLUtils.showDialog(this, getString(R.string.action_about), getString(R.string.introducation));
-            break;
+            case R.id.action_settings:
+                DLUtils.showDialog(this, getString(R.string.action_about),
+                        getString(R.string.introducation));
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -136,7 +140,8 @@ public class MainActivity extends Activity implements OnItemClickListener {
             PackageInfo packageInfo = item.packageInfo;
             holder.appIcon.setImageDrawable(DLUtils.getAppIcon(MainActivity.this, item.pluginPath));
             holder.appName.setText(DLUtils.getAppLabel(MainActivity.this, item.pluginPath));
-            holder.apkName.setText(item.pluginPath.substring(item.pluginPath.lastIndexOf(File.separatorChar) + 1));
+            holder.apkName.setText(item.pluginPath.substring(item.pluginPath
+                    .lastIndexOf(File.separatorChar) + 1));
             holder.packageName.setText(packageInfo.applicationInfo.packageName);
             return convertView;
         }
@@ -170,7 +175,64 @@ public class MainActivity extends Activity implements OnItemClickListener {
         DLIntent dlIntent = new DLIntent(item.packageInfo.packageName,
                 item.launcherActivityName);
         dlIntent.setDexPath(item.pluginPath);
+        //
+        // dlIntent.setPathClassLoader(Person.class.getClassLoader());
+        dlIntent.putExtra("person", new Person("simple", 24));
+        dlIntent.putExtra("key", "hello");
+        //
+        Log.d(TAG, "启动插件 --- ");
+
         pluginManager.launchPluginActivity(dlIntent);
+    }
+
+    /**
+     * @author mrsimple
+     */
+    public static class Person implements Parcelable {
+
+        String mName;
+        int mAge;
+
+        public Person(String name, int age) {
+            mName = name;
+            mAge = age;
+        }
+
+        protected Person(Parcel in) {
+            mName = in.readString();
+            mAge = in.readInt();
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(mName);
+            dest.writeInt(mAge);
+        }
+
+        public static final Parcelable.Creator<Person> CREATOR = new Creator<Person>() {
+
+            @Override
+            public Person createFromParcel(Parcel source) {
+                return new Person(source);
+            }
+
+            @Override
+            public Person[] newArray(int size) {
+                return new Person[size];
+            }
+
+        };
+
+        @Override
+        public String toString() {
+            return "Person [mName=" + mName + ", mAge=" + mAge + "]";
+        }
+
     }
 
 }
