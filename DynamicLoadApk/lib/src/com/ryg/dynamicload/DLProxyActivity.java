@@ -30,8 +30,8 @@ import android.view.MotionEvent;
 import android.view.WindowManager.LayoutParams;
 
 import com.ryg.dynamicload.internal.DLPluginManager;
+import com.ryg.dynamicload.internal.DLProxy;
 import com.ryg.dynamicload.internal.DLProxyImpl;
-import com.ryg.dynamicload.internal.DLProxyImpl.DLProxy;
 
 public class DLProxyActivity extends Activity implements DLProxy {
 

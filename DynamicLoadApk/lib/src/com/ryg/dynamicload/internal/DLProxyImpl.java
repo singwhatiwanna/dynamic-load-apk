@@ -36,6 +36,13 @@ import com.ryg.dynamicload.DLPlugin;
 import com.ryg.utils.DLConfigs;
 import com.ryg.utils.DLConstants;
 
+/**
+ * This is a plugin activity proxy, the proxy will create the plugin activity
+ * with reflect, and then call the plugin activity's attach、onCreate method, at
+ * this time, the plugin activity is running.
+ * 
+ * @author mrsimple
+ */
 public class DLProxyImpl {
 
     private static final String TAG = "DLProxyImpl";
@@ -142,9 +149,5 @@ public class DLProxyImpl {
 
     public DLPlugin getRemoteActivity() {
         return mRemoteActivity;
-    }
-
-    public interface DLProxy {
-        public void attach(DLPlugin remoteActivity, DLPluginManager pluginManager);
     }
 }

@@ -20,7 +20,6 @@ package com.ryg.dynamicload.internal;
 
 import android.content.Intent;
 import android.os.Parcelable;
-import android.util.Log;
 
 import com.ryg.utils.DLConfigs;
 import com.ryg.utils.DLConstants;
@@ -77,8 +76,7 @@ public class DLIntent extends Intent {
         if (getExtras() == null) {
             putExtra("dl-verson", DLConstants.DL_VERSION);
         }
-        
-        Log.d("", "### plugin loader : " + pluginLoader) ;
+
         DLConfigs.sPluginClassloader = pluginLoader;
         getExtras().setClassLoader(pluginLoader);
         return super.putExtra(name, value);
