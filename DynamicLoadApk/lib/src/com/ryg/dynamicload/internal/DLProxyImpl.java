@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.ryg.dynamicload.internal;
 
 import java.lang.reflect.Constructor;
@@ -84,6 +85,11 @@ public class DLProxyImpl {
     }
 
     public void onCreate(Intent intent) {
+
+        // 在获取数据之前设置Extras ClassLoader,避免传输自定义的Parcelable对象时出现Class Not
+        // Found的问题.
+        intent.setExtrasClassLoader(DLConfig.getConfig().mPluginClassLoader);
+        // 获取数据
         mPackageName = intent.getStringExtra(DLConstants.EXTRA_PACKAGE);
         mClass = intent.getStringExtra(DLConstants.EXTRA_CLASS);
         mDexPath = intent.getStringExtra(DLConstants.EXTRA_DEX_PATH);

@@ -15,8 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.ryg.dynamicload.internal;
 
+package com.ryg.dynamicload.internal;
 
 import android.content.Intent;
 import android.os.Parcel;
@@ -77,6 +77,16 @@ public class DLIntent extends Intent {
         return mDexPath;
     }
 
+    @Override
+    public Intent putExtra(String name, Parcelable value) {
+        ClassLoader pluginLoader = value.getClass().getClassLoader();
+        if (getExtras() == null) {
+            putExtra("dl-verson", DLConfig.getConfig().DL_VERSION);
+        }
+        DLConfig.getConfig().mPluginClassLoader = pluginLoader;
+        getExtras().setClassLoader(pluginLoader);
+        return super.putExtra(name, value);
+    }
 
     public static final Parcelable.Creator<DLIntent> CREATOR = new Parcelable.Creator<DLIntent>() {
 
@@ -112,6 +122,12 @@ public class DLIntent extends Intent {
         mPluginPackage = in.readString();
         mPluginClass = in.readString();
         super.readFromParcel(in);
+    }
+
+    @Override
+    public String toString() {
+        return "DLIntent [mDexPath=" + mDexPath + ", mPluginPackage=" + mPluginPackage
+                + ", mPluginClass=" + mPluginClass + ", hashcode : " + this.hashCode() + " ]";
     }
 
 }

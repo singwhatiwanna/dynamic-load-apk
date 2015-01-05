@@ -1,8 +1,5 @@
 package com.ryg.utils;
 
-import java.util.List;
-
-import android.R.anim;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
@@ -18,8 +15,8 @@ import android.util.Log;
 
 import com.ryg.dynamicload.DLBasePluginActivity;
 import com.ryg.dynamicload.DLBasePluginFragmentActivity;
-import com.ryg.dynamicload.internal.DLPluginManager;
-import com.ryg.dynamicload.internal.DLPluginPackage;
+
+import java.util.List;
 
 public class DLUtils {
     private static final String TAG = "DLUtils";
