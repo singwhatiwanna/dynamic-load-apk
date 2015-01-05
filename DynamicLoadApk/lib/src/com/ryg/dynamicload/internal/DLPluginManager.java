@@ -15,11 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.ryg.dynamicload.internal;
 
-import java.io.File;
-import java.lang.reflect.Method;
-import java.util.HashMap;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
@@ -28,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.os.Build;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.ryg.dynamicload.DLBasePluginActivity;
@@ -36,32 +35,40 @@ import com.ryg.dynamicload.DLProxyActivity;
 import com.ryg.dynamicload.DLProxyFragmentActivity;
 import com.ryg.utils.DLConstants;
 import com.ryg.utils.DLUtils;
+
 import dalvik.system.DexClassLoader;
+
+import java.io.File;
+import java.lang.reflect.Method;
+import java.util.HashMap;
 
 public class DLPluginManager {
 
     private static final String TAG = "DLPluginManager";
 
     /**
-     * return value of {@link #startPluginActivity(Activity, DLIntent)} start success
+     * return value of {@link #startPluginActivity(Activity, DLIntent)} start
+     * success
      */
     public static final int START_RESULT_SUCCESS = 0;
 
     /**
-     * return value of {@link #startPluginActivity(Activity, DLIntent)} package not found
+     * return value of {@link #startPluginActivity(Activity, DLIntent)} package
+     * not found
      */
     public static final int START_RESULT_NO_PKG = 1;
 
     /**
-     * return value of {@link #startPluginActivity(Activity, DLIntent)} class not found
+     * return value of {@link #startPluginActivity(Activity, DLIntent)} class
+     * not found
      */
     public static final int START_RESULT_NO_CLASS = 2;
 
     /**
-     * return value of {@link #startPluginActivity(Activity, DLIntent)} class type error
+     * return value of {@link #startPluginActivity(Activity, DLIntent)} class
+     * type error
      */
     public static final int START_RESULT_TYPE_ERROR = 3;
-
 
     private static DLPluginManager sInstance;
     private Context mContext;
@@ -69,7 +76,25 @@ public class DLPluginManager {
 
     private int mFrom = DLConstants.FROM_INTERNAL;
 
-    private String mNativeLibDir=null;
+    private String mNativeLibDir = null;
+
+    /**
+     * @author mrsimple
+     */
+    private class CopySoRunnable implements Runnable {
+
+        String mDexPath = "";
+
+        public CopySoRunnable(String dexPath) {
+            mDexPath = dexPath;
+        }
+
+        @Override
+        public void run() {
+            DLUtils.copyPluginSoLib(mContext, mDexPath, mNativeLibDir);
+        }
+
+    };
 
     private DLPluginManager(Context context) {
         mContext = context.getApplicationContext();
@@ -90,56 +115,61 @@ public class DLPluginManager {
     /**
      * Load a apk. Before start a plugin Activity, we should do this first.<br/>
      * NOTE : will only be called by host apk.
+     * 
      * @param dexPath
      */
     public DLPluginPackage loadApk(String dexPath) {
-        // when loadApk is called by host apk, we assume that plugin is invoked by host.
-        return loadApk(dexPath,true);
+        // when loadApk is called by host apk, we assume that plugin is invoked
+        // by host.
+        return loadApk(dexPath, true);
     }
-    
+
     /**
-     * @param dexPath
-     *        plugin path
-     * @param hasSoLib
-     *        whether exist so lib in plugin
+     * @param dexPath plugin path
+     * @param hasSoLib whether exist so lib in plugin
      * @return
      */
-    public DLPluginPackage loadApk(final String dexPath,boolean hasSoLib)
-    {
-      mFrom = DLConstants.FROM_EXTERNAL;
+    public DLPluginPackage loadApk(final String dexPath, boolean hasSoLib) {
+        mFrom = DLConstants.FROM_EXTERNAL;
 
-      PackageInfo packageInfo = mContext.getPackageManager().
-              getPackageArchiveInfo(dexPath, PackageManager.GET_ACTIVITIES);
-      if (packageInfo == null)
-          return null;
-
-      final String packageName = packageInfo.packageName;
-      DLPluginPackage pluginPackage = mPackagesHolder.get(packageName);
-      if (pluginPackage == null) {
-          DexClassLoader dexClassLoader = createDexClassLoader(dexPath);
-          AssetManager assetManager = createAssetManager(dexPath);
-          Resources resources = createResources(assetManager);
-          pluginPackage = new DLPluginPackage(packageName, dexPath, dexClassLoader, assetManager,
-                  resources, packageInfo);
-          mPackagesHolder.put(packageName, pluginPackage);
-      }
-
-        if (hasSoLib) {
-            //TODO: copy so lib async will lead to bugs maybe, waiting for resolved later.
-            new Thread("DL#CopyPluginSoLib") {
-                @Override
-                public void run() {
-                    DLUtils.copyPluginSoLib(mContext, dexPath, mNativeLibDir);
-                };
-            }.start();
+        PackageInfo packageInfo = mContext.getPackageManager().
+                getPackageArchiveInfo(dexPath, PackageManager.GET_ACTIVITIES);
+        if (packageInfo == null) {
+            return null;
         }
+
+        DLPluginPackage pluginPackage = preparePluginEnv(packageInfo, dexPath);
+        copySoLib(dexPath, hasSoLib);
+        return pluginPackage;
+    }
+
+    /**
+     * prepare plugin runtime env, has DexClassLoader, Resources, and so on.
+     * 
+     * @param packageInfo
+     * @param dexPath
+     * @return
+     */
+    private DLPluginPackage preparePluginEnv(PackageInfo packageInfo, String dexPath) {
+
+        DLPluginPackage pluginPackage = mPackagesHolder.get(packageInfo.packageName);
+        if (pluginPackage != null) {
+            return pluginPackage;
+        }
+        DexClassLoader dexClassLoader = createDexClassLoader(dexPath);
+        AssetManager assetManager = createAssetManager(dexPath);
+        Resources resources = createResources(assetManager);
+        // create pluginPackage
+        pluginPackage = new DLPluginPackage(dexClassLoader, resources, packageInfo);
+        mPackagesHolder.put(packageInfo.packageName, pluginPackage);
         return pluginPackage;
     }
 
     private DexClassLoader createDexClassLoader(String dexPath) {
         File dexOutputDir = mContext.getDir("dex", Context.MODE_PRIVATE);
         final String dexOutputPath = dexOutputDir.getAbsolutePath();
-        DexClassLoader loader = new DexClassLoader(dexPath, dexOutputPath, mNativeLibDir, mContext.getClassLoader());
+        DexClassLoader loader = new DexClassLoader(dexPath, dexOutputPath, mNativeLibDir,
+                mContext.getClassLoader());
         return loader;
     }
 
@@ -168,6 +198,24 @@ public class DLPluginManager {
     }
 
     /**
+     * copy .so file to pluginlib dir.
+     * 
+     * @param dexPath
+     * @param hasSoLib
+     */
+    private void copySoLib(String dexPath, boolean hasSoLib) {
+        if (hasSoLib) {
+            // TODO: copy so lib async will lead to bugs maybe, waiting for
+            // resolved later.
+
+            // TODO : use wait and signal is ok ? that means when copying the
+            // .so files, the main thread will enter watting status, when the
+            // copy is done, send a signal to the main thread.
+            new Thread(new CopySoRunnable(dexPath)).start();
+        }
+    }
+
+    /**
      * {@link #startPluginActivityForResult(Activity, DLIntent, int)}
      */
     public int startPluginActivity(Context context, DLIntent dlIntent) {
@@ -178,8 +226,9 @@ public class DLPluginManager {
      * @param context
      * @param dlIntent
      * @param requestCode
-     * @return One of below: {@link #START_RESULT_SUCCESS} {@link #START_RESULT_NO_PKG}
-     *         {@link #START_RESULT_NO_CLASS} {@link #START_RESULT_TYPE_ERROR}
+     * @return One of below: {@link #START_RESULT_SUCCESS}
+     *         {@link #START_RESULT_NO_PKG} {@link #START_RESULT_NO_CLASS}
+     *         {@link #START_RESULT_TYPE_ERROR}
      */
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     public int startPluginActivityForResult(Context context, DLIntent dlIntent, int requestCode) {
@@ -190,42 +239,72 @@ public class DLPluginManager {
         }
 
         String packageName = dlIntent.getPluginPackage();
-        if (packageName == null) {
+        if (TextUtils.isEmpty(packageName)) {
             throw new NullPointerException("disallow null packageName.");
         }
+
         DLPluginPackage pluginPackage = mPackagesHolder.get(packageName);
         if (pluginPackage == null) {
             return START_RESULT_NO_PKG;
-        } 
-
-        DexClassLoader classLoader = pluginPackage.classLoader;
-        String className = dlIntent.getPluginClass();
-        className = (className == null ? pluginPackage.getDefaultActivity() : className);
-        if (className.startsWith(".")) {
-            className = packageName + className;
         }
-        Class<?> clazz = null;
-        try {
-            clazz = Class.forName(className, true, classLoader);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+
+        final String className = getPluginActivityFullPath(dlIntent, pluginPackage);
+        Class<?> clazz = loadPluginActivityClass(pluginPackage.mClassLoader, className);
+        if (clazz == null) {
             return START_RESULT_NO_CLASS;
         }
 
-        Class<? extends Activity> activityClass = null;
-        if (DLBasePluginActivity.class.isAssignableFrom(clazz)) {
-            activityClass = DLProxyActivity.class;
-        } else if (DLBasePluginFragmentActivity.class.isAssignableFrom(clazz)) {
-            activityClass = DLProxyFragmentActivity.class;
-        } else {
+        // get the proxy activity class, the proxy activity will launch the
+        // plugin activity.
+        Class<? extends Activity> activityClass = getProxyActivityClass(clazz);
+        if (activityClass == null) {
             return START_RESULT_TYPE_ERROR;
         }
 
+        // put extra data
         dlIntent.putExtra(DLConstants.EXTRA_CLASS, className);
         dlIntent.putExtra(DLConstants.EXTRA_PACKAGE, packageName);
         dlIntent.setClass(mContext, activityClass);
         performStartActivityForResult(context, dlIntent, requestCode);
         return START_RESULT_SUCCESS;
+    }
+
+    private Class<?> loadPluginActivityClass(ClassLoader classLoader, String className) {
+        Class<?> clazz = null;
+        try {
+            clazz = Class.forName(className, true, classLoader);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return clazz;
+    }
+
+    private String getPluginActivityFullPath(DLIntent dlIntent, DLPluginPackage pluginPackage) {
+        String className = dlIntent.getPluginClass();
+        className = (className == null ? pluginPackage.mDefaultActivity : className);
+        if (className.startsWith(".")) {
+            className = dlIntent.getPluginPackage() + className;
+        }
+        return className;
+    }
+
+    /**
+     * get the proxy activity class, the proxy activity will delegate the plugin
+     * activity
+     * 
+     * @param clazz target activity's class
+     * @return
+     */
+    private Class<? extends Activity> getProxyActivityClass(Class<?> clazz) {
+        Class<? extends Activity> activityClass = null;
+        if (DLBasePluginActivity.class.isAssignableFrom(clazz)) {
+            activityClass = DLProxyActivity.class;
+        } else if (DLBasePluginFragmentActivity.class.isAssignableFrom(clazz)) {
+            activityClass = DLProxyFragmentActivity.class;
+        }
+
+        return activityClass;
     }
 
     private void performStartActivityForResult(Context context, DLIntent dlIntent, int requestCode) {

@@ -37,7 +37,6 @@ public class DLProxyActivity extends Activity implements DLProxy {
 
     protected DLPlugin mRemoteActivity;
     private DLProxyImpl impl = new DLProxyImpl(this);
-    private DLPluginManager mPluginManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +47,6 @@ public class DLProxyActivity extends Activity implements DLProxy {
     @Override
     public void attach(DLPlugin remoteActivity, DLPluginManager pluginManager) {
         mRemoteActivity = remoteActivity;
-        mPluginManager = pluginManager;
     }
 
     @Override

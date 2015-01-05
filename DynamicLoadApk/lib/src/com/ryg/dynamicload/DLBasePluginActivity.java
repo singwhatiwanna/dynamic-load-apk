@@ -164,7 +164,7 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
         if (mFrom == DLConstants.FROM_INTERNAL) {
             return super.getPackageName();
         } else {
-            return mPluginPackage.packageName;
+            return mPluginPackage.mPackageName;
         }
     }
 
@@ -373,7 +373,7 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
     public int startPluginActivityForResult(DLIntent dlIntent, int requestCode) {
         if (mFrom == DLConstants.FROM_EXTERNAL) {
             if (dlIntent.getPluginPackage() == null) {
-                dlIntent.setPluginPackage(mPluginPackage.packageName);
+                dlIntent.setPluginPackage(mPluginPackage.mPackageName);
             }
         }
         return mPluginManager.startPluginActivityForResult(that, dlIntent, requestCode);

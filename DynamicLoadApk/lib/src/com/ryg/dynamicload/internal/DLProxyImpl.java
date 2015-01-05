@@ -59,7 +59,7 @@ public class DLProxyImpl {
     }
 
     private void initializeActivityInfo() {
-        PackageInfo packageInfo = mPluginPackage.packageInfo;
+        PackageInfo packageInfo = mPluginPackage.mPackageInfo;
         if ((packageInfo.activities != null) && (packageInfo.activities.length > 0)) {
             if (mClass == null) {
                 mClass = packageInfo.activities[0].name;
@@ -96,8 +96,8 @@ public class DLProxyImpl {
 
         mPluginManager = DLPluginManager.getInstance(mActivity);
         mPluginPackage = mPluginManager.getPackage(mPackageName);
-        mAssetManager = mPluginPackage.assetManager;
-        mResources = mPluginPackage.resources;
+        mAssetManager = mPluginPackage.mAssetManager;
+        mResources = mPluginPackage.mResources;
 
         initializeActivityInfo();
         handleActivityInfo();
@@ -125,7 +125,7 @@ public class DLProxyImpl {
     }
 
     public ClassLoader getClassLoader() {
-        return mPluginPackage.classLoader;
+        return mPluginPackage.mClassLoader;
     }
 
     public AssetManager getAssets() {
