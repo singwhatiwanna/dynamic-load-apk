@@ -21,17 +21,12 @@ package com.ryg.dynamicload.internal;
 import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 public class DLIntent extends Intent {
 
     private String mDexPath;
     private String mPluginPackage;
     private String mPluginClass;
-    /**
-     * 加载自己代码ClassLoader, 默认设置为BaseDexClassLoader
-     */
-    private ClassLoader mPathClassLoader = DLIntent.class.getClassLoader();
 
     public DLIntent() {
         super();
@@ -52,10 +47,6 @@ public class DLIntent extends Intent {
         super();
         this.mPluginPackage = pluginPackage;
         this.mPluginClass = clazz.getName();
-    }
-
-    public ClassLoader getPathClassLoader() {
-        return mPathClassLoader;
     }
 
     public String getPluginPackage() {
@@ -88,8 +79,12 @@ public class DLIntent extends Intent {
 
     @Override
     public Intent putExtra(String name, Parcelable value) {
-        mPathClassLoader = value.getClass().getClassLoader();
-        Log.d("", "### 新的loader : " + mPathClassLoader);
+        ClassLoader pluginLoader = value.getClass().getClassLoader();
+        if (getExtras() == null) {
+            putExtra("dl-verson", DLConfig.getConfig().DL_VERSION);
+        }
+        DLConfig.getConfig().mPluginClassLoader = pluginLoader;
+        getExtras().setClassLoader(pluginLoader);
         return super.putExtra(name, value);
     }
 
@@ -127,6 +122,12 @@ public class DLIntent extends Intent {
         mPluginPackage = in.readString();
         mPluginClass = in.readString();
         super.readFromParcel(in);
+    }
+
+    @Override
+    public String toString() {
+        return "DLIntent [mDexPath=" + mDexPath + ", mPluginPackage=" + mPluginPackage
+                + ", mPluginClass=" + mPluginClass + ", hashcode : " + this.hashCode() + " ]";
     }
 
 }

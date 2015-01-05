@@ -180,7 +180,7 @@ public class DLPluginManager {
     public void launchPluginActivity(DLIntent dlIntent) {
         Intent service = new Intent(mContext, DLIntentService.class);
         service.setAction(DLConstants.ACTION_LAUNCH_PLUGIN);
-        service.setExtrasClassLoader(dlIntent.getPathClassLoader());
+        service.setExtrasClassLoader(DLConfig.getConfig().mPluginClassLoader);
         service.putExtra(DLConstants.EXTRA_DLINTENT, dlIntent);
         mContext.startService(service);
     }
@@ -202,6 +202,10 @@ public class DLPluginManager {
      */
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     public int startPluginActivityForResult(Context context, DLIntent dlIntent, int requestCode) {
+
+        // 设置 Extras ClassLoader
+        dlIntent.setExtrasClassLoader(DLConfig.getConfig().mPluginClassLoader);
+
         if (mFrom == DLConstants.FROM_INTERNAL) {
             dlIntent.setClassName(context, dlIntent.getPluginClass());
             performStartActivityForResult(context, dlIntent, requestCode);
@@ -253,7 +257,8 @@ public class DLPluginManager {
         // 将dlIntent中的参数设置到intent中
         if (dlIntent.getExtras() != null) {
             // 设置ClassLoader,避免出现通过Intent传递Parcelable参数时出现Class Not Found异常
-            dlIntent.setExtrasClassLoader(dlIntent.getPathClassLoader());
+            // dlIntent.setExtrasClassLoader(dlIntent.getPathClassLoader());
+            intent.setExtrasClassLoader(DLConfig.getConfig().mPluginClassLoader);
             intent.putExtras(dlIntent.getExtras());
         }
 

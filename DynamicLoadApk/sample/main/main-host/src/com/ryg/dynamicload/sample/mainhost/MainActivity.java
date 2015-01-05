@@ -175,64 +175,10 @@ public class MainActivity extends Activity implements OnItemClickListener {
         DLIntent dlIntent = new DLIntent(item.packageInfo.packageName,
                 item.launcherActivityName);
         dlIntent.setDexPath(item.pluginPath);
-        //
         // dlIntent.setPathClassLoader(Person.class.getClassLoader());
-        dlIntent.putExtra("person", new Person("simple", 24));
-        dlIntent.putExtra("key", "hello");
-        //
         Log.d(TAG, "启动插件 --- ");
-
         pluginManager.launchPluginActivity(dlIntent);
     }
 
-    /**
-     * @author mrsimple
-     */
-    public static class Person implements Parcelable {
-
-        String mName;
-        int mAge;
-
-        public Person(String name, int age) {
-            mName = name;
-            mAge = age;
-        }
-
-        protected Person(Parcel in) {
-            mName = in.readString();
-            mAge = in.readInt();
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(mName);
-            dest.writeInt(mAge);
-        }
-
-        public static final Parcelable.Creator<Person> CREATOR = new Creator<Person>() {
-
-            @Override
-            public Person createFromParcel(Parcel source) {
-                return new Person(source);
-            }
-
-            @Override
-            public Person[] newArray(int size) {
-                return new Person[size];
-            }
-
-        };
-
-        @Override
-        public String toString() {
-            return "Person [mName=" + mName + ", mAge=" + mAge + "]";
-        }
-
-    }
 
 }

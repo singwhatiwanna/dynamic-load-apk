@@ -27,7 +27,6 @@ public class MainActivity extends DLBasePluginActivity {
         super.onCreate(savedInstanceState);
         initView(savedInstanceState);
 
-
         Log.d(TAG, "on create start.");
         Bundle extras = getIntent().getExtras();
         try {
@@ -36,8 +35,8 @@ public class MainActivity extends DLBasePluginActivity {
             if (extras != null && extras.containsKey("person")) {
                 Log.d("### person ", extras.getParcelable("person") + "");
             }
-            
-            Log.d(TAG, "### 参数 : " + extras.getString("key")) ;
+
+            Log.d(TAG, "### 参数 : " + extras.getString("key"));
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -65,6 +64,9 @@ public class MainActivity extends DLBasePluginActivity {
                         Toast.LENGTH_SHORT).show();
                 DLIntent intent = new DLIntent(getPackageName(), TestFragmentActivity.class);
                 intent.putExtra("dl_extra", "from DL framework");
+                intent.putExtra("user", new Person("plugin-a", 22));
+                Log.d(TAG, "intent id : " + intent.hashCode()) ;
+                Log.d(TAG, "### plugin -a , person classloader : " + Person.class.getClassLoader());
                 startPluginActivityForResult(intent, 0);
             }
         });

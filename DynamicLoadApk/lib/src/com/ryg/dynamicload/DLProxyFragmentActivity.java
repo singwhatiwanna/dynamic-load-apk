@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.ryg.dynamicload;
 
 import android.content.Intent;
@@ -23,6 +24,7 @@ import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,18 +39,18 @@ public class DLProxyFragmentActivity extends FragmentActivity implements DLProxy
 
     protected DLPlugin mRemoteActivity;
     private DLProxyImpl impl = new DLProxyImpl(this);
-    private DLPluginManager mPluginManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("", "fragment : intent id : " + getIntent().toString());
+        Log.e("", "### proxy fragment : " + getIntent().getClass().getName());
         impl.onCreate(getIntent());
     }
 
     @Override
     public void attach(DLPlugin remoteActivity, DLPluginManager pluginManager) {
         mRemoteActivity = remoteActivity;
-        mPluginManager = pluginManager;
     }
 
     @Override
