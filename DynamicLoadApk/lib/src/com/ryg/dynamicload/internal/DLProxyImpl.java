@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.ryg.dynamicload.internal;
 
 import java.lang.reflect.Constructor;
@@ -32,6 +33,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.ryg.dynamicload.DLPlugin;
+import com.ryg.utils.DLConfigs;
 import com.ryg.utils.DLConstants;
 
 public class DLProxyImpl {
@@ -83,6 +85,11 @@ public class DLProxyImpl {
     }
 
     public void onCreate(Intent intent) {
+
+        // 设置plugin的classloader, 避免插件的Activity之间传递Parcelable类型数据时出现Class Not
+        // Found异常
+        intent.setExtrasClassLoader(DLConfigs.sPluginClassloader);
+
         mPackageName = intent.getStringExtra(DLConstants.EXTRA_PACKAGE);
         mClass = intent.getStringExtra(DLConstants.EXTRA_CLASS);
         Log.d(TAG, "mClass=" + mClass + " mPackageName=" + mPackageName);
