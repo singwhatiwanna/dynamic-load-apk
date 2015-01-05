@@ -58,11 +58,11 @@ public class DLProxyImpl {
     private Theme mTheme;
 
     private ActivityInfo mActivityInfo;
-    private Activity mActivity;
-    protected DLPlugin mRemoteActivity;
+    private Activity mProxyActivity;
+    protected DLPlugin mPluginActivity;
 
     public DLProxyImpl(Activity activity) {
-        mActivity = activity;
+        mProxyActivity = activity;
     }
 
     private void initializeActivityInfo() {
@@ -82,9 +82,9 @@ public class DLProxyImpl {
     private void handleActivityInfo() {
         Log.d(TAG, "handleActivityInfo, theme=" + mActivityInfo.theme);
         if (mActivityInfo.theme > 0) {
-            mActivity.setTheme(mActivityInfo.theme);
+            mProxyActivity.setTheme(mActivityInfo.theme);
         }
-        Theme superTheme = mActivity.getTheme();
+        Theme superTheme = mProxyActivity.getTheme();
         mTheme = mResources.newTheme();
         mTheme.setTo(superTheme);
 
@@ -101,7 +101,7 @@ public class DLProxyImpl {
         mClass = intent.getStringExtra(DLConstants.EXTRA_CLASS);
         Log.d(TAG, "mClass=" + mClass + " mPackageName=" + mPackageName);
 
-        mPluginManager = DLPluginManager.getInstance(mActivity);
+        mPluginManager = DLPluginManager.getInstance(mProxyActivity);
         mPluginPackage = mPluginManager.getPackage(mPackageName);
         mAssetManager = mPluginPackage.mAssetManager;
         mResources = mPluginPackage.mResources;
@@ -117,15 +117,16 @@ public class DLProxyImpl {
             Class<?> localClass = getClassLoader().loadClass(mClass);
             Constructor<?> localConstructor = localClass.getConstructor(new Class[] {});
             Object instance = localConstructor.newInstance(new Object[] {});
-            mRemoteActivity = (DLPlugin) instance;
-            ((DLProxy) mActivity).attach(mRemoteActivity, mPluginManager);
+            mPluginActivity = (DLPlugin) instance;
+            ((DLAttachable) mProxyActivity).attach(mPluginActivity, mPluginManager);
             Log.d(TAG, "instance = " + instance);
-
-            mRemoteActivity.attach(mActivity, mPluginPackage);
+            // attach the proxy activity and plugin package to the
+            // mPluginActivity
+            mPluginActivity.attach(mProxyActivity, mPluginPackage);
 
             Bundle bundle = new Bundle();
             bundle.putInt(DLConstants.FROM, DLConstants.FROM_EXTERNAL);
-            mRemoteActivity.onCreate(bundle);
+            mPluginActivity.onCreate(bundle);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -148,6 +149,6 @@ public class DLProxyImpl {
     }
 
     public DLPlugin getRemoteActivity() {
-        return mRemoteActivity;
+        return mPluginActivity;
     }
 }

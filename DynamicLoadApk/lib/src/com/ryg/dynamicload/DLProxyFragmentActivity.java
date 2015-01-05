@@ -31,10 +31,10 @@ import android.view.MotionEvent;
 import android.view.WindowManager.LayoutParams;
 
 import com.ryg.dynamicload.internal.DLPluginManager;
-import com.ryg.dynamicload.internal.DLProxy;
+import com.ryg.dynamicload.internal.DLAttachable;
 import com.ryg.dynamicload.internal.DLProxyImpl;
 
-public class DLProxyFragmentActivity extends FragmentActivity implements DLProxy {
+public class DLProxyFragmentActivity extends FragmentActivity implements DLAttachable {
 
     protected DLPlugin mRemoteActivity;
     private DLProxyImpl impl = new DLProxyImpl(this);
