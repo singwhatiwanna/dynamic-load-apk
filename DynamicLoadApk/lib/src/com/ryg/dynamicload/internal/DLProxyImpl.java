@@ -18,8 +18,6 @@
 
 package com.ryg.dynamicload.internal;
 
-import java.lang.reflect.Constructor;
-
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
@@ -35,6 +33,8 @@ import android.util.Log;
 import com.ryg.dynamicload.DLPlugin;
 import com.ryg.utils.DLConfigs;
 import com.ryg.utils.DLConstants;
+
+import java.lang.reflect.Constructor;
 
 /**
  * This is a plugin activity proxy, the proxy will create the plugin activity
@@ -60,13 +60,14 @@ public class DLProxyImpl {
     private ActivityInfo mActivityInfo;
     private Activity mProxyActivity;
     protected DLPlugin mPluginActivity;
+    public ClassLoader mPluginClassLoader;
 
     public DLProxyImpl(Activity activity) {
         mProxyActivity = activity;
     }
 
     private void initializeActivityInfo() {
-        PackageInfo packageInfo = mPluginPackage.mPackageInfo;
+        PackageInfo packageInfo = mPluginPackage.packageInfo;
         if ((packageInfo.activities != null) && (packageInfo.activities.length > 0)) {
             if (mClass == null) {
                 mClass = packageInfo.activities[0].name;
@@ -93,8 +94,7 @@ public class DLProxyImpl {
 
     public void onCreate(Intent intent) {
 
-        // 设置plugin的classloader, 避免插件的Activity之间传递Parcelable类型数据时出现Class Not
-        // Found异常
+        // set the extra's class loader
         intent.setExtrasClassLoader(DLConfigs.sPluginClassloader);
 
         mPackageName = intent.getStringExtra(DLConstants.EXTRA_PACKAGE);
@@ -103,8 +103,8 @@ public class DLProxyImpl {
 
         mPluginManager = DLPluginManager.getInstance(mProxyActivity);
         mPluginPackage = mPluginManager.getPackage(mPackageName);
-        mAssetManager = mPluginPackage.mAssetManager;
-        mResources = mPluginPackage.mResources;
+        mAssetManager = mPluginPackage.assetManager;
+        mResources = mPluginPackage.resources;
 
         initializeActivityInfo();
         handleActivityInfo();
@@ -133,7 +133,7 @@ public class DLProxyImpl {
     }
 
     public ClassLoader getClassLoader() {
-        return mPluginPackage.mClassLoader;
+        return mPluginPackage.classLoader;
     }
 
     public AssetManager getAssets() {

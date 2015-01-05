@@ -32,27 +32,27 @@ import dalvik.system.DexClassLoader;
  */
 public class DLPluginPackage {
 
-    public String mPackageName;
-    public String mDefaultActivity;
-    public DexClassLoader mClassLoader;
-    public AssetManager mAssetManager;
-    public Resources mResources;
-    public PackageInfo mPackageInfo;
+    public String packageName;
+    public String defaultActivity;
+    public DexClassLoader classLoader;
+    public AssetManager assetManager;
+    public Resources resources;
+    public PackageInfo packageInfo;
 
     public DLPluginPackage(DexClassLoader loader, Resources resources,
             PackageInfo packageInfo) {
-        this.mPackageName = packageInfo.packageName;
-        this.mClassLoader = loader;
-        this.mAssetManager = resources.getAssets();
-        this.mResources = resources;
-        this.mPackageInfo = packageInfo;
+        this.packageName = packageInfo.packageName;
+        this.classLoader = loader;
+        this.assetManager = resources.getAssets();
+        this.resources = resources;
+        this.packageInfo = packageInfo;
 
-        mDefaultActivity = parseDefaultActivityName();
+        defaultActivity = parseDefaultActivityName();
     }
 
     private final String parseDefaultActivityName() {
-        if (mPackageInfo.activities != null && mPackageInfo.activities.length > 0) {
-            return mPackageInfo.activities[0].name;
+        if (packageInfo.activities != null && packageInfo.activities.length > 0) {
+            return packageInfo.activities[0].name;
         }
         return "";
     }

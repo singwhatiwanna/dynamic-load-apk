@@ -22,7 +22,8 @@ import android.content.Intent;
 import android.os.Parcelable;
 
 import com.ryg.utils.DLConfigs;
-import com.ryg.utils.DLConstants;
+
+import java.io.Serializable;
 
 public class DLIntent extends Intent {
 
@@ -72,14 +73,20 @@ public class DLIntent extends Intent {
 
     @Override
     public Intent putExtra(String name, Parcelable value) {
-        ClassLoader pluginLoader = value.getClass().getClassLoader();
-        if (getExtras() == null) {
-            putExtra("dl-verson", DLConstants.DL_VERSION);
-        }
-
-        DLConfigs.sPluginClassloader = pluginLoader;
-        getExtras().setClassLoader(pluginLoader);
+        setupExtraClassLoader(value);
         return super.putExtra(name, value);
+    }
+
+    @Override
+    public Intent putExtra(String name, Serializable value) {
+        setupExtraClassLoader(value);
+        return super.putExtra(name, value);
+    }
+
+    private void setupExtraClassLoader(Object value) {
+        ClassLoader pluginLoader = value.getClass().getClassLoader();
+        DLConfigs.sPluginClassloader = pluginLoader;
+        setExtrasClassLoader(pluginLoader);
     }
 
 }

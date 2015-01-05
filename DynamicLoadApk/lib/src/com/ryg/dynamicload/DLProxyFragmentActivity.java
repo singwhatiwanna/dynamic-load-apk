@@ -30,8 +30,8 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.WindowManager.LayoutParams;
 
-import com.ryg.dynamicload.internal.DLPluginManager;
 import com.ryg.dynamicload.internal.DLAttachable;
+import com.ryg.dynamicload.internal.DLPluginManager;
 import com.ryg.dynamicload.internal.DLProxyImpl;
 
 public class DLProxyFragmentActivity extends FragmentActivity implements DLAttachable {

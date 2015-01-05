@@ -162,7 +162,7 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
         if (mFrom == DLConstants.FROM_INTERNAL) {
             return super.getPackageName();
         } else {
-            return mPluginPackage.mPackageName;
+            return mPluginPackage.packageName;
         }
     }
 
@@ -371,7 +371,7 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
     public int startPluginActivityForResult(DLIntent dlIntent, int requestCode) {
         if (mFrom == DLConstants.FROM_EXTERNAL) {
             if (dlIntent.getPluginPackage() == null) {
-                dlIntent.setPluginPackage(mPluginPackage.mPackageName);
+                dlIntent.setPluginPackage(mPluginPackage.packageName);
             }
         }
         return mPluginManager.startPluginActivityForResult(that, dlIntent, requestCode);

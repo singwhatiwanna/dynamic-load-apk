@@ -77,6 +77,7 @@ public class DLPluginManager {
     private int mFrom = DLConstants.FROM_INTERNAL;
 
     private String mNativeLibDir = null;
+//    private String mDexPath;
 
     /**
      * @author mrsimple
@@ -109,6 +110,7 @@ public class DLPluginManager {
                 }
             }
         }
+        
         return sInstance;
     }
 
@@ -165,9 +167,11 @@ public class DLPluginManager {
         return pluginPackage;
     }
 
+    private String dexOutputPath;
+
     private DexClassLoader createDexClassLoader(String dexPath) {
         File dexOutputDir = mContext.getDir("dex", Context.MODE_PRIVATE);
-        final String dexOutputPath = dexOutputDir.getAbsolutePath();
+        dexOutputPath = dexOutputDir.getAbsolutePath();
         DexClassLoader loader = new DexClassLoader(dexPath, dexOutputPath, mNativeLibDir,
                 mContext.getClassLoader());
         return loader;
@@ -233,6 +237,7 @@ public class DLPluginManager {
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     public int startPluginActivityForResult(Context context, DLIntent dlIntent, int requestCode) {
         if (mFrom == DLConstants.FROM_INTERNAL) {
+            Log.d(TAG, "### 内部跳转");
             dlIntent.setClassName(context, dlIntent.getPluginClass());
             performStartActivityForResult(context, dlIntent, requestCode);
             return DLPluginManager.START_RESULT_SUCCESS;
@@ -249,7 +254,7 @@ public class DLPluginManager {
         }
 
         final String className = getPluginActivityFullPath(dlIntent, pluginPackage);
-        Class<?> clazz = loadPluginActivityClass(pluginPackage.mClassLoader, className);
+        Class<?> clazz = loadPluginActivityClass(pluginPackage.classLoader, className);
         if (clazz == null) {
             return START_RESULT_NO_CLASS;
         }
@@ -282,7 +287,7 @@ public class DLPluginManager {
 
     private String getPluginActivityFullPath(DLIntent dlIntent, DLPluginPackage pluginPackage) {
         String className = dlIntent.getPluginClass();
-        className = (className == null ? pluginPackage.mDefaultActivity : className);
+        className = (className == null ? pluginPackage.defaultActivity : className);
         if (className.startsWith(".")) {
             className = dlIntent.getPluginPackage() + className;
         }

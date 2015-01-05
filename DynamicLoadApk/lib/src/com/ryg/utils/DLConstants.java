@@ -27,6 +27,5 @@ public class DLConstants {
     public static final String CPU_MIPS = "mips";
 
     public static final String PREFERENCE_NAME = "dynamic_load_configs";
-    public static final float DL_VERSION = 1.0f;
 
 }

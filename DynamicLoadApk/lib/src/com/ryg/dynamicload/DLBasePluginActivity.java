@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.ryg.dynamicload;
 
 import android.app.Activity;
@@ -42,7 +43,8 @@ import com.ryg.utils.DLConstants;
 
 /**
  * note: can use that like this.
- * @see {@link DLBasePluginActivity.that} 
+ * 
+ * @see {@link DLBasePluginActivity.that}
  * @author renyugang
  */
 public class DLBasePluginActivity extends Activity implements DLPlugin {
@@ -67,7 +69,7 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
     @Override
     public void attach(Activity proxyActivity, DLPluginPackage pluginPackage) {
         Log.d(TAG, "attach: proxyActivity= " + proxyActivity);
-        mProxyActivity = (Activity)proxyActivity;
+        mProxyActivity = (Activity) proxyActivity;
         that = mProxyActivity;
         mPluginPackage = pluginPackage;
     }
@@ -84,7 +86,9 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
         }
 
         mPluginManager = DLPluginManager.getInstance(that);
-        Log.d(TAG, "onCreate: from= " + (mFrom == DLConstants.FROM_INTERNAL ? "DLConstants.FROM_INTERNAL" : "FROM_EXTERNAL"));
+        Log.d(TAG, "onCreate: from= "
+                + (mFrom == DLConstants.FROM_INTERNAL ? "DLConstants.FROM_INTERNAL"
+                        : "FROM_EXTERNAL"));
     }
 
     @Override
@@ -164,7 +168,7 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
         if (mFrom == DLConstants.FROM_INTERNAL) {
             return super.getPackageName();
         } else {
-            return mPluginPackage.mPackageName;
+            return mPluginPackage.packageName;
         }
     }
 
@@ -358,8 +362,9 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
 
     /**
      * @param dlIntent
-     * @return may be {@link #START_RESULT_SUCCESS}, {@link #START_RESULT_NO_PKG},
-     *    {@link #START_RESULT_NO_CLASS}, {@link #START_RESULT_TYPE_ERROR}
+     * @return may be {@link #START_RESULT_SUCCESS},
+     *         {@link #START_RESULT_NO_PKG}, {@link #START_RESULT_NO_CLASS},
+     *         {@link #START_RESULT_TYPE_ERROR}
      */
     public int startPluginActivity(DLIntent dlIntent) {
         return startPluginActivityForResult(dlIntent, -1);
@@ -367,13 +372,14 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
 
     /**
      * @param dlIntent
-     * @return may be {@link #START_RESULT_SUCCESS}, {@link #START_RESULT_NO_PKG},
-     *    {@link #START_RESULT_NO_CLASS}, {@link #START_RESULT_TYPE_ERROR}
+     * @return may be {@link #START_RESULT_SUCCESS},
+     *         {@link #START_RESULT_NO_PKG}, {@link #START_RESULT_NO_CLASS},
+     *         {@link #START_RESULT_TYPE_ERROR}
      */
     public int startPluginActivityForResult(DLIntent dlIntent, int requestCode) {
         if (mFrom == DLConstants.FROM_EXTERNAL) {
             if (dlIntent.getPluginPackage() == null) {
-                dlIntent.setPluginPackage(mPluginPackage.mPackageName);
+                dlIntent.setPluginPackage(mPluginPackage.packageName);
             }
         }
         return mPluginManager.startPluginActivityForResult(that, dlIntent, requestCode);
