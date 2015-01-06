@@ -44,9 +44,9 @@ public class MainActivity extends DLBasePluginActivity {
             @Override
             public void onClick(View v) {
                 DLIntent intent = new DLIntent(getPackageName(), TestFragmentActivity.class);
-                intent.putExtra("dl_extra", "from DL framework");
                 // 传递Parcelable类型的数据
                 intent.putExtra("person", new Person("plugin-a", 22));
+                intent.putExtra("dl_extra", "from DL framework");
                 startPluginActivityForResult(intent, 0);
             }
         });

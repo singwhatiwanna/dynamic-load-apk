@@ -237,7 +237,6 @@ public class DLPluginManager {
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     public int startPluginActivityForResult(Context context, DLIntent dlIntent, int requestCode) {
         if (mFrom == DLConstants.FROM_INTERNAL) {
-            Log.d(TAG, "### 内部跳转");
             dlIntent.setClassName(context, dlIntent.getPluginClass());
             performStartActivityForResult(context, dlIntent, requestCode);
             return DLPluginManager.START_RESULT_SUCCESS;
