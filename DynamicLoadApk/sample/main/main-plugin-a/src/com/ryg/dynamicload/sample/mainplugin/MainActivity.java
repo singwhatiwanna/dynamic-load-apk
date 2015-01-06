@@ -1,8 +1,5 @@
-package com.ryg.dynamicload.sample.mainplugin;
 
-import com.ryg.dynamicload.DLBasePluginActivity;
-import com.ryg.dynamicload.internal.DLIntent;
-import com.ryg.dynamicload.sample.mainplugina.R;
+package com.ryg.dynamicload.sample.mainplugin;
 
 import android.content.Context;
 import android.content.Intent;
@@ -15,7 +12,10 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.Toast;
+
+import com.ryg.dynamicload.DLBasePluginActivity;
+import com.ryg.dynamicload.internal.DLIntent;
+import com.ryg.dynamicload.sample.mainplugina.R;
 
 public class MainActivity extends DLBasePluginActivity {
 
@@ -43,9 +43,9 @@ public class MainActivity extends DLBasePluginActivity {
         button.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, "you clicked button",
-                        Toast.LENGTH_SHORT).show();
                 DLIntent intent = new DLIntent(getPackageName(), TestFragmentActivity.class);
+                // 传递Parcelable类型的数据
+                intent.putExtra("person", new Person("plugin-a", 22));
                 intent.putExtra("dl_extra", "from DL framework");
                 startPluginActivityForResult(intent, 0);
             }
@@ -61,7 +61,7 @@ public class MainActivity extends DLBasePluginActivity {
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
