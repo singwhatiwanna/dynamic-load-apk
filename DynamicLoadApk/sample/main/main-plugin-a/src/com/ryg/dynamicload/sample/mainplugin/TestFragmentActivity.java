@@ -1,3 +1,4 @@
+
 package com.ryg.dynamicload.sample.mainplugin;
 
 import android.os.Bundle;
@@ -17,7 +18,7 @@ import com.ryg.dynamicload.internal.DLPluginManager;
 import com.ryg.dynamicload.sample.mainplugina.R;
 
 public class TestFragmentActivity extends DLBasePluginFragmentActivity
-implements OnClickListener{
+        implements OnClickListener {
 
     private static final String TAG = "TestFragmentActivity";
 
@@ -32,11 +33,15 @@ implements OnClickListener{
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.test);
-        Toast.makeText(that, getIntent().getStringExtra("dl_extra"), Toast.LENGTH_SHORT).show();
-        TestButton button = (TestButton)findViewById(R.id.button1);
+        // 输出Parcelable对象信息
+        Toast.makeText(that, getIntent().getExtras().getParcelable("person").toString(),
+                Toast.LENGTH_SHORT).show();
+
+        Log.d(TAG, "### person info : " + getIntent().getExtras().getParcelable("person"));
+        TestButton button = (TestButton) findViewById(R.id.button1);
         button.setText(that.getResources().getString(R.string.test));
         button.setOnClickListener(new OnClickListener() {
-            
+
             @Override
             public void onClick(View v) {
                 Toast.makeText(that, "quit", Toast.LENGTH_SHORT).show();
@@ -44,12 +49,12 @@ implements OnClickListener{
                 that.finish();
             }
         });
-        
-        mEditText = (EditText)findViewById(R.id.editText1);
+
+        mEditText = (EditText) findViewById(R.id.editText1);
         mEditText.setText(R.string.hello_world);
-        mShowFragmentButton = (Button)findViewById(R.id.show_fragment);
+        mShowFragmentButton = (Button) findViewById(R.id.show_fragment);
         mShowFragmentButton.setOnClickListener(this);
-        
+
         mStartPluginB = (Button) findViewById(R.id.start_plugin_b);
         mStartPluginB.setOnClickListener(this);
     }
@@ -57,11 +62,11 @@ implements OnClickListener{
     @Override
     public void onResume() {
         super.onResume();
-        mImageView = (ImageView)findViewById(R.id.imageView1);
+        mImageView = (ImageView) findViewById(R.id.imageView1);
         mImageView.setImageResource(R.drawable.ppmm);
         Log.d(TAG, "onResume");
     }
-    
+
     @Override
     public void onPause() {
         super.onPause();
@@ -71,18 +76,20 @@ implements OnClickListener{
     @Override
     public void onClick(View v) {
         if (v == mShowFragmentButton) {
-            FragmentManager manager= getSupportFragmentManager();
+            FragmentManager manager = getSupportFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
-            transaction.add(R.id.fragment_container, new TestFragment().setPluginPackageName(getPackageName()));
+            transaction.add(R.id.fragment_container,
+                    new TestFragment().setPluginPackageName(getPackageName()));
             transaction.addToBackStack("TestFragment#1");
             transaction.commit();
-        } else if (v == mStartPluginB ) {
-            int result = startPluginActivity(new DLIntent("com.ryg.dynamicload.sample.mainpluginb", ".MainActivity"));
+        } else if (v == mStartPluginB) {
+            int result = startPluginActivity(new DLIntent("com.ryg.dynamicload.sample.mainpluginb",
+                    ".MainActivity"));
             if (result != DLPluginManager.START_RESULT_SUCCESS) {
                 Toast.makeText(this, "start Activity failed", Toast.LENGTH_SHORT).show();
             }
         }
-        
+
     }
-    
+
 }

@@ -15,9 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.ryg.dynamicload.internal;
 
 import android.content.Intent;
+import android.os.Parcelable;
+
+import com.ryg.utils.DLConfigs;
+
+import java.io.Serializable;
 
 public class DLIntent extends Intent {
 
@@ -63,6 +69,24 @@ public class DLIntent extends Intent {
 
     public void setPluginClass(Class<?> clazz) {
         this.mPluginClass = clazz.getName();
+    }
+
+    @Override
+    public Intent putExtra(String name, Parcelable value) {
+        setupExtraClassLoader(value);
+        return super.putExtra(name, value);
+    }
+
+    @Override
+    public Intent putExtra(String name, Serializable value) {
+        setupExtraClassLoader(value);
+        return super.putExtra(name, value);
+    }
+
+    private void setupExtraClassLoader(Object value) {
+        ClassLoader pluginLoader = value.getClass().getClassLoader();
+        DLConfigs.sPluginClassloader = pluginLoader;
+        setExtrasClassLoader(pluginLoader);
     }
 
 }

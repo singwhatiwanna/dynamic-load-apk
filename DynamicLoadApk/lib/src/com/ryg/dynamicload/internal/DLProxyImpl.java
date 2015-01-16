@@ -15,9 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.ryg.dynamicload.internal;
 
-import java.lang.reflect.Constructor;
+package com.ryg.dynamicload.internal;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -32,8 +31,18 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.ryg.dynamicload.DLPlugin;
+import com.ryg.utils.DLConfigs;
 import com.ryg.utils.DLConstants;
 
+import java.lang.reflect.Constructor;
+
+/**
+ * This is a plugin activity proxy, the proxy will create the plugin activity
+ * with reflect, and then call the plugin activity's attach、onCreate method, at
+ * this time, the plugin activity is running.
+ * 
+ * @author mrsimple
+ */
 public class DLProxyImpl {
 
     private static final String TAG = "DLProxyImpl";
@@ -49,11 +58,12 @@ public class DLProxyImpl {
     private Theme mTheme;
 
     private ActivityInfo mActivityInfo;
-    private Activity mActivity;
-    protected DLPlugin mRemoteActivity;
+    private Activity mProxyActivity;
+    protected DLPlugin mPluginActivity;
+    public ClassLoader mPluginClassLoader;
 
     public DLProxyImpl(Activity activity) {
-        mActivity = activity;
+        mProxyActivity = activity;
     }
 
     private void initializeActivityInfo() {
@@ -73,9 +83,9 @@ public class DLProxyImpl {
     private void handleActivityInfo() {
         Log.d(TAG, "handleActivityInfo, theme=" + mActivityInfo.theme);
         if (mActivityInfo.theme > 0) {
-            mActivity.setTheme(mActivityInfo.theme);
+            mProxyActivity.setTheme(mActivityInfo.theme);
         }
-        Theme superTheme = mActivity.getTheme();
+        Theme superTheme = mProxyActivity.getTheme();
         mTheme = mResources.newTheme();
         mTheme.setTo(superTheme);
 
@@ -83,11 +93,15 @@ public class DLProxyImpl {
     }
 
     public void onCreate(Intent intent) {
+
+        // set the extra's class loader
+        intent.setExtrasClassLoader(DLConfigs.sPluginClassloader);
+
         mPackageName = intent.getStringExtra(DLConstants.EXTRA_PACKAGE);
         mClass = intent.getStringExtra(DLConstants.EXTRA_CLASS);
         Log.d(TAG, "mClass=" + mClass + " mPackageName=" + mPackageName);
 
-        mPluginManager = DLPluginManager.getInstance(mActivity);
+        mPluginManager = DLPluginManager.getInstance(mProxyActivity);
         mPluginPackage = mPluginManager.getPackage(mPackageName);
         mAssetManager = mPluginPackage.assetManager;
         mResources = mPluginPackage.resources;
@@ -103,15 +117,16 @@ public class DLProxyImpl {
             Class<?> localClass = getClassLoader().loadClass(mClass);
             Constructor<?> localConstructor = localClass.getConstructor(new Class[] {});
             Object instance = localConstructor.newInstance(new Object[] {});
-            mRemoteActivity = (DLPlugin) instance;
-            ((DLProxy) mActivity).attach(mRemoteActivity, mPluginManager);
+            mPluginActivity = (DLPlugin) instance;
+            ((DLAttachable) mProxyActivity).attach(mPluginActivity, mPluginManager);
             Log.d(TAG, "instance = " + instance);
-
-            mRemoteActivity.attach(mActivity, mPluginPackage);
+            // attach the proxy activity and plugin package to the
+            // mPluginActivity
+            mPluginActivity.attach(mProxyActivity, mPluginPackage);
 
             Bundle bundle = new Bundle();
             bundle.putInt(DLConstants.FROM, DLConstants.FROM_EXTERNAL);
-            mRemoteActivity.onCreate(bundle);
+            mPluginActivity.onCreate(bundle);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -134,10 +149,6 @@ public class DLProxyImpl {
     }
 
     public DLPlugin getRemoteActivity() {
-        return mRemoteActivity;
-    }
-
-    public interface DLProxy {
-        public void attach(DLPlugin remoteActivity, DLPluginManager pluginManager);
+        return mPluginActivity;
     }
 }
