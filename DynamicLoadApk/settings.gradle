@@ -1,0 +1,7 @@
+include ':lib', ':main-host', ':main-plugin-a', ':main-plugin-b', ':doi-host', ':doi-common', ':doi-plugin'
+project(':main-host').projectDir = new File('sample/main/main-host')
+project(':main-plugin-a').projectDir = new File('sample/main/main-plugin-a')
+project(':main-plugin-b').projectDir = new File('sample/main/main-plugin-b')
+project(':doi-host').projectDir = new File('sample/depend_on_interface/doi-host')
+project(':doi-common').projectDir = new File('sample/depend_on_interface/doi-common')
+project(':doi-plugin').projectDir = new File('sample/depend_on_interface/doi-plugin')
