@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2014 singwhatiwanna(任玉刚) <singwhatiwanna@gmail.com>
  *
- * collaborator:田啸,宋思宇
+ * collaborator:田啸,宋思宇,Mr.Simple
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import com.ryg.dynamicload.DLBasePluginFragmentActivity;
 import com.ryg.dynamicload.DLProxyActivity;
 import com.ryg.dynamicload.DLProxyFragmentActivity;
 import com.ryg.utils.DLConstants;
-import com.ryg.utils.DLUtils;
+import com.ryg.utils.SoLibManager;
 
 import dalvik.system.DexClassLoader;
 
@@ -77,25 +77,26 @@ public class DLPluginManager {
     private int mFrom = DLConstants.FROM_INTERNAL;
 
     private String mNativeLibDir = null;
-//    private String mDexPath;
 
-    /**
-     * @author mrsimple
-     */
-    private class CopySoRunnable implements Runnable {
+    // private String mDexPath;
 
-        String mDexPath = "";
-
-        public CopySoRunnable(String dexPath) {
-            mDexPath = dexPath;
-        }
-
-        @Override
-        public void run() {
-            DLUtils.copyPluginSoLib(mContext, mDexPath, mNativeLibDir);
-        }
-
-    };
+    // /**
+    // * @author mrsimple
+    // */
+    // private class CopySoRunnable implements Runnable {
+    //
+    // String mDexPath = "";
+    //
+    // public CopySoRunnable(String dexPath) {
+    // mDexPath = dexPath;
+    // }
+    //
+    // @Override
+    // public void run() {
+    // DLUtils.copyPluginSoLib(mContext, mDexPath, mNativeLibDir);
+    // }
+    //
+    // };
 
     private DLPluginManager(Context context) {
         mContext = context.getApplicationContext();
@@ -110,7 +111,7 @@ public class DLPluginManager {
                 }
             }
         }
-        
+
         return sInstance;
     }
 
@@ -141,7 +142,10 @@ public class DLPluginManager {
         }
 
         DLPluginPackage pluginPackage = preparePluginEnv(packageInfo, dexPath);
-        copySoLib(dexPath, hasSoLib);
+        if (hasSoLib) {
+            copySoLib(dexPath);
+        }
+
         return pluginPackage;
     }
 
@@ -207,16 +211,16 @@ public class DLPluginManager {
      * @param dexPath
      * @param hasSoLib
      */
-    private void copySoLib(String dexPath, boolean hasSoLib) {
-        if (hasSoLib) {
-            // TODO: copy so lib async will lead to bugs maybe, waiting for
-            // resolved later.
+    private void copySoLib(String dexPath) {
+        // TODO: copy so lib async will lead to bugs maybe, waiting for
+        // resolved later.
 
-            // TODO : use wait and signal is ok ? that means when copying the
-            // .so files, the main thread will enter watting status, when the
-            // copy is done, send a signal to the main thread.
-            new Thread(new CopySoRunnable(dexPath)).start();
-        }
+        // TODO : use wait and signal is ok ? that means when copying the
+        // .so files, the main thread will enter watting status, when the
+        // copy is done, send a signal to the main thread.
+        // new Thread(new CopySoRunnable(dexPath)).start();
+
+        SoLibManager.getSoLoader().copyPluginSoLib(mContext, dexPath, mNativeLibDir);
     }
 
     /**

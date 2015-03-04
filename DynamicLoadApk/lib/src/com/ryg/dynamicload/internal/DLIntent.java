@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2014 singwhatiwanna(任玉刚) <singwhatiwanna@gmail.com>
  *
- * collaborator:田啸,宋思宇
+ * collaborator:田啸,宋思宇,Mr.Simple
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
