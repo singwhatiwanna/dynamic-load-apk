@@ -20,7 +20,7 @@ import com.ryg.dynamicload.sample.mainplugina.R;
 public class MainActivity extends DLBasePluginActivity {
 
     private static final String TAG = "Client-MainActivity";
-
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
