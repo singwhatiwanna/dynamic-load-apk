@@ -15,43 +15,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.ryg.dynamicload.internal;
 
 import android.content.pm.PackageInfo;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+
 import dalvik.system.DexClassLoader;
 
 /**
- * A plugin apk. Activities in a same apk share a same AssetManager, Resources and DexClassLoader.
+ * A plugin apk. Activities in a same apk share a same AssetManager, Resources
+ * and DexClassLoader.
  * 
  * @author siyu.song
  */
 public class DLPluginPackage {
 
     public String packageName;
-    private String mDefaultActivity;
-    public String path;
-
+    public String defaultActivity;
     public DexClassLoader classLoader;
     public AssetManager assetManager;
     public Resources resources;
     public PackageInfo packageInfo;
 
-    public DLPluginPackage(String packageName, String path, DexClassLoader loader, AssetManager assetManager,
-            Resources resources, PackageInfo packageInfo) {
-        this.packageName = packageName;
-        this.path = path;
+    public DLPluginPackage(DexClassLoader loader, Resources resources,
+            PackageInfo packageInfo) {
+        this.packageName = packageInfo.packageName;
         this.classLoader = loader;
-        this.assetManager = assetManager;
+        this.assetManager = resources.getAssets();
         this.resources = resources;
         this.packageInfo = packageInfo;
+
+        defaultActivity = parseDefaultActivityName();
     }
 
-    public String getDefaultActivity() {
+    private final String parseDefaultActivityName() {
         if (packageInfo.activities != null && packageInfo.activities.length > 0) {
-            mDefaultActivity = packageInfo.activities[0].name;
+            return packageInfo.activities[0].name;
         }
-        return mDefaultActivity;
+        return "";
     }
 }
