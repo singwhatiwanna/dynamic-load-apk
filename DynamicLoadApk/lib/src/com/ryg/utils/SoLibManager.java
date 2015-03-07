@@ -103,8 +103,10 @@ public final class SoLibManager {
     /**
      * copy so lib to specify directory(/data/data/host_pack_name/pluginlib)
      * 
-     * @param dexPath plugin path
-     * @param cpuName cpuName CPU_X86,CPU_MIPS,CPU_ARMEABI
+     * @param dexPath
+     *            plugin path
+     * @param cpuName
+     *            cpuName CPU_X86,CPU_MIPS,CPU_ARMEABI
      */
     public void copyPluginSoLib(Context context, String dexPath, String nativeLibDir) {
         String cpuName = getCpuName();
@@ -114,27 +116,24 @@ public final class SoLibManager {
         Log.d(TAG, "cpuArchitect: " + cpuArchitect);
         long start = System.currentTimeMillis();
         try {
-            ZipFile zip = new ZipFile(dexPath);
-            Enumeration<? extends ZipEntry> entries = zip.entries();
+            ZipFile zipFile = new ZipFile(dexPath);
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
             while (entries.hasMoreElements()) {
-                ZipEntry ze = (ZipEntry) entries.nextElement();
-                if (ze.isDirectory()) {
+                ZipEntry zipEntry = (ZipEntry) entries.nextElement();
+                if (zipEntry.isDirectory()) {
                     continue;
                 }
-                String zipEntryName = ze.getName();
+                String zipEntryName = zipEntry.getName();
                 if (zipEntryName.endsWith(".so") && zipEntryName.contains(cpuArchitect)) {
-                    final long lastModify = ze.getTime();
+                    final long lastModify = zipEntry.getTime();
                     if (lastModify == DLConfigs.getSoLastModifiedTime(context, zipEntryName)) {
                         // exist and no change
-                        Log.d(TAG, "skip copying, the so lib is exist and not change: "
-                                + zipEntryName);
+                        Log.d(TAG, "skip copying, the so lib is exist and not change: " + zipEntryName);
                         continue;
                     }
-                    InputStream ins = zip.getInputStream(ze);
-                    mSoExecutor.execute(new CopySoTask(context, ins, zipEntryName, lastModify));
+                    mSoExecutor.execute(new CopySoTask(context, zipFile, zipEntry, lastModify));
                 }
             }
-            zip.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -149,16 +148,16 @@ public final class SoLibManager {
     private class CopySoTask implements Runnable {
 
         private String mSoFileName;
-        private InputStream mIns;
-        private String mZipEntryName;
+        private ZipFile mZipFile;
+        private ZipEntry mZipEntry;
         private Context mContext;
         private long mLastModityTime;
 
-        CopySoTask(Context context, InputStream ins, String zipEntryName, long lastModify) {
-            mIns = ins;
+        CopySoTask(Context context, ZipFile zipFile, ZipEntry zipEntry, long lastModify) {
+            mZipFile = zipFile;
             mContext = context;
-            mZipEntryName = zipEntryName;
-            mSoFileName = parseSoFileName(zipEntryName);
+            mZipEntry = zipEntry;
+            mSoFileName = parseSoFileName(zipEntry.getName());
             mLastModityTime = lastModify;
         }
 
@@ -167,31 +166,68 @@ public final class SoLibManager {
         }
 
         private void writeSoFile2LibDir() {
+            InputStream is = null;
             FileOutputStream fos = null;
             try {
+                is = mZipFile.getInputStream(mZipEntry);
                 fos = new FileOutputStream(new File(sNativeLibDir, mSoFileName));
-                byte[] buf = new byte[8192];
-                int len = -1;
-
-                while ((len = mIns.read(buf)) != -1) {
-                    fos.write(buf, 0, len);
-                }
-
-                Log.e(TAG, "### copy so file : " + mSoFileName);
-                fos.flush();
-            } catch (Exception e) {
+            } catch (IOException e) {
                 e.printStackTrace();
-            } finally {
-                DLUtils.closeQuietly(fos);
-                DLUtils.closeQuietly(mIns);
             }
+            copy(is, fos);
+            try {
+                mZipFile.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        /**
+         * 输入输出流拷贝
+         * 
+         * @param is
+         * @param os
+         */
+        public void copy(InputStream is, OutputStream os) {
+            if (is == null || os == null)
+                return;
+            BufferedInputStream bis = new BufferedInputStream(is);
+            BufferedOutputStream bos = new BufferedOutputStream(os);
+            byte[] buf = null;
+            try {
+                buf = new byte[getAvailableSize(bis)];
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            int i = 0;
+            try {
+                while ((i = bis.read(buf)) != -1) {
+                    bos.write(buf, 0, i);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                bos.flush();
+                bos.close();
+                bis.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        private int getAvailableSize(InputStream is) throws IOException {
+            if (is == null)
+                return 0;
+            int available = is.available();
+            return available <= 0 ? 1024 : available;
         }
 
         @Override
         public void run() {
             writeSoFile2LibDir();
-            DLConfigs.setSoLastModifiedTime(mContext, mZipEntryName, mLastModityTime);
-            Log.d(TAG, "copy so lib success: " + mZipEntryName);
+            DLConfigs.setSoLastModifiedTime(mContext, mZipEntry.getName(), mLastModityTime);
+            Log.d(TAG, "copy so lib success: " + mZipEntry.getName());
         }
 
     }
