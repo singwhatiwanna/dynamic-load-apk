@@ -5,6 +5,6 @@
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/dl-main-host"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/main-host"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
