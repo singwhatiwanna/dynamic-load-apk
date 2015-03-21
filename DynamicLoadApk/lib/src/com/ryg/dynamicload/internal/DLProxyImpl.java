@@ -88,6 +88,12 @@ public class DLProxyImpl {
         Theme superTheme = mProxyActivity.getTheme();
         mTheme = mResources.newTheme();
         mTheme.setTo(superTheme);
+        //Finals适配三星以及部分加载XML出现异常BUG
+        try {
+	     mTheme.applyStyle(mActivityInfo.theme, true);
+	} catch (Exception e) {
+	    e.printStackTrace();
+	}
 
         // TODO: handle mActivityInfo.launchMode here in the future.
     }
