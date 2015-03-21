@@ -19,8 +19,10 @@
 package com.ryg.dynamicload;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -384,5 +386,32 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
         }
         return mPluginManager.startPluginActivityForResult(that, dlIntent, requestCode);
     }
+    
+    public ComponentName startService(Intent service) {
+//        if (mFrom == DLConstants.FROM_EXTERNAL) {
+//            return mPluginManager.startPluginService(that, service);
+//        } else {
+//	        return super.startService(service);
+//        }
+        return null;
+    }
+    
+    @Override
+    public boolean stopService(Intent name) {
+        // TODO Auto-generated method stub
+        return super.stopService(name);
+    }
+    
+    @Override
+    public boolean bindService(Intent service, ServiceConnection conn, int flags) {
+        // TODO Auto-generated method stub
+        return super.bindService(service, conn, flags);
+    }
+    
+    @Override
+    public void unbindService(ServiceConnection conn) {
+        // TODO Auto-generated method stub
+        super.unbindService(conn);
+    } 
 
 }

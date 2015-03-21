@@ -33,6 +33,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        
+        <service 
+            android:name="com.ryg.dynamicload.sample.mainplugin.TestService"></service>
     </application>
 
 </manifest>

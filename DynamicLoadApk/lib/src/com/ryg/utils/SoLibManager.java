@@ -18,10 +18,8 @@
 
 package com.ryg.utils;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.util.Log;
-
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,11 +27,16 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.util.Log;
 
 public final class SoLibManager {
 
@@ -214,6 +217,21 @@ public final class SoLibManager {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+//            finally {
+//                try {
+//                    bos.flush();
+//                } catch (IOException e) {
+//                }
+//                try {
+//                    bos.close();
+//                } catch (IOException e) {
+//                }
+//                
+//                try {
+//                    bis.close();
+//                } catch(IOException e) {
+//                }
+//            }
         }
 
         private int getAvailableSize(InputStream is) throws IOException {

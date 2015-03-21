@@ -68,6 +68,15 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        
+        <service 
+            android:name="com.ryg.dynamicload.DLProxyService">
+            <!-- 
+           	<intent-filter >
+           	    <action android:name="com.ryg.dynamicload.proxy.service.action"/>
+           	</intent-filter> 
+           	 -->
+        </service>
     </application>
 
 </manifest>
