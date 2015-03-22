@@ -18,8 +18,13 @@
 
 package com.ryg.dynamicload.internal;
 
+import java.io.File;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.Service;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -31,16 +36,14 @@ import android.util.Log;
 
 import com.ryg.dynamicload.DLBasePluginActivity;
 import com.ryg.dynamicload.DLBasePluginFragmentActivity;
+import com.ryg.dynamicload.DLBasePluginService;
 import com.ryg.dynamicload.DLProxyActivity;
 import com.ryg.dynamicload.DLProxyFragmentActivity;
+import com.ryg.dynamicload.DLProxyService;
 import com.ryg.utils.DLConstants;
 import com.ryg.utils.SoLibManager;
 
 import dalvik.system.DexClassLoader;
-
-import java.io.File;
-import java.lang.reflect.Method;
-import java.util.HashMap;
 
 public class DLPluginManager {
 
@@ -128,15 +131,17 @@ public class DLPluginManager {
     }
 
     /**
-     * @param dexPath plugin path
-     * @param hasSoLib whether exist so lib in plugin
+     * @param dexPath
+     *            plugin path
+     * @param hasSoLib
+     *            whether exist so lib in plugin
      * @return
      */
     public DLPluginPackage loadApk(final String dexPath, boolean hasSoLib) {
         mFrom = DLConstants.FROM_EXTERNAL;
 
-        PackageInfo packageInfo = mContext.getPackageManager().
-                getPackageArchiveInfo(dexPath, PackageManager.GET_ACTIVITIES);
+        PackageInfo packageInfo = mContext.getPackageManager().getPackageArchiveInfo(dexPath,
+                PackageManager.GET_ACTIVITIES | PackageManager.GET_SERVICES);
         if (packageInfo == null) {
             return null;
         }
@@ -176,8 +181,7 @@ public class DLPluginManager {
     private DexClassLoader createDexClassLoader(String dexPath) {
         File dexOutputDir = mContext.getDir("dex", Context.MODE_PRIVATE);
         dexOutputPath = dexOutputDir.getAbsolutePath();
-        DexClassLoader loader = new DexClassLoader(dexPath, dexOutputPath, mNativeLibDir,
-                mContext.getClassLoader());
+        DexClassLoader loader = new DexClassLoader(dexPath, dexOutputPath, mNativeLibDir, mContext.getClassLoader());
         return loader;
     }
 
@@ -200,8 +204,7 @@ public class DLPluginManager {
 
     private Resources createResources(AssetManager assetManager) {
         Resources superRes = mContext.getResources();
-        Resources resources = new Resources(assetManager, superRes.getDisplayMetrics(),
-                superRes.getConfiguration());
+        Resources resources = new Resources(assetManager, superRes.getDisplayMetrics(), superRes.getConfiguration());
         return resources;
     }
 
@@ -257,7 +260,7 @@ public class DLPluginManager {
         }
 
         final String className = getPluginActivityFullPath(dlIntent, pluginPackage);
-        Class<?> clazz = loadPluginActivityClass(pluginPackage.classLoader, className);
+        Class<?> clazz = loadPluginClass(pluginPackage.classLoader, className);
         if (clazz == null) {
             return START_RESULT_NO_CLASS;
         }
@@ -276,8 +279,47 @@ public class DLPluginManager {
         performStartActivityForResult(context, dlIntent, requestCode);
         return START_RESULT_SUCCESS;
     }
+    
+    public int startPluginService(Context context, DLIntent dlIntent) {
+        if (mFrom == DLConstants.FROM_INTERNAL) {
+            //暂时未写，后续补充内部调用
+        }
+        
+        String packageName = dlIntent.getPluginPackage();
+        if (TextUtils.isEmpty(packageName)) {
+            throw new NullPointerException("disallow null packageName.");
+        }
 
-    private Class<?> loadPluginActivityClass(ClassLoader classLoader, String className) {
+        DLPluginPackage pluginPackage = mPackagesHolder.get(packageName);
+        if (pluginPackage == null) {
+            return START_RESULT_NO_PKG;
+        }
+
+        // 获取要启动的Service的全名
+        String className = dlIntent.getPluginClass();
+        Class<?> clazz = loadPluginClass(pluginPackage.classLoader, className);
+        if (clazz == null) {
+            return START_RESULT_NO_CLASS;
+        }
+
+        // get the proxy activity class, the proxy activity will launch the
+        // plugin activity.
+        Class<? extends Service> proxyServiceClass = getProxyServiceClass(clazz);
+        if (proxyServiceClass == null) {
+            return START_RESULT_TYPE_ERROR;
+        }
+
+        // put extra data
+        dlIntent.putExtra(DLConstants.EXTRA_CLASS, className);
+        dlIntent.putExtra(DLConstants.EXTRA_PACKAGE, packageName);
+        dlIntent.setClass(mContext, proxyServiceClass);
+        //启动了代理Service
+        context.startService(dlIntent);
+        return START_RESULT_SUCCESS;
+    }
+
+    //zhangjie1980 重命名 loadPluginActivityClass -> loadPluginClass
+    private Class<?> loadPluginClass(ClassLoader classLoader, String className) {
         Class<?> clazz = null;
         try {
             clazz = Class.forName(className, true, classLoader);
@@ -301,7 +343,8 @@ public class DLPluginManager {
      * get the proxy activity class, the proxy activity will delegate the plugin
      * activity
      * 
-     * @param clazz target activity's class
+     * @param clazz
+     *            target activity's class
      * @return
      */
     private Class<? extends Activity> getProxyActivityClass(Class<?> clazz) {
@@ -314,6 +357,16 @@ public class DLPluginManager {
 
         return activityClass;
     }
+    
+    private Class<? extends Service> getProxyServiceClass(Class<?> clazz) {
+        Class<? extends Service> proxyServiceClass = null;
+        if (DLBasePluginService.class.isAssignableFrom(clazz)) {
+            proxyServiceClass = DLProxyService.class;
+        }
+        //后续可能还有IntentService，待补充
+
+        return proxyServiceClass;
+    }
 
     private void performStartActivityForResult(Context context, DLIntent dlIntent, int requestCode) {
         Log.d(TAG, "launch " + dlIntent.getPluginClass());
@@ -324,4 +377,5 @@ public class DLPluginManager {
         }
     }
 
+    
 }

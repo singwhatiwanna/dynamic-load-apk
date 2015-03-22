@@ -65,6 +65,9 @@ public class MainActivity extends Activity implements OnItemClickListener {
             if (item.packageInfo.activities != null && item.packageInfo.activities.length > 0) {
                 item.launcherActivityName = item.packageInfo.activities[0].name;
             }
+            if (item.packageInfo.services != null && item.packageInfo.services.length > 0) {
+                item.launcherServiceName = item.packageInfo.services[0].name;
+            }
             mPluginItems.add(item);
             DLPluginManager.getInstance(this).loadApk(item.pluginPath);
         }
@@ -136,7 +139,9 @@ public class MainActivity extends Activity implements OnItemClickListener {
             holder.appIcon.setImageDrawable(DLUtils.getAppIcon(MainActivity.this, item.pluginPath));
             holder.appName.setText(DLUtils.getAppLabel(MainActivity.this, item.pluginPath));
             holder.apkName.setText(item.pluginPath.substring(item.pluginPath.lastIndexOf(File.separatorChar) + 1));
-            holder.packageName.setText(packageInfo.applicationInfo.packageName);
+            holder.packageName.setText(packageInfo.applicationInfo.packageName + "\n" + 
+                                       item.launcherActivityName + "\n" + 
+                                       item.launcherServiceName);
             return convertView;
         }
     }
@@ -152,6 +157,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
         public PackageInfo packageInfo;
         public String pluginPath;
         public String launcherActivityName;
+        public String launcherServiceName;
 
         public PluginItem() {
         }
@@ -162,6 +168,13 @@ public class MainActivity extends Activity implements OnItemClickListener {
         PluginItem item = mPluginItems.get(position);
         DLPluginManager pluginManager = DLPluginManager.getInstance(this);
         pluginManager.startPluginActivity(this, new DLIntent(item.packageInfo.packageName, item.launcherActivityName));
+        
+        //如果存在Service则调用起Service
+        if (item.launcherServiceName != null) { 
+	        DLIntent intent = new DLIntent(item.packageInfo.packageName, item.launcherServiceName);
+	        pluginManager.startPluginService(this, intent); 
+        }
+        
     }
 
 }
