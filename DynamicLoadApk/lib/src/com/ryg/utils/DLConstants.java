@@ -44,5 +44,12 @@ public class DLConstants {
     public static final String CPU_MIPS = "mips";
 
     public static final String PREFERENCE_NAME = "dynamic_load_configs";
+    
+    /**
+     * zhangjie1980
+     * Intent Extra keys
+     */
+    public final static String INTENT_PLUGIN_PACKAGE = "dl_plugin_package";
+    public final static String INTENT_PLUGIN_CLASS = "dl_plugin_class";
 
 }

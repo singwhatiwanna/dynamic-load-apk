@@ -20,6 +20,7 @@ package com.ryg.dynamicload;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -375,6 +376,32 @@ public class DLBasePluginFragmentActivity extends FragmentActivity implements DL
             }
         }
         return mPluginManager.startPluginActivityForResult(that, dlIntent, requestCode);
+    }
+    
+    public int startPluginService(DLIntent dlIntent) {
+        if (mFrom == DLConstants.FROM_EXTERNAL) {
+            if (dlIntent.getPluginPackage() == null) {
+                dlIntent.setPluginPackage(mPluginPackage.packageName);
+            }
+        }
+        return mPluginManager.startPluginService(that, dlIntent);
+    }
+    
+    public int bindPluginService(DLIntent dlIntent, ServiceConnection conn, int flags) {
+        if (mFrom == DLConstants.FROM_EXTERNAL) {
+            if (dlIntent.getPluginPackage() == null) {
+                dlIntent.setPluginPackage(mPluginPackage.packageName);
+            }
+        }
+        return mPluginManager.bindPluginService(that, dlIntent, conn, flags);
+    }
+    
+    public int unBindPluginService(DLIntent dlIntent, ServiceConnection conn) {
+        if (mFrom == DLConstants.FROM_EXTERNAL) {
+            if (dlIntent.getPluginPackage() == null)
+            dlIntent.setPluginPackage(mPluginPackage.packageName);
+        }
+        return mPluginManager.unBindPluginService(that, dlIntent, conn);
     }
 
     // ------------------------------------------------------------------------

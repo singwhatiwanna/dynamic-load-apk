@@ -38,6 +38,10 @@ import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.util.Log;
+
 public final class SoLibManager {
 
     private static final String TAG = SoLibManager.class.getSimpleName();
@@ -217,6 +221,21 @@ public final class SoLibManager {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+//            finally {
+//                try {
+//                    bos.flush();
+//                } catch (IOException e) {
+//                }
+//                try {
+//                    bos.close();
+//                } catch (IOException e) {
+//                }
+//                
+//                try {
+//                    bis.close();
+//                } catch(IOException e) {
+//                }
+//            }
         }
 
         private int getAvailableSize(InputStream is) throws IOException {

@@ -19,6 +19,7 @@
 package com.ryg.dynamicload;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -170,6 +171,11 @@ public class DLProxyActivity extends Activity implements DLAttachable {
     public boolean onOptionsItemSelected(MenuItem item) {
         mRemoteActivity.onOptionsItemSelected(item);
         return super.onOptionsItemSelected(item);
+    }
+    
+    @Override
+    public ComponentName startService(Intent service) {
+        return super.startService(service);
     }
 
 }

@@ -41,7 +41,7 @@ public class DLUtils {
         PackageManager pm = context.getPackageManager();
         PackageInfo pkgInfo = null;
         try {
-            pkgInfo = pm.getPackageArchiveInfo(apkFilepath, PackageManager.GET_ACTIVITIES);
+            pkgInfo = pm.getPackageArchiveInfo(apkFilepath, PackageManager.GET_ACTIVITIES | PackageManager.GET_SERVICES);
         } catch (Exception e) {
             // should be something wrong with parse
             e.printStackTrace();
