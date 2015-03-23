@@ -46,7 +46,7 @@ public class TestService extends DLBasePluginService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // TODO Auto-generated method stub
-        Log.e(TAG, "onStartCommand");
+        Log.e(TAG, "onStartCommand " + this.toString());
         return super.onStartCommand(intent, flags, startId);
     }
 

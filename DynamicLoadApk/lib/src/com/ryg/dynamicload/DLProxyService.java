@@ -48,7 +48,7 @@ public class DLProxyService extends Service implements DLServiceAttachable{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // TODO Auto-generated method stub
-        Log.d(TAG, TAG + " onStartCommand");
+        Log.d(TAG, TAG + " onStartCommand " + this.toString());
         //判断是否存在插件Service，如果存在，则不进行Service插件的构造工作
         if (mRemoteService == null) {
 	        mImpl.init(intent);
