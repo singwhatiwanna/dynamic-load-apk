@@ -29,6 +29,8 @@ import android.os.Build;
  *         create at 2014年12月11日 下午5:55:59
  */
 public class DLConfigs {
+    
+    public static final boolean LOG = true;
 
     public static ClassLoader sPluginClassloader = DLConstants.class.getClassLoader();
 

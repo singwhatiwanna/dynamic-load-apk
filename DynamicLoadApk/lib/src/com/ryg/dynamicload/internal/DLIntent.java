@@ -26,6 +26,8 @@ import com.ryg.utils.DLConfigs;
 import java.io.Serializable;
 
 public class DLIntent extends Intent {
+    
+    
 
     private String mPluginPackage;
     private String mPluginClass;

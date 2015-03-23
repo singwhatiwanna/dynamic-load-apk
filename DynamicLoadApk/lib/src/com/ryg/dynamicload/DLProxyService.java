@@ -23,7 +23,8 @@ public class DLProxyService extends Service implements DLServiceAttachable{
     public IBinder onBind(Intent intent) {
         // TODO Auto-generated method stub
         Log.d(TAG, TAG + " onBind");
-        return null;
+        mImpl.init(intent);
+        return mRemoteService.onBind(intent);
     }
 
     @Override
@@ -54,6 +55,7 @@ public class DLProxyService extends Service implements DLServiceAttachable{
     @Override
     public void onDestroy() {
         // TODO Auto-generated method stub
+        mRemoteService.onDestroy();
         super.onDestroy();
         Log.d(TAG, TAG + " onDestroy");
     }
@@ -61,6 +63,7 @@ public class DLProxyService extends Service implements DLServiceAttachable{
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         // TODO Auto-generated method stub
+        mRemoteService.onConfigurationChanged(newConfig);
         super.onConfigurationChanged(newConfig);
         Log.d(TAG, TAG + " onConfigurationChanged");
     }
@@ -68,6 +71,7 @@ public class DLProxyService extends Service implements DLServiceAttachable{
     @Override
     public void onLowMemory() {
         // TODO Auto-generated method stub
+        mRemoteService.onLowMemory();
         super.onLowMemory();
         Log.d(TAG, TAG + " onLowMemory");
     }
@@ -76,6 +80,7 @@ public class DLProxyService extends Service implements DLServiceAttachable{
     @Override
     public void onTrimMemory(int level) {
         // TODO Auto-generated method stub
+        mRemoteService.onTrimMemory(level);
         super.onTrimMemory(level);
         Log.d(TAG, TAG + " onTrimMemory");
     }
@@ -84,12 +89,14 @@ public class DLProxyService extends Service implements DLServiceAttachable{
     public boolean onUnbind(Intent intent) {
         // TODO Auto-generated method stub
         Log.d(TAG, TAG + " onUnbind");
-        return super.onUnbind(intent);
+        super.onUnbind(intent);
+        return mRemoteService.onUnbind(intent);
     }
     
     @Override
     public void onRebind(Intent intent) {
         // TODO Auto-generated method stub
+        mRemoteService.onRebind(intent);
         super.onRebind(intent);
         Log.d(TAG, TAG + " onRebind");
     }
@@ -98,6 +105,7 @@ public class DLProxyService extends Service implements DLServiceAttachable{
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         // TODO Auto-generated method stub
+        mRemoteService.onTaskRemoved(rootIntent);
         super.onTaskRemoved(rootIntent);
         Log.d(TAG, TAG + " onTaskRemoved");
     }

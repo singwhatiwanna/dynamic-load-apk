@@ -1,9 +1,12 @@
 package com.ryg.dynamicload.sample.mainplugin;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -17,10 +20,12 @@ import android.widget.LinearLayout;
 import com.ryg.dynamicload.DLBasePluginActivity;
 import com.ryg.dynamicload.internal.DLIntent;
 import com.ryg.dynamicload.sample.mainplugina.R;
+import com.ryg.dynamicload.service.ITestServiceInterface;
 
 public class MainActivity extends DLBasePluginActivity {
 
     private static final String TAG = "Client-MainActivity";
+    private ServiceConnection mConnecton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -34,6 +39,7 @@ public class MainActivity extends DLBasePluginActivity {
 
     private View generateContentView(final Context context) {
         LinearLayout layout = new LinearLayout(context);
+        layout.setOrientation(LinearLayout.VERTICAL);
         layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         layout.setBackgroundColor(Color.parseColor("#F79AB5"));
         Button button = new Button(context);
@@ -47,6 +53,46 @@ public class MainActivity extends DLBasePluginActivity {
                 intent.putExtra("person", new Person("plugin-a", 22));
                 intent.putExtra("dl_extra", "from DL framework");
                 startPluginActivityForResult(intent, 0);
+            }
+        });
+        
+        Button button2 = new Button(context);
+        button2.setText("Start Service");
+        layout.addView(button2, LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+        button2.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                DLIntent intent = new DLIntent(getPackageName(), TestService.class);
+                startPluginService(intent);
+            }
+        });
+        
+        Button button3 = new Button(context);
+        button3.setText("bind Service");
+        layout.addView(button3, LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+        button3.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                DLIntent intent = new DLIntent(getPackageName(), TestService.class);
+                bindPluginService(intent, mConnecton = new ServiceConnection() {
+                    public void onServiceDisconnected(ComponentName name) {
+                    }
+                    
+                    public void onServiceConnected(ComponentName name, IBinder binder) {
+                        int sum = ((ITestServiceInterface)binder).sum(5, 5);
+                        Log.e("MainActivity", "onServiceConnected sum(5 + 5) = " + sum);
+                    }
+                }, Context.BIND_AUTO_CREATE);
+            }
+        });
+        
+        Button button4 = new Button(context);
+        button4.setText("unbind Service");
+        layout.addView(button4, LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+        button4.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                if (mConnecton != null) {
+                    DLIntent intent = new DLIntent(getPackageName(), TestService.class);
+                    unBindPluginService(intent, mConnecton);
+                }
             }
         });
         return layout;
