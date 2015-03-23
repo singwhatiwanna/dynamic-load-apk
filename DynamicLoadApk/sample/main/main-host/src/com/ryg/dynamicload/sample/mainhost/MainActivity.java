@@ -4,9 +4,14 @@ import java.io.File;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.IBinder;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,6 +26,7 @@ import android.widget.TextView;
 
 import com.ryg.dynamicload.internal.DLIntent;
 import com.ryg.dynamicload.internal.DLPluginManager;
+import com.ryg.dynamicload.service.ITestServiceInterface;
 import com.ryg.utils.DLUtils;
 
 public class MainActivity extends Activity implements OnItemClickListener {
@@ -34,6 +40,8 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
     private ListView mListView;
     private TextView mNoPluginTextView;
+    
+    private ServiceConnection mConnection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -171,10 +179,32 @@ public class MainActivity extends Activity implements OnItemClickListener {
         
         //如果存在Service则调用起Service
         if (item.launcherServiceName != null) { 
+            //startService
 	        DLIntent intent = new DLIntent(item.packageInfo.packageName, item.launcherServiceName);
-	        pluginManager.startPluginService(this, intent); 
+	        //startService
+//	        pluginManager.startPluginService(this, intent); 
+	        
+	        //bindService
+	        pluginManager.bindPluginService(this, intent, mConnection = new ServiceConnection() {
+                public void onServiceDisconnected(ComponentName name) {
+                }
+                
+                public void onServiceConnected(ComponentName name, IBinder binder) {
+                    int sum = ((ITestServiceInterface)binder).sum(5, 5);
+                    Log.e("MainActivity", "onServiceConnected sum(5 + 5) = " + sum);
+                }
+            }, Context.BIND_AUTO_CREATE);
         }
         
+    }
+    
+    @Override
+    protected void onDestroy() {
+        // TODO Auto-generated method stub
+        super.onDestroy();
+        if (mConnection != null) {
+	        this.unbindService(mConnection);
+        }
     }
 
 }

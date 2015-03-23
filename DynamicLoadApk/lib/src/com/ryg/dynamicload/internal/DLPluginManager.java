@@ -26,6 +26,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
+import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -315,6 +316,44 @@ public class DLPluginManager {
         dlIntent.setClass(mContext, proxyServiceClass);
         //启动了代理Service
         context.startService(dlIntent);
+        return START_RESULT_SUCCESS;
+    }
+    
+    public int bindPluginService(Context context, DLIntent dlIntent, ServiceConnection conn, int flags) {
+        if (mFrom == DLConstants.FROM_INTERNAL) {
+            //暂时未写，后续补充内部调用
+        }
+        
+        String packageName = dlIntent.getPluginPackage();
+        if (TextUtils.isEmpty(packageName)) {
+            throw new NullPointerException("disallow null packageName.");
+        }
+
+        DLPluginPackage pluginPackage = mPackagesHolder.get(packageName);
+        if (pluginPackage == null) {
+            return START_RESULT_NO_PKG;
+        }
+
+        // 获取要启动的Service的全名
+        String className = dlIntent.getPluginClass();
+        Class<?> clazz = loadPluginClass(pluginPackage.classLoader, className);
+        if (clazz == null) {
+            return START_RESULT_NO_CLASS;
+        }
+
+        // get the proxy activity class, the proxy activity will launch the
+        // plugin activity.
+        Class<? extends Service> proxyServiceClass = getProxyServiceClass(clazz);
+        if (proxyServiceClass == null) {
+            return START_RESULT_TYPE_ERROR;
+        }
+
+        // put extra data
+        dlIntent.putExtra(DLConstants.EXTRA_CLASS, className);
+        dlIntent.putExtra(DLConstants.EXTRA_PACKAGE, packageName);
+        dlIntent.setClass(mContext, proxyServiceClass);
+        //启动了代理Service
+        context.bindService(dlIntent, conn, flags);
         return START_RESULT_SUCCESS;
     }
 

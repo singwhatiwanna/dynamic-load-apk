@@ -1,13 +1,39 @@
 package com.ryg.dynamicload.sample.mainplugin;
 
 import android.content.Intent;
+import android.os.Binder;
+import android.os.IBinder;
 import android.util.Log;
 
 import com.ryg.dynamicload.DLBasePluginService;
+import com.ryg.dynamicload.service.ITestServiceInterface;
 
 public class TestService extends DLBasePluginService {
 
     private static final String TAG = "TestService";
+    
+    private class MyBinder extends Binder implements ITestServiceInterface{
+        
+        @Override
+        public int sum(int a, int b) {
+            // TODO Auto-generated method stub
+            return a + b;
+        }
+    }
+    
+    @Override
+    public IBinder onBind(Intent intent) {
+        // TODO Auto-generated method stub
+        Log.e(TAG, "onBind");
+        return new MyBinder();
+    } 
+    
+    @Override
+    public boolean onUnbind(Intent intent) {
+        // TODO Auto-generated method stub
+        Log.d(TAG, "onUnbind");
+        return super.onUnbind(intent);
+    }
     
     @Override
     public void onCreate() {
@@ -22,6 +48,7 @@ public class TestService extends DLBasePluginService {
         Log.e(TAG, "onStartCommand");
         return super.onStartCommand(intent, flags, startId);
     }
+
     
     
 }
