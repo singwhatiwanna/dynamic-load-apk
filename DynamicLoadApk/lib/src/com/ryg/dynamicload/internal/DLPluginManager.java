@@ -283,7 +283,9 @@ public class DLPluginManager {
     
     public int startPluginService(Context context, DLIntent dlIntent) {
         if (mFrom == DLConstants.FROM_INTERNAL) {
-            //暂时未写，后续补充内部调用
+            dlIntent.setClassName(context, dlIntent.getPluginClass());
+            mContext.startService(dlIntent);
+            return DLPluginManager.START_RESULT_SUCCESS;
         }
         
         String packageName = dlIntent.getPluginPackage();
@@ -321,7 +323,9 @@ public class DLPluginManager {
     
     public int bindPluginService(Context context, DLIntent dlIntent, ServiceConnection conn, int flags) {
         if (mFrom == DLConstants.FROM_INTERNAL) {
-            //暂时未写，后续补充内部调用
+            dlIntent.setClassName(context, dlIntent.getPluginClass());
+            mContext.bindService(dlIntent, conn, flags);
+            return DLPluginManager.START_RESULT_SUCCESS;
         }
         
         String packageName = dlIntent.getPluginPackage();
@@ -352,10 +356,50 @@ public class DLPluginManager {
         dlIntent.putExtra(DLConstants.EXTRA_CLASS, className);
         dlIntent.putExtra(DLConstants.EXTRA_PACKAGE, packageName);
         dlIntent.setClass(mContext, proxyServiceClass);
-        //启动了代理Service
+        //Bind代理Service
         context.bindService(dlIntent, conn, flags);
         return START_RESULT_SUCCESS;
     }
+    
+    public int unBindPluginService(Context context, DLIntent dlIntent, ServiceConnection conn) {
+        if (mFrom == DLConstants.FROM_INTERNAL) {
+            mContext.unbindService(conn);
+            return DLPluginManager.START_RESULT_SUCCESS;
+        }
+        
+        String packageName = dlIntent.getPluginPackage();
+        if (TextUtils.isEmpty(packageName)) {
+            throw new NullPointerException("disallow null packageName.");
+        }
+
+        DLPluginPackage pluginPackage = mPackagesHolder.get(packageName);
+        if (pluginPackage == null) {
+            return START_RESULT_NO_PKG;
+        }
+
+        // 获取要启动的Service的全名
+        String className = dlIntent.getPluginClass();
+        Class<?> clazz = loadPluginClass(pluginPackage.classLoader, className);
+        if (clazz == null) {
+            return START_RESULT_NO_CLASS;
+        }
+
+        // get the proxy activity class, the proxy activity will launch the
+        // plugin activity.
+        Class<? extends Service> proxyServiceClass = getProxyServiceClass(clazz);
+        if (proxyServiceClass == null) {
+            return START_RESULT_TYPE_ERROR;
+        }
+
+        // put extra data
+        dlIntent.putExtra(DLConstants.EXTRA_CLASS, className);
+        dlIntent.putExtra(DLConstants.EXTRA_PACKAGE, packageName);
+        dlIntent.setClass(mContext, proxyServiceClass);
+        //unBind代理Service
+        context.unbindService(conn);
+        return START_RESULT_SUCCESS;
+    }
+    
 
     //zhangjie1980 重命名 loadPluginActivityClass -> loadPluginClass
     private Class<?> loadPluginClass(ClassLoader classLoader, String className) {

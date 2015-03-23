@@ -31,7 +31,7 @@ public class TestService extends DLBasePluginService {
     @Override
     public boolean onUnbind(Intent intent) {
         // TODO Auto-generated method stub
-        Log.d(TAG, "onUnbind");
+        Log.e(TAG, "onUnbind");
         return super.onUnbind(intent);
     }
     

@@ -185,15 +185,15 @@ public class MainActivity extends Activity implements OnItemClickListener {
 //	        pluginManager.startPluginService(this, intent); 
 	        
 	        //bindService
-	        pluginManager.bindPluginService(this, intent, mConnection = new ServiceConnection() {
-                public void onServiceDisconnected(ComponentName name) {
-                }
-                
-                public void onServiceConnected(ComponentName name, IBinder binder) {
-                    int sum = ((ITestServiceInterface)binder).sum(5, 5);
-                    Log.e("MainActivity", "onServiceConnected sum(5 + 5) = " + sum);
-                }
-            }, Context.BIND_AUTO_CREATE);
+//	        pluginManager.bindPluginService(this, intent, mConnection = new ServiceConnection() {
+//                public void onServiceDisconnected(ComponentName name) {
+//                }
+//                
+//                public void onServiceConnected(ComponentName name, IBinder binder) {
+//                    int sum = ((ITestServiceInterface)binder).sum(5, 5);
+//                    Log.e("MainActivity", "onServiceConnected sum(5 + 5) = " + sum);
+//                }
+//            }, Context.BIND_AUTO_CREATE);
         }
         
     }

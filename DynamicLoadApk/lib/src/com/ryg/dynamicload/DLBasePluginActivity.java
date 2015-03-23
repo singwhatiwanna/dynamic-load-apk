@@ -89,8 +89,7 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
 
         mPluginManager = DLPluginManager.getInstance(that);
         Log.d(TAG, "onCreate: from= "
-                + (mFrom == DLConstants.FROM_INTERNAL ? "DLConstants.FROM_INTERNAL"
-                        : "FROM_EXTERNAL"));
+                + (mFrom == DLConstants.FROM_INTERNAL ? "DLConstants.FROM_INTERNAL" : "FROM_EXTERNAL"));
     }
 
     @Override
@@ -387,31 +386,58 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
         return mPluginManager.startPluginActivityForResult(that, dlIntent, requestCode);
     }
     
-    public ComponentName startService(Intent service) {
-//        if (mFrom == DLConstants.FROM_EXTERNAL) {
-//            return mPluginManager.startPluginService(that, service);
-//        } else {
-//	        return super.startService(service);
-//        }
-        return null;
+    public int startPluginService(DLIntent dlIntent) {
+        if (mFrom == DLConstants.FROM_EXTERNAL) {
+            if (dlIntent.getPluginPackage() == null) {
+                dlIntent.setPluginPackage(mPluginPackage.packageName);
+            }
+        }
+        return mPluginManager.startPluginService(that, dlIntent);
     }
     
-    @Override
-    public boolean stopService(Intent name) {
-        // TODO Auto-generated method stub
-        return super.stopService(name);
+    public int bindPluginService(DLIntent dlIntent, ServiceConnection conn, int flags) {
+        if (mFrom == DLConstants.FROM_EXTERNAL) {
+            if (dlIntent.getPluginPackage() == null) {
+                dlIntent.setPluginPackage(mPluginPackage.packageName);
+            }
+        }
+        return mPluginManager.bindPluginService(that, dlIntent, conn, flags);
     }
     
-    @Override
-    public boolean bindService(Intent service, ServiceConnection conn, int flags) {
-        // TODO Auto-generated method stub
-        return super.bindService(service, conn, flags);
+    public int unBindPluginService(DLIntent dlIntent, ServiceConnection conn) {
+        if (mFrom == DLConstants.FROM_EXTERNAL) {
+            if (dlIntent.getPluginPackage() == null)
+            dlIntent.setPluginPackage(mPluginPackage.packageName);
+        }
+        return mPluginManager.unBindPluginService(that, dlIntent, conn);
     }
-    
-    @Override
-    public void unbindService(ServiceConnection conn) {
-        // TODO Auto-generated method stub
-        super.unbindService(conn);
-    } 
+
+//    /**
+//     * 直接调用that.startService
+//     * that 可能有两种情况
+//     * 1.指向this 
+//     * 2.指向DLProxyActivity 
+//     */
+//    public ComponentName startService(Intent service) {
+//        return that.startService(service);
+//    }
+//
+//    @Override
+//    public boolean stopService(Intent name) {
+//        // TODO Auto-generated method stub
+//        return super.stopService(name);
+//    }
+//
+//    @Override
+//    public boolean bindService(Intent service, ServiceConnection conn, int flags) {
+//        // TODO Auto-generated method stub
+//        return super.bindService(service, conn, flags);
+//    }
+//
+//    @Override
+//    public void unbindService(ServiceConnection conn) {
+//        // TODO Auto-generated method stub
+//        super.unbindService(conn);
+//    }
 
 }
