@@ -324,7 +324,7 @@ public class DLPluginManager {
     public int bindPluginService(Context context, DLIntent dlIntent, ServiceConnection conn, int flags) {
         if (mFrom == DLConstants.FROM_INTERNAL) {
             dlIntent.setClassName(context, dlIntent.getPluginClass());
-            mContext.bindService(dlIntent, conn, flags);
+            context.bindService(dlIntent, conn, flags);
             return DLPluginManager.START_RESULT_SUCCESS;
         }
         
@@ -355,7 +355,7 @@ public class DLPluginManager {
         // put extra data
         dlIntent.putExtra(DLConstants.EXTRA_CLASS, className);
         dlIntent.putExtra(DLConstants.EXTRA_PACKAGE, packageName);
-        dlIntent.setClass(mContext, proxyServiceClass);
+        dlIntent.setClass(context, proxyServiceClass);
         //Bind代理Service
         context.bindService(dlIntent, conn, flags);
         return START_RESULT_SUCCESS;
@@ -363,7 +363,7 @@ public class DLPluginManager {
     
     public int unBindPluginService(Context context, DLIntent dlIntent, ServiceConnection conn) {
         if (mFrom == DLConstants.FROM_INTERNAL) {
-            mContext.unbindService(conn);
+            context.unbindService(conn);
             return DLPluginManager.START_RESULT_SUCCESS;
         }
         
@@ -394,7 +394,7 @@ public class DLPluginManager {
         // put extra data
         dlIntent.putExtra(DLConstants.EXTRA_CLASS, className);
         dlIntent.putExtra(DLConstants.EXTRA_PACKAGE, packageName);
-        dlIntent.setClass(mContext, proxyServiceClass);
+        dlIntent.setClass(context, proxyServiceClass);
         //unBind代理Service
         context.unbindService(conn);
         return START_RESULT_SUCCESS;

@@ -23,7 +23,10 @@ public class DLProxyService extends Service implements DLServiceAttachable{
     public IBinder onBind(Intent intent) {
         // TODO Auto-generated method stub
         Log.d(TAG, TAG + " onBind");
-        mImpl.init(intent);
+        //判断是否存在插件Service，如果存在，则不进行Service插件的构造工作
+        if (mRemoteService == null) {
+	        mImpl.init(intent);
+        }
         return mRemoteService.onBind(intent);
     }
 
@@ -46,7 +49,10 @@ public class DLProxyService extends Service implements DLServiceAttachable{
     public int onStartCommand(Intent intent, int flags, int startId) {
         // TODO Auto-generated method stub
         Log.d(TAG, TAG + " onStartCommand");
-        mImpl.init(intent);
+        //判断是否存在插件Service，如果存在，则不进行Service插件的构造工作
+        if (mRemoteService == null) {
+	        mImpl.init(intent);
+        }
         super.onStartCommand(intent, flags, startId);
         return mRemoteService.onStartCommand(intent, flags, startId);
 //        return super.onStartCommand(intent, flags, startId);
