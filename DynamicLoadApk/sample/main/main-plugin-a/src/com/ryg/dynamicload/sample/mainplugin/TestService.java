@@ -11,6 +11,7 @@ import com.ryg.dynamicload.service.ITestServiceInterface;
 public class TestService extends DLBasePluginService {
 
     private static final String TAG = "TestService";
+    private MyBinder mBinder = new MyBinder();
     
     private class MyBinder extends Binder implements ITestServiceInterface{
         
@@ -25,7 +26,7 @@ public class TestService extends DLBasePluginService {
     public IBinder onBind(Intent intent) {
         // TODO Auto-generated method stub
         Log.e(TAG, "onBind");
-        return new MyBinder();
+        return mBinder;
     } 
     
     @Override
@@ -45,7 +46,7 @@ public class TestService extends DLBasePluginService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // TODO Auto-generated method stub
-        Log.e(TAG, "onStartCommand");
+        Log.e(TAG, "onStartCommand " + this.toString());
         return super.onStartCommand(intent, flags, startId);
     }
 

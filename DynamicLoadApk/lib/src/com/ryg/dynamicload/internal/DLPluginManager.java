@@ -82,6 +82,8 @@ public class DLPluginManager {
 
     private String mNativeLibDir = null;
 
+    private int mResult;
+
     // private String mDexPath;
 
     // /**
@@ -280,128 +282,112 @@ public class DLPluginManager {
         performStartActivityForResult(context, dlIntent, requestCode);
         return START_RESULT_SUCCESS;
     }
-    
-    public int startPluginService(Context context, DLIntent dlIntent) {
+
+    public int startPluginService(final Context context, final DLIntent dlIntent) {
         if (mFrom == DLConstants.FROM_INTERNAL) {
             dlIntent.setClassName(context, dlIntent.getPluginClass());
-            mContext.startService(dlIntent);
+            context.startService(dlIntent);
             return DLPluginManager.START_RESULT_SUCCESS;
         }
+
+        fetchProxyServiceClass(dlIntent, new OnFetchProxyServiceClass() {
+            @Override
+            public void onFetch(int result, Class<? extends Service> proxyServiceClass) {
+                // TODO Auto-generated method stub
+                if (result == START_RESULT_SUCCESS) {
+                    dlIntent.setClass(context, proxyServiceClass);
+                    // start代理Service
+                    context.startService(dlIntent);
+                }
+                mResult = result;
+            }
+        });
         
-        String packageName = dlIntent.getPluginPackage();
-        if (TextUtils.isEmpty(packageName)) {
-            throw new NullPointerException("disallow null packageName.");
-        }
-
-        DLPluginPackage pluginPackage = mPackagesHolder.get(packageName);
-        if (pluginPackage == null) {
-            return START_RESULT_NO_PKG;
-        }
-
-        // 获取要启动的Service的全名
-        String className = dlIntent.getPluginClass();
-        Class<?> clazz = loadPluginClass(pluginPackage.classLoader, className);
-        if (clazz == null) {
-            return START_RESULT_NO_CLASS;
-        }
-
-        // get the proxy activity class, the proxy activity will launch the
-        // plugin activity.
-        Class<? extends Service> proxyServiceClass = getProxyServiceClass(clazz);
-        if (proxyServiceClass == null) {
-            return START_RESULT_TYPE_ERROR;
-        }
-
-        // put extra data
-        dlIntent.putExtra(DLConstants.EXTRA_CLASS, className);
-        dlIntent.putExtra(DLConstants.EXTRA_PACKAGE, packageName);
-        dlIntent.setClass(mContext, proxyServiceClass);
-        //启动了代理Service
-        context.startService(dlIntent);
-        return START_RESULT_SUCCESS;
+        return mResult;
     }
-    
-    public int bindPluginService(Context context, DLIntent dlIntent, ServiceConnection conn, int flags) {
+
+    public int bindPluginService(final Context context, final DLIntent dlIntent, final ServiceConnection conn,
+            final int flags) {
         if (mFrom == DLConstants.FROM_INTERNAL) {
             dlIntent.setClassName(context, dlIntent.getPluginClass());
-            mContext.bindService(dlIntent, conn, flags);
+            context.bindService(dlIntent, conn, flags);
             return DLPluginManager.START_RESULT_SUCCESS;
         }
-        
-        String packageName = dlIntent.getPluginPackage();
-        if (TextUtils.isEmpty(packageName)) {
-            throw new NullPointerException("disallow null packageName.");
-        }
 
-        DLPluginPackage pluginPackage = mPackagesHolder.get(packageName);
-        if (pluginPackage == null) {
-            return START_RESULT_NO_PKG;
-        }
+        fetchProxyServiceClass(dlIntent, new OnFetchProxyServiceClass() {
+            @Override
+            public void onFetch(int result, Class<? extends Service> proxyServiceClass) {
+                // TODO Auto-generated method stub
+                if (result == START_RESULT_SUCCESS) {
+			        dlIntent.setClass(context, proxyServiceClass);
+                    // Bind代理Service
+                    context.bindService(dlIntent, conn, flags);
+                }
+                mResult = result;
+            }
+        });
 
-        // 获取要启动的Service的全名
-        String className = dlIntent.getPluginClass();
-        Class<?> clazz = loadPluginClass(pluginPackage.classLoader, className);
-        if (clazz == null) {
-            return START_RESULT_NO_CLASS;
-        }
-
-        // get the proxy activity class, the proxy activity will launch the
-        // plugin activity.
-        Class<? extends Service> proxyServiceClass = getProxyServiceClass(clazz);
-        if (proxyServiceClass == null) {
-            return START_RESULT_TYPE_ERROR;
-        }
-
-        // put extra data
-        dlIntent.putExtra(DLConstants.EXTRA_CLASS, className);
-        dlIntent.putExtra(DLConstants.EXTRA_PACKAGE, packageName);
-        dlIntent.setClass(mContext, proxyServiceClass);
-        //Bind代理Service
-        context.bindService(dlIntent, conn, flags);
-        return START_RESULT_SUCCESS;
+        return mResult;
     }
-    
-    public int unBindPluginService(Context context, DLIntent dlIntent, ServiceConnection conn) {
+
+    public int unBindPluginService(final Context context, DLIntent dlIntent, final ServiceConnection conn) {
         if (mFrom == DLConstants.FROM_INTERNAL) {
-            mContext.unbindService(conn);
+            context.unbindService(conn);
             return DLPluginManager.START_RESULT_SUCCESS;
         }
-        
+
+        fetchProxyServiceClass(dlIntent, new OnFetchProxyServiceClass() {
+            @Override
+            public void onFetch(int result, Class<? extends Service> proxyServiceClass) {
+                // TODO Auto-generated method stub
+                if (result == START_RESULT_SUCCESS) {
+                    // unBind代理Service
+                    context.unbindService(conn);
+                }
+                mResult = result;
+            }
+        });
+        return mResult;
+
+    }
+
+    /**
+     * 获取代理ServiceClass
+     * @param dlIntent
+     * @param fetchProxyServiceClass
+     */
+    private void fetchProxyServiceClass(DLIntent dlIntent, OnFetchProxyServiceClass fetchProxyServiceClass) {
         String packageName = dlIntent.getPluginPackage();
         if (TextUtils.isEmpty(packageName)) {
             throw new NullPointerException("disallow null packageName.");
         }
-
         DLPluginPackage pluginPackage = mPackagesHolder.get(packageName);
         if (pluginPackage == null) {
-            return START_RESULT_NO_PKG;
+            fetchProxyServiceClass.onFetch(START_RESULT_NO_PKG, null);
+            return;
         }
 
         // 获取要启动的Service的全名
         String className = dlIntent.getPluginClass();
         Class<?> clazz = loadPluginClass(pluginPackage.classLoader, className);
         if (clazz == null) {
-            return START_RESULT_NO_CLASS;
+            fetchProxyServiceClass.onFetch(START_RESULT_NO_CLASS, null);
+            return;
         }
 
-        // get the proxy activity class, the proxy activity will launch the
-        // plugin activity.
         Class<? extends Service> proxyServiceClass = getProxyServiceClass(clazz);
         if (proxyServiceClass == null) {
-            return START_RESULT_TYPE_ERROR;
+            fetchProxyServiceClass.onFetch(START_RESULT_TYPE_ERROR, null);
+            return;
         }
 
         // put extra data
         dlIntent.putExtra(DLConstants.EXTRA_CLASS, className);
         dlIntent.putExtra(DLConstants.EXTRA_PACKAGE, packageName);
-        dlIntent.setClass(mContext, proxyServiceClass);
-        //unBind代理Service
-        context.unbindService(conn);
-        return START_RESULT_SUCCESS;
+        fetchProxyServiceClass.onFetch(START_RESULT_SUCCESS, proxyServiceClass);
     }
-    
 
-    //zhangjie1980 重命名 loadPluginActivityClass -> loadPluginClass
+    // zhangjie1980 重命名 loadPluginActivityClass -> loadPluginClass
     private Class<?> loadPluginClass(ClassLoader classLoader, String className) {
         Class<?> clazz = null;
         try {
@@ -440,13 +426,13 @@ public class DLPluginManager {
 
         return activityClass;
     }
-    
+
     private Class<? extends Service> getProxyServiceClass(Class<?> clazz) {
         Class<? extends Service> proxyServiceClass = null;
         if (DLBasePluginService.class.isAssignableFrom(clazz)) {
             proxyServiceClass = DLProxyService.class;
         }
-        //后续可能还有IntentService，待补充
+        // 后续可能还有IntentService，待补充
 
         return proxyServiceClass;
     }
@@ -460,5 +446,8 @@ public class DLPluginManager {
         }
     }
 
-    
+    private interface OnFetchProxyServiceClass {
+        public void onFetch(int result, Class<? extends Service> proxyServiceClass);
+    }
+
 }
