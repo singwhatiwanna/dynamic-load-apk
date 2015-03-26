@@ -26,7 +26,7 @@ public class MainActivity extends DLBasePluginActivity {
 
     private static final String TAG = "Client-MainActivity";
     private ServiceConnection mConnecton;
-
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,21 +66,25 @@ public class MainActivity extends DLBasePluginActivity {
             }
         });
         
+       
         Button button3 = new Button(context);
         button3.setText("bind Service");
         layout.addView(button3, LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
         button3.setOnClickListener(new OnClickListener() {
+            @Override
             public void onClick(View v) {
+                if (mConnecton == null) {
+                    mConnecton = new ServiceConnection() {
+                        public void onServiceDisconnected(ComponentName name) {
+                        }
+                        public void onServiceConnected(ComponentName name, IBinder binder) {
+                            int sum = ((ITestServiceInterface)binder).sum(5, 5);
+                            Log.e("MainActivity", "onServiceConnected sum(5 + 5) = " + sum);
+                        }
+                    };
+                }
                 DLIntent intent = new DLIntent(getPackageName(), TestService.class);
-                bindPluginService(intent, mConnecton = new ServiceConnection() {
-                    public void onServiceDisconnected(ComponentName name) {
-                    }
-                    
-                    public void onServiceConnected(ComponentName name, IBinder binder) {
-                        int sum = ((ITestServiceInterface)binder).sum(5, 5);
-                        Log.e("MainActivity", "onServiceConnected sum(5 + 5) = " + sum);
-                    }
-                }, Context.BIND_AUTO_CREATE);
+                bindPluginService(intent, mConnecton, Context.BIND_AUTO_CREATE);
             }
         });
         
@@ -92,6 +96,7 @@ public class MainActivity extends DLBasePluginActivity {
                 if (mConnecton != null) {
                     DLIntent intent = new DLIntent(getPackageName(), TestService.class);
                     unBindPluginService(intent, mConnecton);
+                    mConnecton = null;
                 }
             }
         });
