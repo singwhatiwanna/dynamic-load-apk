@@ -2,7 +2,6 @@ package com.ryg.dynamicload.internal;
 
 import java.lang.reflect.Constructor;
 
-import com.ryg.dynamicload.DLPlugin;
 import com.ryg.dynamicload.DLServicePlugin;
 import com.ryg.utils.DLConfigs;
 import com.ryg.utils.DLConstants;
@@ -10,7 +9,6 @@ import com.ryg.utils.DLConstants;
 import android.annotation.TargetApi;
 import android.app.Service;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;

@@ -72,23 +72,27 @@ public class DLProxyImpl {
             if (mClass == null) {
                 mClass = packageInfo.activities[0].name;
             }
+
             //Finals 修复主题BUG
             int defaultTheme = packageInfo.applicationInfo.theme;
             for (ActivityInfo a : packageInfo.activities) {
                 if (a.name.equals(mClass)) {
                     mActivityInfo = a;
-                    //Finals ADD 修复主题没有配置的时候插件异常
-                    if (mActivityInfo.theme == 0 && defaultTheme != 0) {
-		       mActivityInfo.theme = defaultTheme;
-		    } else {
-			if (Build.VERSION.SDK_INT >= 14) {
-			    mActivityInfo.theme = android.R.style.Theme_DeviceDefault;
-			} else {
-			    mActivityInfo.theme = android.R.style.Theme;
-			}
-		    }
+                    // Finals ADD 修复主题没有配置的时候插件异常
+                    if (mActivityInfo.theme == 0) {
+                        if (defaultTheme != 0) {
+                            mActivityInfo.theme = defaultTheme;
+                        } else {
+                            if (Build.VERSION.SDK_INT >= 14) {
+                                mActivityInfo.theme = android.R.style.Theme_DeviceDefault;
+                            } else {
+                                mActivityInfo.theme = android.R.style.Theme;
+                            }
+                        }
+                    }
                 }
             }
+
         }
     }
 
@@ -100,12 +104,12 @@ public class DLProxyImpl {
         Theme superTheme = mProxyActivity.getTheme();
         mTheme = mResources.newTheme();
         mTheme.setTo(superTheme);
-        //Finals适配三星以及部分加载XML出现异常BUG
+        // Finals适配三星以及部分加载XML出现异常BUG
         try {
-	     mTheme.applyStyle(mActivityInfo.theme, true);
-	} catch (Exception e) {
-	    e.printStackTrace();
-	}
+            mTheme.applyStyle(mActivityInfo.theme, true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // TODO: handle mActivityInfo.launchMode here in the future.
     }
@@ -138,8 +142,7 @@ public class DLProxyImpl {
             mPluginActivity = (DLPlugin) instance;
             ((DLAttachable) mProxyActivity).attach(mPluginActivity, mPluginManager);
             Log.d(TAG, "instance = " + instance);
-            // attach the proxy activity and plugin package to the
-            // mPluginActivity
+            // attach the proxy activity and plugin package to the mPluginActivity
             mPluginActivity.attach(mProxyActivity, mPluginPackage);
 
             Bundle bundle = new Bundle();

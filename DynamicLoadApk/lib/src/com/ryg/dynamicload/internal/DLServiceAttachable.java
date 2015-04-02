@@ -18,7 +18,6 @@
 
 package com.ryg.dynamicload.internal;
 
-import com.ryg.dynamicload.DLPlugin;
 import com.ryg.dynamicload.DLServicePlugin;
 
 /**

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ryg.dynamicload.sample.mainhost"
-    android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionCode="2"
+    android:versionName="1.1" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -68,15 +68,15 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        
-        <service 
-            android:name="com.ryg.dynamicload.DLProxyService">
-            <!-- 
-           	<intent-filter >
-           	    <action android:name="com.ryg.dynamicload.proxy.service.action"/>
-           	</intent-filter> 
-           	 -->
+        <service android:name="com.ryg.dynamicload.DLProxyService" >
+
+            <!--
+            <intent-filter >
+                <action android:name="com.ryg.dynamicload.proxy.service.action"/>
+            </intent-filter> 
+            -->
         </service>
+
     </application>
 
 </manifest>

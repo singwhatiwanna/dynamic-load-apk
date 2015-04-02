@@ -84,26 +84,6 @@ public class DLPluginManager {
 
     private int mResult;
 
-    // private String mDexPath;
-
-    // /**
-    // * @author mrsimple
-    // */
-    // private class CopySoRunnable implements Runnable {
-    //
-    // String mDexPath = "";
-    //
-    // public CopySoRunnable(String dexPath) {
-    // mDexPath = dexPath;
-    // }
-    //
-    // @Override
-    // public void run() {
-    // DLUtils.copyPluginSoLib(mContext, mDexPath, mNativeLibDir);
-    // }
-    //
-    // };
-
     private DLPluginManager(Context context) {
         mContext = context.getApplicationContext();
         mNativeLibDir = mContext.getDir("pluginlib", Context.MODE_PRIVATE).getAbsolutePath();
@@ -222,7 +202,7 @@ public class DLPluginManager {
         // resolved later.
 
         // TODO : use wait and signal is ok ? that means when copying the
-        // .so files, the main thread will enter watting status, when the
+        // .so files, the main thread will enter waiting status, when the
         // copy is done, send a signal to the main thread.
         // new Thread(new CopySoRunnable(dexPath)).start();
 
