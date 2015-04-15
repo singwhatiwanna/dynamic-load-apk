@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="distributionType" value="LOCAL" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleHome" value="$APPLICATION_HOME_DIR$/gradle/gradle-2.2.1" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/lib" />
+            <option value="$PROJECT_DIR$/sample/depend_on_interface/doi-common" />
+            <option value="$PROJECT_DIR$/sample/depend_on_interface/doi-host" />
+            <option value="$PROJECT_DIR$/sample/depend_on_interface/doi-plugin" />
+            <option value="$PROJECT_DIR$/sample/main/main-host" />
+            <option value="$PROJECT_DIR$/sample/main/main-plugin-a" />
+            <option value="$PROJECT_DIR$/sample/main/main-plugin-b" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>
+
