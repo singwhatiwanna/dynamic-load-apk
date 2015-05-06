@@ -31,13 +31,14 @@ import android.view.MotionEvent;
 import android.view.WindowManager.LayoutParams;
 
 import com.ryg.dynamicload.internal.DLAttachable;
-import com.ryg.dynamicload.internal.DLPluginManager;
-import com.ryg.dynamicload.internal.DLProxyImpl;
+import com.ryg.dynamicload.internal.DLPluginPackage;
+import com.ryg.dynamicload.proxy.DLActivityProxy;
 
-public class DLProxyFragmentActivity extends FragmentActivity implements DLAttachable {
+public class DLProxyFragmentActivity extends FragmentActivity
+        implements DLAttachable<DLPlugin> {
 
     protected DLPlugin mRemoteActivity;
-    private DLProxyImpl impl = new DLProxyImpl(this);
+    private DLActivityProxy impl = new DLActivityProxy(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +47,7 @@ public class DLProxyFragmentActivity extends FragmentActivity implements DLAttac
     }
 
     @Override
-    public void attach(DLPlugin remoteActivity, DLPluginManager pluginManager) {
+    public void attach(DLPlugin remoteActivity, DLPluginPackage pluginPackage) {
         mRemoteActivity = remoteActivity;
     }
 

@@ -33,12 +33,14 @@ import android.view.WindowManager.LayoutParams;
 
 import com.ryg.dynamicload.internal.DLAttachable;
 import com.ryg.dynamicload.internal.DLPluginManager;
-import com.ryg.dynamicload.internal.DLProxyImpl;
+import com.ryg.dynamicload.internal.DLPluginPackage;
+import com.ryg.dynamicload.proxy.DLActivityProxy;
 
-public class DLProxyActivity extends Activity implements DLAttachable {
+public class DLProxyActivity extends Activity
+        implements DLAttachable<DLPlugin> {
 
     protected DLPlugin mRemoteActivity;
-    private DLProxyImpl impl = new DLProxyImpl(this);
+    private DLActivityProxy impl = new DLActivityProxy(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +49,7 @@ public class DLProxyActivity extends Activity implements DLAttachable {
     }
 
     @Override
-    public void attach(DLPlugin remoteActivity, DLPluginManager pluginManager) {
+    public void attach(DLPlugin remoteActivity, DLPluginPackage pluginPackage) {
         mRemoteActivity = remoteActivity;
     }
 
@@ -172,7 +174,7 @@ public class DLProxyActivity extends Activity implements DLAttachable {
         mRemoteActivity.onOptionsItemSelected(item);
         return super.onOptionsItemSelected(item);
     }
-    
+
     @Override
     public ComponentName startService(Intent service) {
         return super.startService(service);
