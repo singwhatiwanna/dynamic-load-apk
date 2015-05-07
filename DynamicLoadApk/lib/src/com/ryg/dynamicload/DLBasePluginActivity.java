@@ -38,6 +38,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.ryg.dynamicload.internal.DLActivityPlugin;
 import com.ryg.dynamicload.internal.DLIntent;
 import com.ryg.dynamicload.internal.DLPluginManager;
 import com.ryg.dynamicload.internal.DLPluginPackage;
@@ -49,7 +50,7 @@ import com.ryg.utils.DLConstants;
  * @see {@link DLBasePluginActivity.that}
  * @author renyugang
  */
-public class DLBasePluginActivity extends Activity implements DLPlugin {
+public class DLBasePluginActivity extends Activity implements DLActivityPlugin {
 
     private static final String TAG = "DLBasePluginActivity";
 

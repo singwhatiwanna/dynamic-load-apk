@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.ryg.dynamicload.proxy;
+package com.ryg.dynamicload.loader;
 
 import android.content.Context;
 import android.content.Intent;
@@ -32,14 +32,14 @@ import com.ryg.utils.DLConstants;
 import java.lang.reflect.Constructor;
 
 /**
- * 插件代理类基类
+ * 插件加载器基类,负责构建、加载插件组件，并且与代理组件建立关联关系
  * 
  * @author mrsimple
  * @param <P> 组件代理类型,例如DLProxyActivity,DLProxyService等
  * @param <T> Plugin类型，例如{@see DLPlugin},{@see DLServicePlugin}
  */
 @SuppressWarnings("unchecked")
-public abstract class DLBaseProxy<P extends Context, T> {
+public abstract class DLBaseLoader<P extends Context, T> {
 
     /**
      * 组件类型,例如Service,Activity等
@@ -112,7 +112,7 @@ public abstract class DLBaseProxy<P extends Context, T> {
      * 调用插件的attach和onCreate函数，启动插件
      */
     private void callOnCreate() {
-        // 调用插件的attach
+        // 调用插件的attach,将Proxy组件注入到插件对象中
         ((DLAttachable<P>) mPlugin).attach(mProxyComponent, mPluginPackage);
         Bundle bundle = new Bundle();
         bundle.putInt(DLConstants.FROM, DLConstants.FROM_EXTERNAL);
@@ -120,6 +120,11 @@ public abstract class DLBaseProxy<P extends Context, T> {
         callPluginOnCreate(bundle);
     }
 
+    /**
+     * 调用插件的onCreate方法
+     * 
+     * @param bundle 额外的数据
+     */
     protected abstract void callPluginOnCreate(Bundle bundle);
 
 }

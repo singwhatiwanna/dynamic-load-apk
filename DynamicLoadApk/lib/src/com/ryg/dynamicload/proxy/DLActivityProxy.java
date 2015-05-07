@@ -19,117 +19,166 @@
 package com.ryg.dynamicload.proxy;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageInfo;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
-import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.WindowManager.LayoutParams;
 
-import com.ryg.dynamicload.DLPlugin;
+import com.ryg.dynamicload.internal.DLActivityPlugin;
+import com.ryg.dynamicload.internal.DLAttachable;
+import com.ryg.dynamicload.internal.DLPluginManager;
+import com.ryg.dynamicload.internal.DLPluginPackage;
+import com.ryg.dynamicload.loader.DLActivityLoader;
 
-/**
- * This is a plugin activity proxy, the proxy will create the plugin activity
- * with reflect, and then call the plugin activity's attach、onCreate method, at
- * this time, the plugin activity is running.
- * 
- * @author mrsimple
- */
-public class DLActivityProxy extends DLBaseProxy<Activity, DLPlugin> {
+public class DLActivityProxy extends Activity
+        implements DLAttachable<DLActivityPlugin> {
 
-    private AssetManager mAssetManager;
-    private Resources mResources;
-    private Theme mTheme;
+    protected DLActivityPlugin mRemoteActivity;
+    private DLActivityLoader impl = new DLActivityLoader(this);
 
-    private ActivityInfo mActivityInfo;
-//    public ClassLoader mPluginClassLoader;
-
-    public DLActivityProxy(Activity activity) {
-        mProxyComponent = activity;
-    }
-
-    private void initializeActivityInfo() {
-        PackageInfo packageInfo = mPluginPackage.packageInfo;
-        if ((packageInfo.activities != null) && (packageInfo.activities.length > 0)) {
-            if (mPluginClazz == null) {
-                mPluginClazz = packageInfo.activities[0].name;
-            }
-
-            // Finals 修复主题BUG
-            int defaultTheme = packageInfo.applicationInfo.theme;
-            for (ActivityInfo a : packageInfo.activities) {
-                if (a.name.equals(mPluginClazz)) {
-                    mActivityInfo = a;
-                    // Finals ADD 修复主题没有配置的时候插件异常
-                    if (mActivityInfo.theme == 0) {
-                        if (defaultTheme != 0) {
-                            mActivityInfo.theme = defaultTheme;
-                        } else {
-                            if (Build.VERSION.SDK_INT >= 14) {
-                                mActivityInfo.theme = android.R.style.Theme_DeviceDefault;
-                            } else {
-                                mActivityInfo.theme = android.R.style.Theme;
-                            }
-                        }
-                    }
-                }
-            }
-
-        }
-    }
-
-    private void handleActivityInfo() {
-        Log.d(TAG, "handleActivityInfo, theme=" + mActivityInfo.theme);
-        if (mActivityInfo.theme > 0) {
-            mProxyComponent.setTheme(mActivityInfo.theme);
-        }
-
-        Theme superTheme = mProxyComponent.getTheme();
-        mTheme = mResources.newTheme();
-        mTheme.setTo(superTheme);
-        // Finals适配三星以及部分加载XML出现异常BUG
-        try {
-            mTheme.applyStyle(mActivityInfo.theme, true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        // TODO: handle mActivityInfo.launchMode here in the future.
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        impl.onCreate(getIntent());
     }
 
     @Override
-    protected void init(Intent intent) {
-        super.init(intent);
-        mAssetManager = mPluginPackage.assetManager;
-        mResources = mPluginPackage.resources;
-        initializeActivityInfo();
-        handleActivityInfo();
+    public void attach(DLActivityPlugin remoteActivity, DLPluginPackage pluginPackage) {
+        mRemoteActivity = remoteActivity;
     }
 
-    public ClassLoader getClassLoader() {
-        return mPluginPackage.classLoader;
-    }
-
+    @Override
     public AssetManager getAssets() {
-        return mAssetManager;
-    }
-
-    public Resources getResources() {
-        return mResources;
-    }
-
-    public Theme getTheme() {
-        return mTheme;
-    }
-
-    public DLPlugin getRemoteActivity() {
-        return mPlugin;
+        return impl.getAssets() == null ? super.getAssets() : impl.getAssets();
     }
 
     @Override
-    protected void callPluginOnCreate(Bundle bundle) {
-        mPlugin.onCreate(bundle);
+    public Resources getResources() {
+        return impl.getResources() == null ? super.getResources() : impl.getResources();
     }
+
+    @Override
+    public Theme getTheme() {
+        return impl.getTheme() == null ? super.getTheme() : impl.getTheme();
+    }
+
+    @Override
+    public ClassLoader getClassLoader() {
+        return impl.getClassLoader();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        mRemoteActivity.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onStart() {
+        mRemoteActivity.onStart();
+        super.onStart();
+    }
+
+    @Override
+    protected void onRestart() {
+        mRemoteActivity.onRestart();
+        super.onRestart();
+    }
+
+    @Override
+    protected void onResume() {
+        mRemoteActivity.onResume();
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        mRemoteActivity.onPause();
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        mRemoteActivity.onStop();
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        mRemoteActivity.onDestroy();
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        mRemoteActivity.onSaveInstanceState(outState);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        mRemoteActivity.onRestoreInstanceState(savedInstanceState);
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        mRemoteActivity.onNewIntent(intent);
+        super.onNewIntent(intent);
+    }
+
+    @Override
+    public void onBackPressed() {
+        mRemoteActivity.onBackPressed();
+        super.onBackPressed();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        super.onTouchEvent(event);
+        return mRemoteActivity.onTouchEvent(event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        super.onKeyUp(keyCode, event);
+        return mRemoteActivity.onKeyUp(keyCode, event);
+    }
+
+    @Override
+    public void onWindowAttributesChanged(LayoutParams params) {
+        mRemoteActivity.onWindowAttributesChanged(params);
+        super.onWindowAttributesChanged(params);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        mRemoteActivity.onWindowFocusChanged(hasFocus);
+        super.onWindowFocusChanged(hasFocus);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        mRemoteActivity.onCreateOptionsMenu(menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        mRemoteActivity.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public ComponentName startService(Intent service) {
+        return super.startService(service);
+    }
+
 }

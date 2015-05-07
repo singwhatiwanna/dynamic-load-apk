@@ -24,6 +24,7 @@ import android.content.res.Configuration;
 import android.os.IBinder;
 
 import com.ryg.dynamicload.internal.DLPluginPackage;
+import com.ryg.dynamicload.internal.DLServicePlugin;
 import com.ryg.utils.DLConstants;
 import com.ryg.utils.LOG;
 

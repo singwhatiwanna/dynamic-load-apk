@@ -40,12 +40,13 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.ryg.dynamicload.internal.DLActivityPlugin;
 import com.ryg.dynamicload.internal.DLIntent;
 import com.ryg.dynamicload.internal.DLPluginManager;
 import com.ryg.dynamicload.internal.DLPluginPackage;
 import com.ryg.utils.DLConstants;
 
-public class DLBasePluginFragmentActivity extends FragmentActivity implements DLPlugin {
+public class DLBasePluginFragmentActivity extends FragmentActivity implements DLActivityPlugin {
 
     private static final String TAG = "DLBasePluginFragmentActivity";
 
