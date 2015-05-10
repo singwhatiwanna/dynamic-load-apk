@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.ryg.dynamicload;
+package com.ryg.dynamicload.internal;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -26,9 +26,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.WindowManager.LayoutParams;
 
-import com.ryg.dynamicload.internal.DLPluginPackage;
-
-public interface DLPlugin {
+public interface DLActivityPlugin extends DLAttachable<Activity>{
 
     public void onCreate(Bundle savedInstanceState);
     public void onStart();
@@ -38,7 +36,6 @@ public interface DLPlugin {
     public void onPause();
     public void onStop();
     public void onDestroy();
-    public void attach(Activity proxyActivity, DLPluginPackage pluginPackage);
     public void onSaveInstanceState(Bundle outState);
     public void onNewIntent(Intent intent);
     public void onRestoreInstanceState(Bundle savedInstanceState);

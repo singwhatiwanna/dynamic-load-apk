@@ -38,10 +38,6 @@ import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.util.Log;
-
 public final class SoLibManager {
 
     private static final String TAG = SoLibManager.class.getSimpleName();
@@ -71,7 +67,7 @@ public final class SoLibManager {
 
     /**
      * get cpu name, according cpu type parse relevant so lib
-     * 
+     *
      * @return ARM、ARMV7、X86、MIPS
      */
     private String getCpuName() {
@@ -109,11 +105,9 @@ public final class SoLibManager {
 
     /**
      * copy so lib to specify directory(/data/data/host_pack_name/pluginlib)
-     * 
-     * @param dexPath
-     *            plugin path
-     * @param cpuName
-     *            cpuName CPU_X86,CPU_MIPS,CPU_ARMEABI
+     *
+     * @param dexPath      plugin path
+     * @param nativeLibDir nativeLibDir
      */
     public void copyPluginSoLib(Context context, String dexPath, String nativeLibDir) {
         String cpuName = getCpuName();
@@ -172,70 +166,35 @@ public final class SoLibManager {
             return zipEntryName.substring(zipEntryName.lastIndexOf("/") + 1);
         }
 
-        private void writeSoFile2LibDir() {
+        private void writeSoFile2LibDir() throws IOException {
             InputStream is = null;
             FileOutputStream fos = null;
-            try {
-                is = mZipFile.getInputStream(mZipEntry);
-                fos = new FileOutputStream(new File(sNativeLibDir, mSoFileName));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            is = mZipFile.getInputStream(mZipEntry);
+            fos = new FileOutputStream(new File(sNativeLibDir, mSoFileName));
             copy(is, fos);
-            try {
-                mZipFile.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            mZipFile.close();
         }
 
         /**
          * 输入输出流拷贝
-         * 
+         *
          * @param is
          * @param os
          */
-        public void copy(InputStream is, OutputStream os) {
+        public void copy(InputStream is, OutputStream os) throws IOException {
             if (is == null || os == null)
                 return;
             BufferedInputStream bis = new BufferedInputStream(is);
             BufferedOutputStream bos = new BufferedOutputStream(os);
-            byte[] buf = null;
-            try {
-                buf = new byte[getAvailableSize(bis)];
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            int size = getAvailableSize(bis);
+            byte[] buf = new byte[size];
             int i = 0;
-            try {
-                while ((i = bis.read(buf)) != -1) {
-                    bos.write(buf, 0, i);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+            while ((i = bis.read(buf, 0, size)) != -1) {
+                bos.write(buf, 0, i);
             }
-            try {
-                bos.flush();
-                bos.close();
-                bis.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-//            finally {
-//                try {
-//                    bos.flush();
-//                } catch (IOException e) {
-//                }
-//                try {
-//                    bos.close();
-//                } catch (IOException e) {
-//                }
-//                
-//                try {
-//                    bis.close();
-//                } catch(IOException e) {
-//                }
-//            }
+            bos.flush();
+            bos.close();
+            bis.close();
         }
 
         private int getAvailableSize(InputStream is) throws IOException {
@@ -247,9 +206,15 @@ public final class SoLibManager {
 
         @Override
         public void run() {
-            writeSoFile2LibDir();
-            DLConfigs.setSoLastModifiedTime(mContext, mZipEntry.getName(), mLastModityTime);
-            Log.d(TAG, "copy so lib success: " + mZipEntry.getName());
+            try {
+                writeSoFile2LibDir();
+                DLConfigs.setSoLastModifiedTime(mContext, mZipEntry.getName(), mLastModityTime);
+                Log.d(TAG, "copy so lib success: " + mZipEntry.getName());
+            } catch (IOException e) {
+                Log.e(TAG, "copy so lib failed: " + e.toString());
+                e.printStackTrace();
+            }
+
         }
 
     }

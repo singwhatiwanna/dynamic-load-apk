@@ -38,9 +38,9 @@ import android.util.Log;
 import com.ryg.dynamicload.DLBasePluginActivity;
 import com.ryg.dynamicload.DLBasePluginFragmentActivity;
 import com.ryg.dynamicload.DLBasePluginService;
-import com.ryg.dynamicload.DLProxyActivity;
-import com.ryg.dynamicload.DLProxyFragmentActivity;
-import com.ryg.dynamicload.DLProxyService;
+import com.ryg.dynamicload.proxy.DLActivityProxy;
+import com.ryg.dynamicload.proxy.DLFragmentActivityProxy;
+import com.ryg.dynamicload.proxy.DLServiceProxy;
 import com.ryg.utils.DLConstants;
 import com.ryg.utils.SoLibManager;
 
@@ -83,26 +83,6 @@ public class DLPluginManager {
     private String mNativeLibDir = null;
 
     private int mResult;
-
-    // private String mDexPath;
-
-    // /**
-    // * @author mrsimple
-    // */
-    // private class CopySoRunnable implements Runnable {
-    //
-    // String mDexPath = "";
-    //
-    // public CopySoRunnable(String dexPath) {
-    // mDexPath = dexPath;
-    // }
-    //
-    // @Override
-    // public void run() {
-    // DLUtils.copyPluginSoLib(mContext, mDexPath, mNativeLibDir);
-    // }
-    //
-    // };
 
     private DLPluginManager(Context context) {
         mContext = context.getApplicationContext();
@@ -222,7 +202,7 @@ public class DLPluginManager {
         // resolved later.
 
         // TODO : use wait and signal is ok ? that means when copying the
-        // .so files, the main thread will enter watting status, when the
+        // .so files, the main thread will enter waiting status, when the
         // copy is done, send a signal to the main thread.
         // new Thread(new CopySoRunnable(dexPath)).start();
 
@@ -419,9 +399,9 @@ public class DLPluginManager {
     private Class<? extends Activity> getProxyActivityClass(Class<?> clazz) {
         Class<? extends Activity> activityClass = null;
         if (DLBasePluginActivity.class.isAssignableFrom(clazz)) {
-            activityClass = DLProxyActivity.class;
+            activityClass = DLActivityProxy.class;
         } else if (DLBasePluginFragmentActivity.class.isAssignableFrom(clazz)) {
-            activityClass = DLProxyFragmentActivity.class;
+            activityClass = DLFragmentActivityProxy.class;
         }
 
         return activityClass;
@@ -430,7 +410,7 @@ public class DLPluginManager {
     private Class<? extends Service> getProxyServiceClass(Class<?> clazz) {
         Class<? extends Service> proxyServiceClass = null;
         if (DLBasePluginService.class.isAssignableFrom(clazz)) {
-            proxyServiceClass = DLProxyService.class;
+            proxyServiceClass = DLServiceProxy.class;
         }
         // 后续可能还有IntentService，待补充
 
