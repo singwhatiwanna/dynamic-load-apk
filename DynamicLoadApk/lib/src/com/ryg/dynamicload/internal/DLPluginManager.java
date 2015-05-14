@@ -21,12 +21,16 @@ package com.ryg.dynamicload.internal;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -35,6 +39,7 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.ryg.dynamicload.DLActivities;
 import com.ryg.dynamicload.DLBasePluginActivity;
 import com.ryg.dynamicload.DLBasePluginFragmentActivity;
 import com.ryg.dynamicload.DLBasePluginService;
@@ -419,6 +424,32 @@ public class DLPluginManager {
 
     private void performStartActivityForResult(Context context, DLIntent dlIntent, int requestCode) {
         Log.d(TAG, "launch " + dlIntent.getPluginClass());
+        //每次开启新界面时获取下所有界面的activitys和launchmode，以防在使用中更新了插件。
+        DLActivities.initData(context);
+        if(DLActivities.Acts != null){
+	        Map<String,Integer> actAndMode = DLActivities.Acts;
+			Set<String> keySet = actAndMode.keySet();
+			int mode = 0; 
+			for(String name : keySet) {
+				if(name.equals(dlIntent.getPluginClass())) {
+					mode = actAndMode.get(name);
+					break;
+				}
+			}
+			if (mode == ActivityInfo.LAUNCH_SINGLE_TASK) {
+				//如果activity在task存在，拿到最顶端,不会启动新的Activity
+				dlIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+				//如果activity在task存在，将Activity之上的所有Activity结束掉
+				dlIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			}else if(mode == ActivityInfo.LAUNCH_SINGLE_TOP) {
+				dlIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+			}else if(mode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
+				dlIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			}
+        }else {
+        	Log.e(TAG, "Acts is null");
+        }
+        
         if (context instanceof Activity) {
             ((Activity) context).startActivityForResult(dlIntent, requestCode);
         } else {
