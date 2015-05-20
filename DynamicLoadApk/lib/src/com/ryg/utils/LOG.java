@@ -1,6 +1,5 @@
 package com.ryg.utils;
 
-import android.os.Debug;
 import android.util.Log;
 
 public class LOG {

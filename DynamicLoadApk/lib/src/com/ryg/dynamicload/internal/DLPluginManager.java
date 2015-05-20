@@ -38,9 +38,9 @@ import android.util.Log;
 import com.ryg.dynamicload.DLBasePluginActivity;
 import com.ryg.dynamicload.DLBasePluginFragmentActivity;
 import com.ryg.dynamicload.DLBasePluginService;
-import com.ryg.dynamicload.DLProxyActivity;
-import com.ryg.dynamicload.DLProxyFragmentActivity;
-import com.ryg.dynamicload.DLProxyService;
+import com.ryg.dynamicload.proxy.DLActivityProxy;
+import com.ryg.dynamicload.proxy.DLFragmentActivityProxy;
+import com.ryg.dynamicload.proxy.DLServiceProxy;
 import com.ryg.utils.DLConstants;
 import com.ryg.utils.SoLibManager;
 
@@ -399,9 +399,9 @@ public class DLPluginManager {
     private Class<? extends Activity> getProxyActivityClass(Class<?> clazz) {
         Class<? extends Activity> activityClass = null;
         if (DLBasePluginActivity.class.isAssignableFrom(clazz)) {
-            activityClass = DLProxyActivity.class;
+            activityClass = DLActivityProxy.class;
         } else if (DLBasePluginFragmentActivity.class.isAssignableFrom(clazz)) {
-            activityClass = DLProxyFragmentActivity.class;
+            activityClass = DLFragmentActivityProxy.class;
         }
 
         return activityClass;
@@ -410,7 +410,7 @@ public class DLPluginManager {
     private Class<? extends Service> getProxyServiceClass(Class<?> clazz) {
         Class<? extends Service> proxyServiceClass = null;
         if (DLBasePluginService.class.isAssignableFrom(clazz)) {
-            proxyServiceClass = DLProxyService.class;
+            proxyServiceClass = DLServiceProxy.class;
         }
         // 后续可能还有IntentService，待补充
 

@@ -1,12 +1,10 @@
-package com.ryg.dynamicload;
+package com.ryg.dynamicload.internal;
 
 
 import android.app.Service;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.IBinder;
-
-import com.ryg.dynamicload.internal.DLPluginPackage;
 
 public interface DLServicePlugin {
 

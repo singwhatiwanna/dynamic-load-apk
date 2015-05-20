@@ -16,9 +16,8 @@
  * limitations under the License.
  */
 
-package com.ryg.dynamicload.internal;
+package com.ryg.dynamicload.loader;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -30,11 +29,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.ryg.dynamicload.DLPlugin;
-import com.ryg.utils.DLConfigs;
-import com.ryg.utils.DLConstants;
-
-import java.lang.reflect.Constructor;
+import com.ryg.dynamicload.internal.DLActivityPlugin;
 
 /**
  * This is a plugin activity proxy, the proxy will create the plugin activity
@@ -43,40 +38,29 @@ import java.lang.reflect.Constructor;
  * 
  * @author mrsimple
  */
-public class DLProxyImpl {
-
-    private static final String TAG = "DLProxyImpl";
-
-    private String mClass;
-    private String mPackageName;
-
-    private DLPluginPackage mPluginPackage;
-    private DLPluginManager mPluginManager;
+public class DLActivityLoader extends DLBaseLoader<Activity, DLActivityPlugin> {
 
     private AssetManager mAssetManager;
     private Resources mResources;
     private Theme mTheme;
 
     private ActivityInfo mActivityInfo;
-    private Activity mProxyActivity;
-    protected DLPlugin mPluginActivity;
-    public ClassLoader mPluginClassLoader;
 
-    public DLProxyImpl(Activity activity) {
-        mProxyActivity = activity;
+    public DLActivityLoader(Activity activity) {
+        mProxyComponent = activity;
     }
 
     private void initializeActivityInfo() {
         PackageInfo packageInfo = mPluginPackage.packageInfo;
         if ((packageInfo.activities != null) && (packageInfo.activities.length > 0)) {
-            if (mClass == null) {
-                mClass = packageInfo.activities[0].name;
+            if (mPluginClazz == null) {
+                mPluginClazz = packageInfo.activities[0].name;
             }
 
-            //Finals 修复主题BUG
+            // Finals 修复主题BUG
             int defaultTheme = packageInfo.applicationInfo.theme;
             for (ActivityInfo a : packageInfo.activities) {
-                if (a.name.equals(mClass)) {
+                if (a.name.equals(mPluginClazz)) {
                     mActivityInfo = a;
                     // Finals ADD 修复主题没有配置的时候插件异常
                     if (mActivityInfo.theme == 0) {
@@ -99,9 +83,10 @@ public class DLProxyImpl {
     private void handleActivityInfo() {
         Log.d(TAG, "handleActivityInfo, theme=" + mActivityInfo.theme);
         if (mActivityInfo.theme > 0) {
-            mProxyActivity.setTheme(mActivityInfo.theme);
+            mProxyComponent.setTheme(mActivityInfo.theme);
         }
-        Theme superTheme = mProxyActivity.getTheme();
+
+        Theme superTheme = mProxyComponent.getTheme();
         mTheme = mResources.newTheme();
         mTheme.setTo(superTheme);
         // Finals适配三星以及部分加载XML出现异常BUG
@@ -110,47 +95,16 @@ public class DLProxyImpl {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         // TODO: handle mActivityInfo.launchMode here in the future.
     }
 
-    public void onCreate(Intent intent) {
-
-        // set the extra's class loader
-        intent.setExtrasClassLoader(DLConfigs.sPluginClassloader);
-
-        mPackageName = intent.getStringExtra(DLConstants.EXTRA_PACKAGE);
-        mClass = intent.getStringExtra(DLConstants.EXTRA_CLASS);
-        Log.d(TAG, "mClass=" + mClass + " mPackageName=" + mPackageName);
-
-        mPluginManager = DLPluginManager.getInstance(mProxyActivity);
-        mPluginPackage = mPluginManager.getPackage(mPackageName);
+    @Override
+    protected void init(Intent intent) {
+        super.init(intent);
         mAssetManager = mPluginPackage.assetManager;
         mResources = mPluginPackage.resources;
-
         initializeActivityInfo();
         handleActivityInfo();
-        launchTargetActivity();
-    }
-
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    protected void launchTargetActivity() {
-        try {
-            Class<?> localClass = getClassLoader().loadClass(mClass);
-            Constructor<?> localConstructor = localClass.getConstructor(new Class[] {});
-            Object instance = localConstructor.newInstance(new Object[] {});
-            mPluginActivity = (DLPlugin) instance;
-            ((DLAttachable) mProxyActivity).attach(mPluginActivity, mPluginManager);
-            Log.d(TAG, "instance = " + instance);
-            // attach the proxy activity and plugin package to the mPluginActivity
-            mPluginActivity.attach(mProxyActivity, mPluginPackage);
-
-            Bundle bundle = new Bundle();
-            bundle.putInt(DLConstants.FROM, DLConstants.FROM_EXTERNAL);
-            mPluginActivity.onCreate(bundle);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public ClassLoader getClassLoader() {
@@ -169,7 +123,12 @@ public class DLProxyImpl {
         return mTheme;
     }
 
-    public DLPlugin getRemoteActivity() {
-        return mPluginActivity;
+    public DLActivityPlugin getRemoteActivity() {
+        return mPlugin;
+    }
+
+    @Override
+    protected void callPluginOnCreate(Bundle bundle) {
+        mPlugin.onCreate(bundle);
     }
 }

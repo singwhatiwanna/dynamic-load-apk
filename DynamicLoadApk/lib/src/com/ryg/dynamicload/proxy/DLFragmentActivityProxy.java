@@ -16,29 +16,30 @@
  * limitations under the License.
  */
 
-package com.ryg.dynamicload;
+package com.ryg.dynamicload.proxy;
 
-import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.WindowManager.LayoutParams;
 
+import com.ryg.dynamicload.internal.DLActivityPlugin;
 import com.ryg.dynamicload.internal.DLAttachable;
-import com.ryg.dynamicload.internal.DLPluginManager;
-import com.ryg.dynamicload.internal.DLProxyImpl;
+import com.ryg.dynamicload.internal.DLPluginPackage;
+import com.ryg.dynamicload.loader.DLActivityLoader;
 
-public class DLProxyActivity extends Activity implements DLAttachable {
+public class DLFragmentActivityProxy extends FragmentActivity
+        implements DLAttachable<DLActivityPlugin> {
 
-    protected DLPlugin mRemoteActivity;
-    private DLProxyImpl impl = new DLProxyImpl(this);
+    protected DLActivityPlugin mRemoteActivity;
+    private DLActivityLoader impl = new DLActivityLoader(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +48,7 @@ public class DLProxyActivity extends Activity implements DLAttachable {
     }
 
     @Override
-    public void attach(DLPlugin remoteActivity, DLPluginManager pluginManager) {
+    public void attach(DLActivityPlugin remoteActivity, DLPluginPackage pluginPackage) {
         mRemoteActivity = remoteActivity;
     }
 
@@ -171,11 +172,6 @@ public class DLProxyActivity extends Activity implements DLAttachable {
     public boolean onOptionsItemSelected(MenuItem item) {
         mRemoteActivity.onOptionsItemSelected(item);
         return super.onOptionsItemSelected(item);
-    }
-    
-    @Override
-    public ComponentName startService(Intent service) {
-        return super.startService(service);
     }
 
 }
