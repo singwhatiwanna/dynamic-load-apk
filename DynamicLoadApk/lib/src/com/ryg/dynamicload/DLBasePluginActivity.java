@@ -394,6 +394,14 @@ public class DLBasePluginActivity extends Activity implements DLPlugin {
         }
         return mPluginManager.startPluginService(that, dlIntent);
     }
+    public int stopPluginService(DLIntent dlIntent) {
+        if (mFrom == DLConstants.FROM_EXTERNAL) {
+            if (dlIntent.getPluginPackage() == null) {
+                dlIntent.setPluginPackage(mPluginPackage.packageName);
+            }
+        }
+        return mPluginManager.stopPluginService(that, dlIntent);
+    }
     
     public int bindPluginService(DLIntent dlIntent, ServiceConnection conn, int flags) {
         if (mFrom == DLConstants.FROM_EXTERNAL) {
