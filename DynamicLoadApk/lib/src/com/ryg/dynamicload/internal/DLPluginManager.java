@@ -285,6 +285,29 @@ public class DLPluginManager {
         
         return mResult;
     }
+    
+    public int stopPluginService(final Context context, final DLIntent dlIntent) {
+        if (mFrom == DLConstants.FROM_INTERNAL) {
+            dlIntent.setClassName(context, dlIntent.getPluginClass());
+            context.stopService(dlIntent);
+            return DLPluginManager.START_RESULT_SUCCESS;
+        }
+        
+        fetchProxyServiceClass(dlIntent, new OnFetchProxyServiceClass() {
+            @Override
+            public void onFetch(int result, Class<? extends Service> proxyServiceClass) {
+                // TODO Auto-generated method stub
+                if (result == START_RESULT_SUCCESS) {
+                    dlIntent.setClass(context, proxyServiceClass);
+                    // stop代理Service
+                    context.stopService(dlIntent);
+                }
+                mResult = result;
+            }
+        });
+        
+        return mResult;
+    }
 
     public int bindPluginService(final Context context, final DLIntent dlIntent, final ServiceConnection conn,
             final int flags) {
