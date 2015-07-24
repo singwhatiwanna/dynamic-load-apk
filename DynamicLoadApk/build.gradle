@@ -14,15 +14,6 @@ buildscript {
 
 def dlPath = '/sdcard/DynamicLoadHost'
 
-def makeJar(String target,String classDir){
-    exec{
-        executable "jar"
-        args "cvf",target
-        args "-C", classDir
-        args "","."
-    }
-}
-
 allprojects {
     repositories {
         jcenter()
@@ -47,14 +38,7 @@ allprojects {
         upload()
     }
 
-    task buildLib(dependsOn:'compileReleaseJava') {
-        def srcDir = project.buildDir.toString() + "/intermediates/classes/release"
-        def destFile = project.buildDir.toString() + File.separator + project.name.toString() + ".jar"
-        println destFile
-//        inputs.dir srcDir
-//        outputs.file destFile
-        doLast {
-            makeJar(destFile, srcDir)
-        }
+    task buildLib (type: Jar, dependsOn:'compileReleaseJava') {
+        from (project.buildDir.toString()+'/intermediates/classes/release')
     }
 }
