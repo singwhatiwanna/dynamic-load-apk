@@ -35,7 +35,7 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     provided project(':lib')
-    provided files('../main-host/build/main-host.jar')
+    provided files('../main-host/build/libs/main-host.jar')
 }
 
 task beforeBuild(dependsOn: ':main-host:buildLib') << {

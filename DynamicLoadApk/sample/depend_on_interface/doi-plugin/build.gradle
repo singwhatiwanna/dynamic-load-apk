@@ -33,8 +33,8 @@ android {
 }
 
 dependencies {
-    provided files('../../../lib/build/lib.jar')
-    provided files('../doi-common/build/doi-common.jar')
+    provided files('../../../lib/build/libs/lib.jar')
+    provided files('../doi-common/build/libs/doi-common.jar')
     provided files('external-jars/android-support-v4.jar')
 }
 
