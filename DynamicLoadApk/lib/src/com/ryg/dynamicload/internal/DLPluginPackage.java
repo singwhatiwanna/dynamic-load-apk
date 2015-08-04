@@ -39,6 +39,13 @@ public class DLPluginPackage {
     public Resources resources;
     public PackageInfo packageInfo;
 
+    /*Modify. AUT: AndyWing . Modify for [apk file md5 check] . 15-8-3 .START*/
+    public String dexPath;
+    public DLPluginPackage() {
+        // empty
+    }
+    /*Modify. AUT: AndyWing . 15-8-3 .END*/
+
     public DLPluginPackage(DexClassLoader loader, Resources resources,
             PackageInfo packageInfo) {
         this.packageName = packageInfo.packageName;

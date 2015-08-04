@@ -20,15 +20,18 @@ package com.ryg.dynamicload;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.os.Bundle;
+import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.WindowManager.LayoutParams;
 
 import com.ryg.dynamicload.internal.DLAttachable;
@@ -172,7 +175,18 @@ public class DLProxyActivity extends Activity implements DLAttachable {
         mRemoteActivity.onOptionsItemSelected(item);
         return super.onOptionsItemSelected(item);
     }
-    
+
+    /*Modify. AUT: AndyWing . Modify for [apk file md5 check] . 15-8-3 .START*/
+    @Override
+    public View onCreateView(String name, Context context, AttributeSet attrs) {
+        View view = impl.onCreateView(name, context, attrs);
+        if (view == null) {
+            view = super.onCreateView(name, context, attrs);
+        }
+        return view;
+    }
+    /*Modify. AUT: AndyWing . 15-8-3 .END*/
+
     @Override
     public ComponentName startService(Intent service) {
         return super.startService(service);

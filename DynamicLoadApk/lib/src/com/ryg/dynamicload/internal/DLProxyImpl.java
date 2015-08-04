@@ -20,6 +20,7 @@ package com.ryg.dynamicload.internal;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
@@ -28,7 +29,9 @@ import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.view.View;
 
 import com.ryg.dynamicload.DLPlugin;
 import com.ryg.utils.DLConfigs;
@@ -61,6 +64,10 @@ public class DLProxyImpl {
     private Activity mProxyActivity;
     protected DLPlugin mPluginActivity;
     public ClassLoader mPluginClassLoader;
+
+    /*Modify. AUT: AndyWing . Modify for [apk file md5 check] . 15-8-3 .START*/
+    private ApkLayoutInflater mApkLayoutInflater;
+    /*Modify. AUT: AndyWing . 15-8-3 .END*/
 
     public DLProxyImpl(Activity activity) {
         mProxyActivity = activity;
@@ -172,4 +179,13 @@ public class DLProxyImpl {
     public DLPlugin getRemoteActivity() {
         return mPluginActivity;
     }
+
+    /*Modify. AUT: AndyWing . Modify for [apk file md5 check] . 15-8-3 .START*/
+    public View onCreateView(String name, Context context, AttributeSet attributes) {
+        if (mApkLayoutInflater == null) {
+            mApkLayoutInflater = new ApkLayoutInflater(context);
+        }
+        return mApkLayoutInflater.onCreateView(name, attributes);
+    }
+    /*Modify. AUT: AndyWing . 15-8-3 .END*/
 }

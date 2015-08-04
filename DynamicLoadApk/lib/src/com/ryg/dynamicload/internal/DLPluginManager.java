@@ -27,11 +27,13 @@ import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -42,6 +44,8 @@ import com.ryg.dynamicload.DLProxyActivity;
 import com.ryg.dynamicload.DLProxyFragmentActivity;
 import com.ryg.dynamicload.DLProxyService;
 import com.ryg.utils.DLConstants;
+import com.ryg.utils.LOG;
+import com.ryg.utils.Md5Util;
 import com.ryg.utils.SoLibManager;
 
 import dalvik.system.DexClassLoader;
@@ -155,6 +159,12 @@ public class DLPluginManager {
         Resources resources = createResources(assetManager);
         // create pluginPackage
         pluginPackage = new DLPluginPackage(dexClassLoader, resources, packageInfo);
+
+        /*Modify. AUT: AndyWing . Modify for [apk file md5 check] . 15-8-3 .START*/
+        pluginPackage.dexPath = dexPath;
+        savePluginApkMd5(pluginPackage.packageName, new File(dexPath));
+        /*Modify. AUT: AndyWing . 15-8-3 .END*/
+
         mPackagesHolder.put(packageInfo.packageName, pluginPackage);
         return pluginPackage;
     }
@@ -181,9 +191,15 @@ public class DLPluginManager {
 
     }
 
+    /*Modify. AUT: AndyWing . Modify for [apk file md5 check] . 15-8-3 .START*/
     public DLPluginPackage getPackage(String packageName) {
-        return mPackagesHolder.get(packageName);
+        DLPluginPackage dlPkg = mPackagesHolder.get(packageName);
+        if (checkAndReloadSingleApkMd5(dlPkg)) {
+            dlPkg = mPackagesHolder.get(packageName);
+        }
+        return dlPkg;
     }
+    /*Modify. AUT: AndyWing . 15-8-3 .END*/
 
     private Resources createResources(AssetManager assetManager) {
         Resources superRes = mContext.getResources();
@@ -237,7 +253,10 @@ public class DLPluginManager {
             throw new NullPointerException("disallow null packageName.");
         }
 
-        DLPluginPackage pluginPackage = mPackagesHolder.get(packageName);
+        /*Modify. AUT: AndyWing . Modify for [apk file md5 check] . 15-8-3 .START*/
+        DLPluginPackage pluginPackage = getPackage(packageName);
+        /*Modify. AUT: AndyWing . 15-8-3 .END*/
+
         if (pluginPackage == null) {
             return START_RESULT_NO_PKG;
         }
@@ -364,7 +383,10 @@ public class DLPluginManager {
         if (TextUtils.isEmpty(packageName)) {
             throw new NullPointerException("disallow null packageName.");
         }
-        DLPluginPackage pluginPackage = mPackagesHolder.get(packageName);
+        /*Modify. AUT: AndyWing . Modify for [apk file md5 check] . 15-8-3 .START*/
+        DLPluginPackage pluginPackage = getPackage(packageName);
+        /*Modify. AUT: AndyWing . 15-8-3 .END*/
+
         if (pluginPackage == null) {
             fetchProxyServiceClass.onFetch(START_RESULT_NO_PKG, null);
             return;
@@ -452,5 +474,46 @@ public class DLPluginManager {
     private interface OnFetchProxyServiceClass {
         public void onFetch(int result, Class<? extends Service> proxyServiceClass);
     }
+
+    /*Modify. AUT: AndyWing . Modify for [apk file md5 check] . 15-8-3 .START*/
+    private boolean checkAndReloadSingleApkMd5(DLPluginPackage packageInfo) {
+        return packageInfo != null &&
+                checkAndReloadSingleApkMd5(packageInfo.dexPath,
+                        packageInfo.packageName);
+    }
+
+    private boolean checkAndReloadSingleApkMd5(String apkPath, String pkg) {
+        String md5 = Md5Util.md5To32(new File(apkPath));
+        if (md5 == null || !isApkMd5Same(pkg, md5)) {
+            LOG.d(TAG, "___Line:[476]___apk modified reload apk ");
+            mPackagesHolder.remove(pkg);
+            ApkLayoutInflater.removeCachedConstructor(apkPath, pkg);
+            return loadApk(apkPath) != null;
+        }
+        return false;
+    }
+
+    private static final String PLUGIN_APK_MD5 = "plugin_apk_md5_";
+    private static final String PLUGIN_APK_MD5_UN_KNOW = "-1";
+    private void savePluginApkMd5(String pkg, File apkPath) {
+        String md5 = Md5Util.md5To32(apkPath);
+        SharedPreferences.Editor editor = PreferenceManager
+                .getDefaultSharedPreferences(mContext)
+                .edit();
+        editor.putString(PLUGIN_APK_MD5 + pkg, md5)
+                .apply();
+    }
+
+    private String getPluginApkMd5(String pkg) {
+        return PreferenceManager
+                .getDefaultSharedPreferences(mContext)
+                .getString(PLUGIN_APK_MD5 + pkg, PLUGIN_APK_MD5_UN_KNOW);
+    }
+
+    private boolean isApkMd5Same(String pkg, String checkedMd5) {
+        String saveMd5 = getPluginApkMd5(pkg);
+        return TextUtils.equals(checkedMd5, saveMd5);
+    }
+    /*Modify. AUT: AndyWing . 15-8-3 .END*/
 
 }
