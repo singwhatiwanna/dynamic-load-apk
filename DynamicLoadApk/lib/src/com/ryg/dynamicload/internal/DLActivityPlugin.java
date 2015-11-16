@@ -18,12 +18,15 @@
 package com.ryg.dynamicload.internal;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.WindowManager.LayoutParams;
 
 public interface DLActivityPlugin extends DLAttachable<Activity>{
@@ -46,4 +49,13 @@ public interface DLActivityPlugin extends DLAttachable<Activity>{
     public void onBackPressed();
     public boolean onCreateOptionsMenu(Menu menu);
     public boolean onOptionsItemSelected(MenuItem item);
+    
+    public int checkPermission(String permission, int pid, int uid);
+    public void sendBroadcast(Intent intent);
+	public Intent registerReceiver(BroadcastReceiver receiver,
+	        IntentFilter filter);
+    public void unregisterReceiver(BroadcastReceiver receiver);
+    public void setTheme(int theme);
+    public void onClick(View view);
+    public String getPackageName();
 }

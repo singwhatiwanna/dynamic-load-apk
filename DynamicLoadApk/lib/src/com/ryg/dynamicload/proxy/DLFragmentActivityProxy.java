@@ -24,16 +24,21 @@ import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.WindowManager.LayoutParams;
 
 import com.ryg.dynamicload.internal.DLActivityPlugin;
 import com.ryg.dynamicload.internal.DLAttachable;
+import com.ryg.dynamicload.internal.DLIntent;
+import com.ryg.dynamicload.internal.DLPluginManager;
 import com.ryg.dynamicload.internal.DLPluginPackage;
 import com.ryg.dynamicload.loader.DLActivityLoader;
+import com.ryg.utils.DLConstants;
 
 public class DLFragmentActivityProxy extends FragmentActivity
         implements DLAttachable<DLActivityPlugin> {
@@ -173,5 +178,61 @@ public class DLFragmentActivityProxy extends FragmentActivity
         mRemoteActivity.onOptionsItemSelected(item);
         return super.onOptionsItemSelected(item);
     }
+    
+  //--------add by xionghoumiao----------//
+    
+    @Override
+	public void startActivity(Intent intent) {
+		if (isStartSuperActi(intent)) {
+			super.startActivity(intent);
+		} else {
+			startPluginActivity(intent);
+		}
+	}
+
+	@Override
+	public void startActivityForResult(Intent intent, int requestCode) {
+		if (isStartSuperActi(intent)) {
+			super.startActivityForResult(intent, requestCode);
+		} else {
+			startPluginActivityForResult(intent, requestCode);
+		}
+	}
+
+	private boolean isStartSuperActi(Intent intent) {
+		boolean isStartSuperActi = (mRemoteActivity == null);
+		isStartSuperActi |= intent.getBooleanExtra(
+		        DLConstants.INTENT_START_ACTI, false);
+		if (intent.hasExtra(DLConstants.INTENT_START_ACTI)) {
+			intent.removeExtra(DLConstants.INTENT_START_ACTI);
+		}
+		isStartSuperActi |= !TextUtils.isEmpty(intent.getAction());
+		return isStartSuperActi;
+	}
+
+	private int startPluginActivity(Intent dlIntent) {
+		return startPluginActivityForResult(dlIntent, -1);
+	}
+
+	private int startPluginActivityForResult(Intent intent, int requestCode) {
+		DLIntent dlIntent = null;
+		if (intent instanceof DLIntent) {
+			dlIntent = (DLIntent) intent;
+		} else {
+			dlIntent = new DLIntent(mRemoteActivity.getPackageName(), intent);
+		}
+		if (dlIntent.getPluginPackage() == null) {
+			dlIntent.setPluginPackage(mRemoteActivity.getPackageName());
+		}
+		DLPluginManager dlMgr = DLPluginManager.getInstance(this);
+		return dlMgr.startPluginActivityForResult(this, dlIntent, requestCode);
+	}
+
+	public void onClick(View view) {
+		if (mRemoteActivity != null) {
+			mRemoteActivity.onClick(view);
+			return;
+		}
+	}
 
 }

@@ -35,6 +35,7 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.ryg.dynamicload.DLApplicationContext;
 import com.ryg.dynamicload.DLBasePluginActivity;
 import com.ryg.dynamicload.DLBasePluginFragmentActivity;
 import com.ryg.dynamicload.DLBasePluginService;
@@ -130,6 +131,11 @@ public class DLPluginManager {
         }
 
         DLPluginPackage pluginPackage = preparePluginEnv(packageInfo, dexPath);
+        DLPackageManager dlPackageMgr = new DLPackageManager(pluginPackage, mContext.getPackageManager());
+		  DLApplicationContext dlAppCon = new DLApplicationContext(mContext.getApplicationContext(), pluginPackage);
+		  pluginPackage.setDLPackageMgr(dlPackageMgr);
+		  pluginPackage.setApplicationContext(dlAppCon);
+		  
         if (hasSoLib) {
             copySoLib(dexPath);
         }
@@ -154,7 +160,7 @@ public class DLPluginManager {
         AssetManager assetManager = createAssetManager(dexPath);
         Resources resources = createResources(assetManager);
         // create pluginPackage
-        pluginPackage = new DLPluginPackage(dexClassLoader, resources, packageInfo);
+        pluginPackage = new DLPluginPackage(dexPath, dexClassLoader, resources, packageInfo);
         mPackagesHolder.put(packageInfo.packageName, pluginPackage);
         return pluginPackage;
     }
@@ -419,6 +425,7 @@ public class DLPluginManager {
 
     private void performStartActivityForResult(Context context, DLIntent dlIntent, int requestCode) {
         Log.d(TAG, "launch " + dlIntent.getPluginClass());
+        dlIntent.putExtra(DLConstants.INTENT_START_ACTI, true);
         if (context instanceof Activity) {
             ((Activity) context).startActivityForResult(dlIntent, requestCode);
         } else {

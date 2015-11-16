@@ -51,5 +51,6 @@ public class DLConstants {
      */
     public final static String INTENT_PLUGIN_PACKAGE = "dl_plugin_package";
     public final static String INTENT_PLUGIN_CLASS = "dl_plugin_class";
+    public final static String INTENT_START_ACTI = "dl_start_acti";
 
 }
