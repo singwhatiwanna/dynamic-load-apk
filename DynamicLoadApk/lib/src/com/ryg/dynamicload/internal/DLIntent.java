@@ -35,6 +35,17 @@ public class DLIntent extends Intent {
     public DLIntent() {
         super();
     }
+    
+    public DLIntent(Intent intent){
+		super(intent);
+		mPluginClass = intent.getComponent().getClassName();
+	}
+	
+	public DLIntent(String pluginPackage, Intent intent){
+		super(intent);
+		mPluginClass = intent.getComponent().getClassName();
+		mPluginPackage = pluginPackage;
+	}
 
     public DLIntent(String pluginPackage) {
         super();

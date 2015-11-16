@@ -19,9 +19,10 @@
 package com.ryg.dynamicload;
 
 import android.app.Activity;
-import android.content.ComponentName;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -363,30 +364,23 @@ public class DLBasePluginActivity extends Activity implements DLActivityPlugin {
         return false;
     }
 
-    /**
-     * @param dlIntent
-     * @return may be {@link #START_RESULT_SUCCESS},
-     *         {@link #START_RESULT_NO_PKG}, {@link #START_RESULT_NO_CLASS},
-     *         {@link #START_RESULT_TYPE_ERROR}
-     */
-    public int startPluginActivity(DLIntent dlIntent) {
-        return startPluginActivityForResult(dlIntent, -1);
-    }
-
-    /**
-     * @param dlIntent
-     * @return may be {@link #START_RESULT_SUCCESS},
-     *         {@link #START_RESULT_NO_PKG}, {@link #START_RESULT_NO_CLASS},
-     *         {@link #START_RESULT_TYPE_ERROR}
-     */
-    public int startPluginActivityForResult(DLIntent dlIntent, int requestCode) {
-        if (mFrom == DLConstants.FROM_EXTERNAL) {
-            if (dlIntent.getPluginPackage() == null) {
-                dlIntent.setPluginPackage(mPluginPackage.packageName);
-            }
-        }
-        return mPluginManager.startPluginActivityForResult(that, dlIntent, requestCode);
-    }
+    @Override
+	public void startActivity(Intent intent) {
+		if (mFrom == DLConstants.FROM_INTERNAL) {
+			super.startActivity(intent);
+		} else {
+			mProxyActivity.startActivity(intent);
+		}
+	}
+	
+	@Override
+	public void startActivityForResult(Intent intent, int requestCode) {
+		if (mFrom == DLConstants.FROM_INTERNAL) {
+			super.startActivityForResult(intent, requestCode);
+		} else {
+			mProxyActivity.startActivityForResult(intent, requestCode);
+		}
+	}
 
     public int startPluginService(DLIntent dlIntent) {
         if (mFrom == DLConstants.FROM_EXTERNAL) {
@@ -397,14 +391,24 @@ public class DLBasePluginActivity extends Activity implements DLActivityPlugin {
         return mPluginManager.startPluginService(that, dlIntent);
     }
 
-    public int bindPluginService(DLIntent dlIntent, ServiceConnection conn, int flags) {
-        if (mFrom == DLConstants.FROM_EXTERNAL) {
-            if (dlIntent.getPluginPackage() == null) {
-                dlIntent.setPluginPackage(mPluginPackage.packageName);
-            }
-        }
-        return mPluginManager.bindPluginService(that, dlIntent, conn, flags);
-    }
+//	public int stopPluginService(DLIntent dlIntent) {
+//		if (mFrom == DLConstants.FROM_EXTERNAL) {
+//			if (dlIntent.getPluginPackage() == null) {
+//				dlIntent.setPluginPackage(mPluginPackage.packageName);
+//			}
+//		}
+//		return mPluginManager.stopPluginService(that, dlIntent);
+//	}
+
+	public int bindPluginService(DLIntent dlIntent, ServiceConnection conn,
+	        int flags) {
+		if (mFrom == DLConstants.FROM_EXTERNAL) {
+			if (dlIntent.getPluginPackage() == null) {
+				dlIntent.setPluginPackage(mPluginPackage.packageName);
+			}
+		}
+		return mPluginManager.bindPluginService(that, dlIntent, conn, flags);
+	}
 
     public int unBindPluginService(DLIntent dlIntent, ServiceConnection conn) {
         if (mFrom == DLConstants.FROM_EXTERNAL) {
@@ -414,33 +418,63 @@ public class DLBasePluginActivity extends Activity implements DLActivityPlugin {
         return mPluginManager.unBindPluginService(that, dlIntent, conn);
     }
 
-    // /**
-    // * 直接调用that.startService
-    // * that 可能有两种情况
-    // * 1.指向this
-    // * 2.指向DLProxyActivity
-    // */
-    // public ComponentName startService(Intent service) {
-    // return that.startService(service);
-    // }
-    //
-    // @Override
-    // public boolean stopService(Intent name) {
-    // // TODO Auto-generated method stub
-    // return super.stopService(name);
-    // }
-    //
-    // @Override
-    // public boolean bindService(Intent service, ServiceConnection conn, int
-    // flags) {
-    // // TODO Auto-generated method stub
-    // return super.bindService(service, conn, flags);
-    // }
-    //
-    // @Override
-    // public void unbindService(ServiceConnection conn) {
-    // // TODO Auto-generated method stub
-    // super.unbindService(conn);
-    // }
+	@Override
+	public int checkPermission(String permission, int pid, int uid) {
+		if (mFrom == DLConstants.FROM_INTERNAL) {
+			return super.checkPermission(permission, pid, uid);
+		} else {
+			return mProxyActivity.checkPermission(permission, pid, uid);
+		}
+	}
+
+	@Override
+	public boolean isFinishing() {
+		if (mFrom == DLConstants.FROM_INTERNAL) {
+			return super.isFinishing();
+		} else {
+			return mProxyActivity.isFinishing();
+		}
+	}
+
+	@Override
+	public void sendBroadcast(Intent intent) {
+		if (mFrom == DLConstants.FROM_INTERNAL) {
+			super.sendBroadcast(intent);
+		} else {
+			mProxyActivity.sendBroadcast(intent);
+		}
+	}
+
+	@Override
+	public Intent registerReceiver(BroadcastReceiver receiver,
+	        IntentFilter filter) {
+		if (mFrom == DLConstants.FROM_INTERNAL) {
+			return super.registerReceiver(receiver, filter);
+		} else {
+			return mProxyActivity.registerReceiver(receiver, filter);
+		}
+	}
+	
+	@Override
+    public void unregisterReceiver(BroadcastReceiver receiver) {
+		if (mFrom == DLConstants.FROM_INTERNAL) {
+			super.unregisterReceiver(receiver);
+		} else {
+			mProxyActivity.unregisterReceiver(receiver);
+		}
+    }
+
+	@Override
+   public void onClick(View view) {
+		
+    }
+	
+	public View getCurrentFocus(){
+		if(mFrom == DLConstants.FROM_INTERNAL){
+			return super.getCurrentFocus();
+		}else{
+			return mProxyActivity.getCurrentFocus();
+		}
+	}
 
 }

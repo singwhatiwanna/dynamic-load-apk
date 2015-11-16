@@ -25,17 +25,21 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.WindowManager.LayoutParams;
 
 import com.ryg.dynamicload.internal.DLActivityPlugin;
 import com.ryg.dynamicload.internal.DLAttachable;
+import com.ryg.dynamicload.internal.DLIntent;
 import com.ryg.dynamicload.internal.DLPluginManager;
 import com.ryg.dynamicload.internal.DLPluginPackage;
 import com.ryg.dynamicload.loader.DLActivityLoader;
+import com.ryg.utils.DLConstants;
 
 public class DLActivityProxy extends Activity
         implements DLAttachable<DLActivityPlugin> {
@@ -180,5 +184,67 @@ public class DLActivityProxy extends Activity
     public ComponentName startService(Intent service) {
         return super.startService(service);
     }
+    
+    //--------add by xionghoumiao----------//
+    /**
+     * 插件apk直接调用上下文的startActivity即可调起activity
+     * @param intent
+     */
+    @Override
+	public void startActivity(Intent intent) {
+		if (isStartSuperActi(intent)) {
+			super.startActivity(intent);
+		} else {
+			startPluginActivityForResult(intent, -1);
+		}
+	}
+
+	@Override
+	public void startActivityForResult(Intent intent, int requestCode) {
+		if (isStartSuperActi(intent)) {
+			super.startActivityForResult(intent, requestCode);
+		} else {
+			startPluginActivityForResult(intent, requestCode);
+		}
+	}
+
+	/**
+	 * 是否启动真正的Activity
+	 *  1.调用系统的界面action不能空 2.或者包含start_acti字段为true
+	 * @param intent
+	 * @return
+	 */
+	private boolean isStartSuperActi(Intent intent) {
+		boolean isStartSuperActi = (mRemoteActivity == null);
+		isStartSuperActi |= intent.getBooleanExtra(
+		        DLConstants.INTENT_START_ACTI, false);
+		if (intent.hasExtra(DLConstants.INTENT_START_ACTI)) {
+			intent.removeExtra(DLConstants.INTENT_START_ACTI);
+		}
+		isStartSuperActi |= !TextUtils.isEmpty(intent.getAction());
+		return isStartSuperActi;
+	}
+
+	private int startPluginActivityForResult(Intent intent, int requestCode) {
+		DLIntent dlIntent = null;
+		if (intent instanceof DLIntent) {
+			dlIntent = (DLIntent) intent;
+		} else {
+			dlIntent = new DLIntent(mRemoteActivity.getPackageName(), intent);
+		}
+		if (dlIntent.getPluginPackage() == null) {
+			dlIntent.setPluginPackage(mRemoteActivity.getPackageName());
+		}
+		DLPluginManager dlMgr = DLPluginManager.getInstance(this);
+		return dlMgr.startPluginActivityForResult(this, dlIntent,
+                requestCode);
+	}
+
+	public void onClick(View view) {
+		if (mRemoteActivity != null) {
+			mRemoteActivity.onClick(view);
+			return;
+		}
+	}
 
 }

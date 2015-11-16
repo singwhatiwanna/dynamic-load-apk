@@ -18,6 +18,8 @@
 
 package com.ryg.dynamicload.internal;
 
+import com.ryg.dynamicload.DLApplicationContext;
+
 import android.content.pm.PackageInfo;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -38,17 +40,29 @@ public class DLPluginPackage {
     public AssetManager assetManager;
     public Resources resources;
     public PackageInfo packageInfo;
+    public String dexPath;
+	 public DLPackageManager packageMgr;
+	 public DLApplicationContext appContext;
 
-    public DLPluginPackage(DexClassLoader loader, Resources resources,
-            PackageInfo packageInfo) {
-        this.packageName = packageInfo.packageName;
-        this.classLoader = loader;
-        this.assetManager = resources.getAssets();
-        this.resources = resources;
-        this.packageInfo = packageInfo;
+    public DLPluginPackage(String dexPath, DexClassLoader loader,
+	        Resources resources, PackageInfo packageInfo) {
+    	this.dexPath = dexPath;
+		this.packageName = packageInfo.packageName;
+		this.classLoader = loader;
+		this.assetManager = resources.getAssets();
+		this.resources = resources;
+		this.packageInfo = packageInfo;
 
-        defaultActivity = parseDefaultActivityName();
-    }
+		defaultActivity = parseDefaultActivityName();
+	}
+    
+    public void setDLPackageMgr(DLPackageManager packageMgr){
+		this.packageMgr = packageMgr;
+	}
+	
+	public void setApplicationContext(DLApplicationContext appContext){
+		this.appContext = appContext;
+	}
 
     private final String parseDefaultActivityName() {
         if (packageInfo.activities != null && packageInfo.activities.length > 0) {

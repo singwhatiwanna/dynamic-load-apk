@@ -172,7 +172,6 @@ public final class SoLibManager {
             is = mZipFile.getInputStream(mZipEntry);
             fos = new FileOutputStream(new File(sNativeLibDir, mSoFileName));
             copy(is, fos);
-            mZipFile.close();
         }
 
         /**
