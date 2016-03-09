@@ -18,6 +18,7 @@
 
 package com.ryg.dynamicload.internal;
 
+import com.ryg.dynamicload.DLBasePluginAppCompatActivity;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -424,6 +425,9 @@ public class DLPluginManager {
         if (DLBasePluginActivity.class.isAssignableFrom(clazz)) {
             activityClass = DLProxyActivity.class;
         } else if (DLBasePluginFragmentActivity.class.isAssignableFrom(clazz)) {
+            activityClass = DLProxyFragmentActivity.class;
+        } else if (DLBasePluginAppCompatActivity.class.isAssignableFrom(clazz)) {
+            // use DLProxyFragmentActivity as plugin's host
             activityClass = DLProxyFragmentActivity.class;
         }
 
