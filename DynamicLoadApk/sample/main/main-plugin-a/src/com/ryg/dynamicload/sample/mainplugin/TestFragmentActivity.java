@@ -12,12 +12,13 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.ryg.dynamicload.DLBasePluginAppcompatActivity;
 import com.ryg.dynamicload.DLBasePluginFragmentActivity;
 import com.ryg.dynamicload.internal.DLIntent;
 import com.ryg.dynamicload.internal.DLPluginManager;
 import com.ryg.dynamicload.sample.mainplugina.R;
 
-public class TestFragmentActivity extends DLBasePluginFragmentActivity
+public class TestFragmentActivity extends DLBasePluginAppcompatActivity
         implements OnClickListener {
 
     private static final String TAG = "TestFragmentActivity";
