@@ -67,6 +67,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
             item.pluginPath = plugin.getAbsolutePath();
             item.packageInfo = DLUtils.getPackageInfo(this, item.pluginPath);
             mPluginItems.add(item);
+//            这里做的工作就包括把sd卡中的apk的资源加载到项目中来
             DLPluginManager.getInstance(this).loadApk(item.pluginPath);
         }
 
