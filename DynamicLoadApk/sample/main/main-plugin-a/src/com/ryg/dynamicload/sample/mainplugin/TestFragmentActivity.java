@@ -18,7 +18,7 @@ import com.ryg.dynamicload.internal.DLIntent;
 import com.ryg.dynamicload.internal.DLPluginManager;
 import com.ryg.dynamicload.sample.mainplugina.R;
 
-public class TestFragmentActivity extends DLBasePluginAppcompatActivity
+public class TestFragmentActivity extends DLBasePluginFragmentActivity
         implements OnClickListener {
 
     private static final String TAG = "TestFragmentActivity";
