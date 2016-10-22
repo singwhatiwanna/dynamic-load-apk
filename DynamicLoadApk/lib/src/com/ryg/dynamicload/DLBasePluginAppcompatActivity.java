@@ -52,13 +52,13 @@ public class DLBasePluginAppcompatActivity extends AppCompatActivity implements 
     /**
      * 代理FragmentActivity，可以当作Context来使用，会根据需要来决定是否指向this
      */
-    protected FragmentActivity mProxyActivity;
+    protected AppCompatActivity mProxyActivity;
 
     /**
      * 等同于mProxyActivity，可以当作Context来使用，会根据需要来决定是否指向this<br/>
      * 可以当作this来使用
      */
-    protected FragmentActivity that;
+    protected AppCompatActivity that;
     protected int mFrom = DLConstants.FROM_INTERNAL;
     protected DLPluginManager mPluginManager;
     protected DLPluginPackage mPluginPackage;
@@ -66,7 +66,7 @@ public class DLBasePluginAppcompatActivity extends AppCompatActivity implements 
     @Override
     public void attach(Activity proxyActivity, DLPluginPackage pluginPackage) {
         Log.d(TAG, "attach: proxyActivity= " + proxyActivity);
-        mProxyActivity = (FragmentActivity) proxyActivity;
+        mProxyActivity = (AppCompatActivity) proxyActivity;
         that = mProxyActivity;
         mPluginPackage = pluginPackage;
     }

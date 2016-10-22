@@ -4,6 +4,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
+    <android.support.v7.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@android:color/holo_red_dark">
+
+    </android.support.v7.widget.Toolbar>
+
     <EditText
         android:id="@+id/editText1"
         android:layout_width="match_parent"

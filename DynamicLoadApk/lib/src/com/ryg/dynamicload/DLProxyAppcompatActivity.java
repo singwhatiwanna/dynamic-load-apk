@@ -151,7 +151,9 @@ public class DLProxyAppcompatActivity extends AppCompatActivity implements DLAtt
 
     @Override
     public void onWindowAttributesChanged(LayoutParams params) {
-        mRemoteActivity.onWindowAttributesChanged(params);
+        if (mRemoteActivity!=null) {
+            mRemoteActivity.onWindowAttributesChanged(params);
+        }
         super.onWindowAttributesChanged(params);
     }
 

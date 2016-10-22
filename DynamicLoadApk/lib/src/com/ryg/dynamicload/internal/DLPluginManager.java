@@ -36,9 +36,11 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.ryg.dynamicload.DLBasePluginActivity;
+import com.ryg.dynamicload.DLBasePluginAppcompatActivity;
 import com.ryg.dynamicload.DLBasePluginFragmentActivity;
 import com.ryg.dynamicload.DLBasePluginService;
 import com.ryg.dynamicload.DLProxyActivity;
+import com.ryg.dynamicload.DLProxyAppcompatActivity;
 import com.ryg.dynamicload.DLProxyFragmentActivity;
 import com.ryg.dynamicload.DLProxyService;
 import com.ryg.utils.DLConstants;
@@ -425,6 +427,8 @@ public class DLPluginManager {
             activityClass = DLProxyActivity.class;
         } else if (DLBasePluginFragmentActivity.class.isAssignableFrom(clazz)) {
             activityClass = DLProxyFragmentActivity.class;
+        } else if (DLBasePluginAppcompatActivity.class.isAssignableFrom(clazz)){
+            activityClass = DLProxyAppcompatActivity.class;
         }
 
         return activityClass;
