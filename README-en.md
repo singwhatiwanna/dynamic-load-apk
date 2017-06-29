@@ -1,6 +1,6 @@
 DL : dynamic load framework for android
 ================
-![mahua](http://www.renyugang.cn/resources/image/DL.png)
+![mahua](http://img.my.csdn.net/uploads/201404/13/1397396766_2511.png)
 
 support load apk which is not installed.
 
@@ -8,7 +8,7 @@ host : host apk, a container contains many plugin apks
 
 plugin : plugin apk, which is invoked by host, also, it can be running when installed.
 
-##about DL
+## about DL
 1. plugin can be invoked by host without being installed
 2. plugin can visit resources by R identifer
 3. support Activity and FragmentActivity
@@ -21,7 +21,7 @@ plugin : plugin apk, which is invoked by host, also, it can be running when inst
 7. easy getting start, just need dl-lib.jar
 8. support android 2.x
 
-###resource managment
+### resource managment
 ```java
 protected void loadResources() {
     try {
@@ -40,7 +40,7 @@ protected void loadResources() {
 }
 ```
 then, in plugin project, resources can be visited by R identifer.
-###activity lifecircle managment
+### activity lifecircle managment
 ```java
 public interface DLPlugin {
 
@@ -98,23 +98,23 @@ implement DLPlugin in DLProxyActivity
     }
 ...
 ```
-##How to develop a DL plugin
+## How to develop a DL plugin
 1. import dl-lib.jar
 2. the key word this is dangerous
 3. use that to instead this when visit Activity's methods
 4. use startActivityByProxy and startActivityForResultByProxy to start activity, another, launchmode is not supported
 5. not support service,broadcast can only be used by register it in code.
 
-##Current job
+## Current job
 1. DLIntent
 2. UI Bus
 3. some little android feature
 
-##Demo
+## Demo
 ![mahua](http://img.blog.csdn.net/20140411000445437?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2luZ3doYXRpd2FubmE=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
 
 firstly, host will load all plugin apks located in /mnt/sdcard/DynamicLoadHost, then, plugin can be invoked by clicking list's item. Details can be found in source code.
-###Thanks [nealgao](http://nealgao06.lofter.com) to design the logo for DL.
+### Thanks [nealgao](http://nealgao06.lofter.com) to design the logo for DL.
 ## License
 
     Copyright (C) 2014 singwhatiwanna(任玉刚) <singwhatiwanna@gmail.com>
