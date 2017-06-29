@@ -1,6 +1,6 @@
 DL : Apk动态加载框架
 ================
-![DL](http://img.my.csdn.net/uploads/201404/13/1397396766_2511.png)
+![DL](https://github.com/singwhatiwanna/dynamic-load-apk/blob/master/imgs/dl.png)
 ## 开发文档 (Development Help)
 [English README](https://github.com/singwhatiwanna/dynamic-load-apk/blob/master/README-en.md)
 

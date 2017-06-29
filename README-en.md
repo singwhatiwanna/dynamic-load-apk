@@ -1,6 +1,6 @@
 DL : dynamic load framework for android
 ================
-![mahua](http://img.my.csdn.net/uploads/201404/13/1397396766_2511.png)
+![mahua](https://github.com/singwhatiwanna/dynamic-load-apk/blob/master/imgs/dl.png)
 
 support load apk which is not installed.
 
