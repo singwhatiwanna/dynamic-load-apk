@@ -4,7 +4,7 @@ DL : Apk动态加载框架
 ## 开发文档 (Development Help)
 [English README](https://github.com/singwhatiwanna/dynamic-load-apk/blob/master/README-en.md)
 
-[使用Android Stuido导入项目](Android Studio.md)
+[使用Android Stuido导入项目](https://github.com/singwhatiwanna/dynamic-load-apk/blob/master/Android%20Studio.md)
 
 [APK动态加载框架（DL）解析](http://blog.csdn.net/singwhatiwanna/article/details/39937639)
 
