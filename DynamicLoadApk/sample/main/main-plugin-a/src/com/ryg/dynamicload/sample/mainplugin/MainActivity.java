@@ -26,7 +26,7 @@ public class MainActivity extends DLBasePluginActivity {
 
     private static final String TAG = "Client-MainActivity";
     private ServiceConnection mConnecton;
-    
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +48,7 @@ public class MainActivity extends DLBasePluginActivity {
         button.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+//                主要是第二个参数，指定要启动的页面，因为Activity没有注册，走的也是主Activity启动apk里面Activity的流程，实际启动的是代理Activity
                 DLIntent intent = new DLIntent(getPackageName(), TestFragmentActivity.class);
                 // 传递Parcelable类型的数据
                 intent.putExtra("person", new Person("plugin-a", 22));
@@ -55,7 +56,7 @@ public class MainActivity extends DLBasePluginActivity {
                 startPluginActivityForResult(intent, 0);
             }
         });
-        
+
         Button button2 = new Button(context);
         button2.setText("Start Service");
         layout.addView(button2, LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
@@ -65,8 +66,8 @@ public class MainActivity extends DLBasePluginActivity {
                 startPluginService(intent);
             }
         });
-        
-       
+
+
         Button button3 = new Button(context);
         button3.setText("bind Service");
         layout.addView(button3, LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
@@ -77,8 +78,9 @@ public class MainActivity extends DLBasePluginActivity {
                     mConnecton = new ServiceConnection() {
                         public void onServiceDisconnected(ComponentName name) {
                         }
+
                         public void onServiceConnected(ComponentName name, IBinder binder) {
-                            int sum = ((ITestServiceInterface)binder).sum(5, 5);
+                            int sum = ((ITestServiceInterface) binder).sum(5, 5);
                             Log.e("MainActivity", "onServiceConnected sum(5 + 5) = " + sum);
                         }
                     };
@@ -87,7 +89,7 @@ public class MainActivity extends DLBasePluginActivity {
                 bindPluginService(intent, mConnecton, Context.BIND_AUTO_CREATE);
             }
         });
-        
+
         Button button4 = new Button(context);
         button4.setText("unbind Service");
         layout.addView(button4, LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
