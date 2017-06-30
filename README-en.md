@@ -1,6 +1,6 @@
 DL : dynamic load framework for android
 ================
-![mahua](https://github.com/singwhatiwanna/dynamic-load-apk/blob/master/imgs/dl.png)
+![dl](imgs/dl.png)
 
 support load apk which is not installed.
 
@@ -111,7 +111,7 @@ implement DLPlugin in DLProxyActivity
 3. some little android feature
 
 ## Demo
-![mahua](http://img.blog.csdn.net/20140411000445437?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2luZ3doYXRpd2FubmE=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
+![dl](imgs/dl-demo.gif)
 
 firstly, host will load all plugin apks located in /mnt/sdcard/DynamicLoadHost, then, plugin can be invoked by clicking list's item. Details can be found in source code.
 ### Thanks [nealgao](http://nealgao06.lofter.com) to design the logo for DL.
